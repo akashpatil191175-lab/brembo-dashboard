@@ -1,272 +1,54 @@
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Monitoring Dashboard</title>
-    <!-- Firebase Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0b1120; color: #ffffff; padding: 15px; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e293b; margin-bottom: 15px; }
-        .logo { color: #e11d48; font-weight: bold; font-size: 20px; }
-        .user-info { background: #1e293b; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
-        
-        /* Dashboard Cards Grid */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; }
-        .card h3 { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
-        .card .count { font-size: 24px; font-weight: bold; }
-        .card .sub { font-size: 9px; color: #64748b; margin-top: 3px; }
-        
-        .c-running { color: #22c55e; border-left: 4px solid #22c55e; }
-        .c-breakdown { color: #ef4444; border-left: 4px solid #ef4444; }
-        .c-cmm { color: #f59e0b; border-left: 4px solid #f59e0b; }
-        .c-fixture { color: #eab308; border-left: 4px solid #eab308; }
-        .c-ready { color: #10b981; border-left: 4px solid #10b981; }
-
-        /* Machine List */
-        .section-title { font-size: 16px; margin: 15px 0 10px 0; color: #38bdf8; }
-        .machine-item { background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .bg-RUNNING { background: #22c55e; color: #000; }
-        .bg-BREAKDOWN { background: #ef4444; color: #fff; }
-        .bg-CMM_NOT_OK { background: #f59e0b; color: #000; }
-        .bg-FIXTURE_NOT_OK { background: #eab308; color: #000; }
-        .bg-LOT_READY { background: #10b981; color: #000; }
-
-        /* Selection & Controls */
-        .control-panel { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-top: 20px; }
-        .btn-work { width: 100%; background: #22c55e; color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 10px 0; }
-        .status-options button { width: 100%; background: #1e293b; color: #fff; border: 1px solid #334155; padding: 10px; margin-top: 5px; border-radius: 5px; text-align: left; cursor: pointer; }
-        .status-options button:hover { background: #334155; }
-        
-        /* Modal for Filtered List */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); padding: 20px; box-sizing: border-box; }
-        .modal-content { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
-        .close-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; float: right; border-radius: 4px; cursor: pointer; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brembo - Machine List on Click - FINAL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:#070d1f;color:#fff}
+#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.loginBox{background:#0e1731;border:1px solid #1c2a4e;border-radius:18px;padding:24px;width:380px;text-align:center}
+.inp{width:100%;padding:12px;background:#070d1f;border:1.5px solid #1c2a4e;border-radius:10px;color:#fff;margin:7px 0}
+.btnLogin{width:100%;padding:12px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:8px}
+.topBar{padding:12px 16px;background:#0a1430;display:flex;justify-content:space-between;border-bottom:1px solid #1c2a4e;position:sticky;top:0;z-index:10}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px;max-width:1200px;margin:auto}
+.card{background:#0e1731;border:1px solid #1c2a4e;border-radius:14px;padding:14px;text-align:center;cursor:pointer}
+.card.active{border:2px solid #fff;background:#1a2a5a}
+.seriesGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 12px 12px;max-width:1200px;margin:auto}
+.sCard{background:#0e1731;border:1px solid #1c2a4e;border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sCard.active{border:2px solid #fff;background:#1a2d5e}
+.mainBox{max-width:1200px;margin:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.phone{background:#0a1430;border:1px solid #1c2a4e;border-radius:16px;padding:14px;min-height:500px}
+.mItem{padding:10px 12px;background:#16224a;border-radius:8px;margin:5px 0;font-size:12px;display:flex;justify-content:space-between;cursor:pointer}
+.mItem.active{background:#fff;color:#000;font-weight:900}
+.opCard{background:#1a2d5e;border:1px solid #2a4a8a;border-radius:12px;padding:12px;margin-top:12px;font-size:11px;line-height:1.8}
+.btnAssign{width:100%;padding:12px;background:#22c55e;color:#000;font-weight:900;border:none;border-radius:10px;margin-top:12px;cursor:pointer}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.seriesGrid{grid-template-columns:1fr}.mainBox{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="logo">brembo</div>
-        <div class="user-info">
-            <span id="login-user">👤 Akash Patil (ID: 5878)</span>
-        </div>
-    </div>
-
-    <!-- Dashboard Filter Cards -->
-    <div class="grid">
-        <div class="card c-running" onclick="filterMachines('RUNNING')">
-            <h3>RUNNING</h3>
-            <div class="count" id="cnt-running">0</div>
-            <div class="sub">CLICK TO VIEW LIST →</div>
-        </div>
-        <div class="card c-breakdown" onclick="filterMachines('BREAKDOWN')">
-            <h3>BREAKDOWN</h3>
-            <div class="count" id="cnt-breakdown">0</div>
-            <div class="sub">CLICK TO VIEW LIST →</div>
-        </div>
-        <div class="card c-cmm" onclick="filterMachines('CMM NOT OK')">
-            <h3>CMM NOT OK</h3>
-            <div class="count" id="cnt-cmm">0</div>
-            <div class="sub">CLICK TO VIEW LIST →</div>
-        </div>
-        <div class="card c-fixture" onclick="filterMachines('FIXTURE NOT OK')">
-            <h3>FIXTURE NOT OK</h3>
-            <div class="count" id="cnt-fixture">0</div>
-            <div class="sub">CLICK TO VIEW LIST →</div>
-        </div>
-        <div class="card c-ready" onclick="filterMachines('LOT READY')">
-            <h3>LOT READY</h3>
-            <div class="count" id="cnt-ready">0</div>
-            <div class="sub">CLICK TO VIEW LIST →</div>
-        </div>
-    </div>
-
-    <!-- Machine List Section -->
-    <div class="section-title">E SERIES MACHINES</div>
-    <div id="machine-list"></div>
-
-    <!-- Machine Control & Details Panel -->
-    <div class="control-panel" id="control-panel" style="display:none;">
-        <h3 style="color:#22c55e;">Selected Machine: <span id="selected-m-id">E-01</span></h3>
-        <p style="font-size: 12px; margin-top:5px;">Current Status: <b id="selected-m-status">-</b></p>
-        
-        <button class="btn-work" onclick="assignOperator()">I AM WORKING HERE - माझं नाव लावा</button>
-        
-        <div style="font-size: 12px; background:#1e293b; padding:10px; border-radius:5px; margin-bottom:10px;">
-            <p>👷 <b>काम करणारा:</b></p>
-            <p>नाव: <span id="op-name">None</span></p>
-            <p>ID: <span id="op-id">-</span></p>
-        </div>
-
-        <h4>Update Status:</h4>
-        <div class="status-options">
-            <button onclick="updateStatus('RUNNING')">● RUNNING</button>
-            <button onclick="updateStatus('BREAKDOWN')">● BREAKDOWN</button>
-            <button onclick="updateStatus('CMM NOT OK')">● CMM NOT OK</button>
-            <button onclick="updateStatus('FIXTURE NOT OK')">● FIXTURE NOT OK</button>
-            <button onclick="updateStatus('LOT READY')">● LOT READY</button>
-        </div>
-    </div>
-
-    <!-- Modal Pop-up for Filtered View -->
-    <div class="modal" id="filter-modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">X</button>
-            <h3 id="modal-title" style="margin-bottom:15px;">List</h3>
-            <div id="modal-list"></div>
-        </div>
-    </div>
-
-    <script>
-        // --------------------------------------------------
-        // १. Firebase Config (तुमचा स्वतःचा Firebase Config टाका)
-        // --------------------------------------------------
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // लॉगिन ऑपरेटर माहिती (डिफॉल्ट)
-        let currentLoggedInUser = { name: "Akash Patil", id: "5878", shift: "Day" };
-        let selectedMachineId = null;
-        let allMachinesData = {};
-
-        // सॅम्पल मशीन्स डेटाबेस तयार करणे (पहिल्यांदा रन झाल्यावर)
-        const initialMachines = {};
-        for(let i=1; i<=10; i++) {
-            let mKey = "E-" + (i < 10 ? "0" + i : i);
-            initialMachines[mKey] = {
-                status: "RUNNING",
-                operator_name: "Unassigned",
-                operator_id: "-"
-            };
-        }
-
-        // डेटाबेस ऐकणे (Real-time Listener)
-        db.ref('machines').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(!data) {
-                db.ref('machines').set(initialMachines);
-            } else {
-                allMachinesData = data;
-                renderDashboard();
-            }
-        });
-
-        // --------------------------------------------------
-        // २. UI रेंडरिंग लॉजिक
-        // --------------------------------------------------
-        function renderDashboard() {
-            const listContainer = document.getElementById('machine-list');
-            listContainer.innerHTML = '';
-
-            let counts = { RUNNING: 0, BREAKDOWN: 0, 'CMM NOT OK': 0, 'FIXTURE NOT OK': 0, 'LOT READY': 0 };
-
-            for (let mId in allMachinesData) {
-                let m = allMachinesData[mId];
-                if(counts[m.status] !== undefined) counts[m.status]++;
-
-                let item = document.createElement('div');
-                item.className = 'machine-item';
-                let statusClass = 'bg-' + m.status.replace(/ /g, '_');
-                item.innerHTML = `
-                    <span><b>${mId}</b></span>
-                    <span class="badge ${statusClass}">${m.status}</span>
-                `;
-                item.onclick = () => selectMachine(mId);
-                listContainer.appendChild(item);
-            }
-
-            // काउंट्स अपडेट करणे
-            document.getElementById('cnt-running').innerText = counts['RUNNING'];
-            document.getElementById('cnt-breakdown').innerText = counts['BREAKDOWN'];
-            document.getElementById('cnt-cmm').innerText = counts['CMM NOT OK'];
-            document.getElementById('cnt-fixture').innerText = counts['FIXTURE NOT OK'];
-            document.getElementById('cnt-ready').innerText = counts['LOT READY'];
-
-            // जर मशीन सिलेक्ट असेल तर त्याचे डिटेल्स अपडेट ठेवणे
-            if(selectedMachineId) {
-                selectMachine(selectedMachineId);
-            }
-        }
-
-        // --------------------------------------------------
-        // ३. मशीन सिलेक्ट करणे आणि ऑपरेटर असाइन करणे
-        // --------------------------------------------------
-        function selectMachine(mId) {
-            selectedMachineId = mId;
-            const m = allMachinesData[mId];
-            document.getElementById('control-panel').style.display = 'block';
-            document.getElementById('selected-m-id').innerText = mId;
-            document.getElementById('selected-m-status').innerText = m.status;
-            document.getElementById('op-name').innerText = m.operator_name || 'None';
-            document.getElementById('op-id').innerText = m.operator_id || '-';
-        }
-
-        function assignOperator() {
-            if(!selectedMachineId) return;
-            db.ref('machines/' + selectedMachineId).update({
-                operator_name: currentLoggedInUser.name,
-                operator_id: currentLoggedInUser.id
-            });
-            alert(`मशीन ${selectedMachineId} वर ${currentLoggedInUser.name} यांचे नाव लावले गेले आहे.`);
-        }
-
-        function updateStatus(newStatus) {
-            if(!selectedMachineId) return;
-            db.ref('machines/' + selectedMachineId).update({
-                status: newStatus
-            });
-        }
-
-        // --------------------------------------------------
-        // ४. फिल्टर्ड मशीन्सची यादी दाखवणे (Pop-up Modal)
-        // --------------------------------------------------
-        function filterMachines(statusType) {
-            const modalList = document.getElementById('modal-list');
-            document.getElementById('modal-title').innerText = statusType + " MACHINES";
-            modalList.innerHTML = '';
-
-            let found = false;
-            for (let mId in allMachinesData) {
-                let m = allMachinesData[mId];
-                if(m.status === statusType) {
-                    found = true;
-                    let div = document.createElement('div');
-                    div.className = 'machine-item';
-                    div.innerHTML = `
-                        <div>
-                            <b>${mId}</b><br>
-                            <small>ऑपरेटर: ${m.operator_name} (ID: ${m.operator_id})</small>
-                        </div>
-                    `;
-                    modalList.appendChild(div);
-                }
-            }
-
-            if(!found) {
-                modalList.innerHTML = '<p style="font-size:12px; color:#94a3b8;">या स्टेटसमधील एकही मशीन नाही.</p>';
-            }
-
-            document.getElementById('filter-modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('filter-modal').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+<div id="login"><div class="loginBox"><h1 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h1><p style="font-size:9px;letter-spacing:2px;opacity:.6;margin-bottom:16px">FACTORY MACHINE TRACKING - FINAL</p><input id="opId" class="inp" placeholder="Employee ID - 5878"><input id="opName" class="inp" placeholder="Name - Akash Patil"><select id="opShift" class="inp"><option>Day Shift (7AM-7PM)</option><option>Night Shift</option><option>General Shift</option></select><button class="btnLogin" onclick="doLogin()">LOGIN</button></div></div>
+<div class="topBar"><div><b style="color:#ff1a1a;font-size:18px">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><div><span style="font-size:10px;background:#0f2218;color:#22c55e;padding:4px 8px;border-radius:12px">● LIVE</span> <button onclick="localStorage.clear();location.reload()" style="background:#1a254a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;margin-left:8px">LOGOUT</button></div></div>
+<div class="cards" id="cards"></div>
+<div class="seriesGrid" id="seriesGrid"></div>
+<div class="mainBox">
+<div class="phone"><div style="font-size:12px;font-weight:900;color:#8fa0c7;margin-bottom:10px" id="listTitle">MACHINE LIST</div><div id="machineList"></div></div>
+<div class="phone"><div style="font-size:12px;font-weight:900;color:#8fa0c7;margin-bottom:10px">SELECTED MACHINE + OPERATOR INFO</div><div id="machineDetail"></div><div id="operatorBox"></div><div id="statusList" style="margin-top:14px"></div></div>
+</div>
+<script>
+let curSeries='E', curMachine='E-06', curFilter='ALL', operator=null, machines={};
+function init(){for(let i=1;i<=14;i++)machines['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null};for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';machines['E-'+String(i).padStart(2,'0')]={status:s,op:null}}for(let i=1;i<=8;i++)machines['MK-0'+i]={status:'RUNNING',op:null};for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null}}for(let i=1;i<=3;i++)machines['BR-0'+i]={status:'RUNNING',op:null};machines['E-06'].op={name:'Akash Patil',id:'5878',shift:'Day',time:'07:10 AM'};}
+function doLogin(){let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim();if(!id||!nm)return alert('Enter ID and Name');operator={id,name:nm,shift:document.getElementById('opShift').value};localStorage.setItem('brembo_final_eng',JSON.stringify(operator));document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+nm+' (ID:'+id+')';renderAll();}
+function getCount(k){if(k=='ALL')return Object.keys(machines).length;return Object.values(machines).filter(m=>m.status==k).length;}
+function renderCards(){let list=[{k:'ALL',t:'TOTAL',c:'#60a5fa'},{k:'RUNNING',t:'RUNNING',c:'#22c55e'},{k:'BREAKDOWN',t:'BREAKDOWN',c:'#ef4444'},{k:'CMM NOT OK',t:'CMM NOT OK',c:'#f59e0b'},{k:'FIXTURE NOT OK',t:'FIXTURE NOT OK',c:'#fbbf24'},{k:'LOT READY',t:'LOT READY',c:'#22d3ee'},{k:'LOT HOLD',t:'LOT HOLD',c:'#a855f7'},{k:'SIGN PENDING',t:'SIGN PENDING',c:'#60a5fa'}];document.getElementById('cards').innerHTML=list.map(x=>`<div class="card ${curFilter==x.k?'active':''}" onclick="setFilter('${x.k}')" style="border-left:4px solid ${x.c}"><p style="font-size:9px;opacity:.6">${x.t}</p><h2 style="color:${x.c};font-size:20px">${getCount(x.k)}</h2><p style="font-size:8px;color:#60a5fa">CLICK TO VIEW LIST →</p></div>`).join('');}
+function setFilter(f){curFilter=f;renderCards();renderMachineList();}
+function setSeries(s){curSeries=s;curFilter='ALL';renderCards();renderSeries();renderMachineList();}
+function renderSeries(){let d=[{id:'M1',name:'M1 SERIES',c:14,col:'#3b82f6'},{id:'E',name:'E SERIES',c:32,col:'#22c55e'},{id:'MK',name:'MK SERIES',c:8,col:'#f59e0b'},{id:'PN',name:'PN SERIES',c:4,col:'#a855f7'},{id:'L',name:'L SERIES',c:4,col:'#14b8a6'},{id:'BR',name:'BR SERIES',c:3,col:'#ef4444'}];document.getElementById('seriesGrid').innerHTML=d.map(x=>`<div class="sCard ${curSeries==x.id?'active':''}" onclick="setSeries('${x.id}')"><div style="width:36px;height:36px;background:${x.col};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000">${x.id}</div><div><div style="font-size:12px;font-weight:800">${x.name}</div><div style="font-size:10px;opacity:.6">${x.c} Machines - CLICK TO VIEW</div></div><div style="margin-left:auto;font-size:20px;font-weight:900">${x.c}</div></div>`).join('');}
+function renderMachineList(){let ids=curFilter=='ALL'?Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();document.getElementById('listTitle').innerText=`MACHINES - ${curFilter} (${ids.length}) - ${curSeries} SERIES - CLICK ANY MACHINE`;document.getElementById('machineList').innerHTML=ids.map(id=>`<div class="mItem ${id==curMachine?'active':''}" onclick="selectMachine('${id}')"><span><b>${id}</b></span><span style="font-size:8px;padding:3px 6px;border-radius:4px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};color:#fff">${machines[id].status}</span></div>`).join('')||'<div style="opacity:.5;padding:20px;text-align:center">No machines</div>';if(ids.length)selectMachine(ids.includes(curMachine)?curMachine:ids[0],false);}
+function selectMachine(id,auto=true){if(!machines[id])return;curMachine=id;if(auto&&operator&&!machines[id].op){machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};}document.getElementById('machineDetail').innerHTML=`<div style="font-size:32px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button class="btnAssign" onclick="assignMe()">I AM WORKING HERE - Assign My Name</button>`;let op=machines[id].op;document.getElementById('operatorBox').innerHTML=op?`<div class="opCard"><b>OPERATOR INFO:</b><br>Name: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>Time: ${op.time}<br>Machine: ${id}</div>`:`<div class="opCard" style="background:#3a1a2a">No Operator Assigned</div>`;document.getElementById('statusList').innerHTML='<div style="font-size:11px;font-weight:800;margin-bottom:6px">UPDATE STATUS:</div>'+['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'].map(s=>`<div class="mItem ${machines[id].status==s?'active':''}" onclick="updateStatus('${s}')"><span>● ${s}</span><span>${machines[id].status==s?'✓':''}</span></div>`).join('');}
+function assignMe(){if(!operator)return;machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};selectMachine(curMachine,false);}
+function updateStatus(s){if(!operator){document.getElementById('login').style.display='flex';return;}machines[curMachine].status=s;renderCards();renderMachineList();let msg=`*BREMBO ${s}*%0AMachine:${curMachine}%0AOperator:${operator.name} (${operator.id})`;window.location.href=`https://wa.me/919881097236?text=${msg}`;}
+function renderAll(){renderCards();renderSeries();renderMachineList();}
+init();let sv=localStorage.getItem('brembo_final_eng');if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';}renderAll();
+</script></body></html>
