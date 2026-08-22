@@ -1,75 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="mr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Brembo - FINAL with Real Numbers</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brembo - Final Operator System</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
-body{background:#0a0e1c;color:#fff}
-.topbar{height:62px;background:#0a0e1c;border-bottom:1px solid #1d2642;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-.logo{color:#ff1a1a;font-weight:900;font-size:28px}
-.sub{font-size:8px;color:#7a85a6;letter-spacing:2px;font-weight:800}
-.live{font-size:10px;color:#22c55e;font-weight:800}
-.wrap{display:flex;max-width:1450px;margin:auto}
-.main{flex:1;padding:14px}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.c{background:#121a33;border:1px solid #1f2a4a;border-radius:14px;padding:12px;text-align:center}
-.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.sb{border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.07);cursor:pointer}
-.sb.active{border:2px solid #fff;box-shadow:0 0 15px rgba(255,255,255,.2)}
-.sb.m1{background:linear-gradient(135deg,#132552,#0d1a38)}
-.sb.e{background:linear-gradient(135deg,#0f3322,#0d2418)}
-.sb.mk{background:linear-gradient(135deg,#3b2b0f,#241c07)}
-.sb.pn{background:linear-gradient(135deg,#2a1650,#1a0e32)}
-.sb.l{background:linear-gradient(135deg,#0e3140,#0a212c)}
-.sb.br{background:linear-gradient(135deg,#3a1515,#240d0d)}
-.badge{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px}
-.mobsec{background:#eef2ff;border-radius:16px;padding:16px;margin-top:20px;color:#111}
-.mobgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.phone{background:#0a0e1c;border-radius:22px;padding:12px;color:#fff;min-height:420px;border:3px solid #222}
-.opt{padding:9px 10px;border-radius:9px;margin:5px 0;font-size:11px;font-weight:800;display:flex;justify-content:space-between;border:1.5px solid #22305c;cursor:pointer;color:#fff}
-.opt.sel{border-color:#f59e0b;background:#2e2613}
-.btn{width:100%;padding:11px;border-radius:10px;border:none;font-weight:900;font-size:12px;cursor:pointer;margin-top:10px}
-.btn-green{background:#22c55e;color:#fff}
+body{background:#080c1c;color:#fff}
+#login{position:fixed;inset:0;background:#080c1c;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.box{background:#111a33;border:1px solid #1e2c5a;border-radius:20px;padding:24px;width:100%;max-width:400px;text-align:center}
+.inp{width:100%;padding:13px;border-radius:10px;background:#080c1c;border:1.5px solid #233363;color:#fff;margin:8px 0}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;background:#ff1a1a;color:#fff;font-weight:900;cursor:pointer}
+.top{display:flex;justify-content:space-between;padding:10px 14px;background:#0c122b;border-bottom:1px solid #1a2650}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;max-width:1200px;margin:auto}
+.c{background:#111a33;border-radius:14px;padding:12px;text-align:center;border:1px solid #1e2c5a;cursor:pointer}
+.c.active{border:2px solid #fff;transform:scale(1.03)}
+.c h3{font-size:22px}
+.c p{font-size:9px;opacity:.7;letter-spacing:1px}
+.sGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 12px;max-width:1200px;margin:auto}
+.s{background:#111a33;padding:12px;border-radius:14px;border:1px solid #1e2c5a;cursor:pointer}
+.mobWrap{background:#eef2ff;border-radius:18px;padding:14px;margin:14px 12px;color:#000;max-width:1200px;margin:auto;margin-top:16px}
+.mobGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.phone{background:#0a0e1f;border-radius:18px;padding:10px;min-height:420px;color:#fff;border:2px solid #222}
+.opt{padding:8px 9px;background:#141e3b;border-radius:8px;margin:4px 0;font-size:11px;display:flex;justify-content:space-between;cursor:pointer;border:1px solid #22305c}
+.opt.sel{background:#fff;color:#000;font-weight:900}
+.opInfo{background:#1a254a;padding:10px;border-radius:10px;margin-top:10px;font-size:11px;line-height:1.6}
+@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.sGrid{grid-template-columns:repeat(1,1fr)}.mobGrid{grid-template-columns:repeat(1,1fr)}}
 </style>
 </head>
 <body>
-<div class="topbar"><div><div class="logo">brembo</div><div class="sub">FACTORY TRACKING - REAL NUMBERS</div></div><div class="live">● LIVE <span id="liveClock"></span></div></div>
-<div class="wrap"><div class="main">
-<div class="cards"><div class="c"><div style="font-size:9px;color:#8b97b9">TOTAL</div><div style="font-size:28px;font-weight:900;color:#60a5fa">65</div></div><div class="c"><div style="font-size:9px">RUNNING</div><div style="font-size:28px;font-weight:900;color:#22c55e">42</div></div><div class="c"><div style="font-size:9px">BREAKDOWN</div><div style="font-size:28px;font-weight:900;color:#ef4444">5</div></div><div class="c"><div style="font-size:9px">CMM NOT OK</div><div style="font-size:28px;font-weight:900;color:#f59e0b">6</div></div></div>
-<div style="font-size:11px;font-weight:800;color:#8a96b8;margin:14px 0 10px">MACHINE SERIES - CLICK ANY CARD TO VIEW MACHINES</div>
-<div class="sgrid" id="sg"></div>
-<div class="mobsec"><div style="text-align:center;font-weight:900;margin-bottom:12px">OPERATOR MOBILE FLOW - REAL WHATSAPP</div><div class="mobgrid"><div class="phone"><div style="color:#ff1a1a;font-weight:900">brembo</div><div style="margin:10px 0;font-weight:800">Select Series</div><div id="phoneSeries"></div><div style="font-size:8px;color:#aaa;margin-top:15px">Supervisor: Mahesh Andhale<br>9881097236</div></div><div class="phone"><div style="font-weight:800" id="seriesTitle">E SERIES MACHINES</div><div id="mlist" style="margin-top:8px;max-height:320px;overflow-y:auto"></div></div><div class="phone"><div style="font-weight:800">Selected Machine</div><div id="selMid" style="font-size:22px;font-weight:900;color:#22c55e;margin-top:10px">E-06</div><div id="selMidStatus" style="font-size:11px;color:#f59e0b">CMM NOT OK</div><button class="btn btn-green">START MACHINE</button><div style="font-size:9px;color:#aaa;margin-top:15px">Maintenance: Pravin Kolhe<br>Tool Room: Prashant Tarate<br>Loading: Sonepal Ram</div></div><div class="phone"><div style="font-weight:800">Update Status - <span id="upId">E-06</span></div><div id="statusOpts" style="margin-top:10px"></div><div style="font-size:9px;color:#aaa;margin-top:8px">Real WhatsApp Routing Enabled</div></div></div></div>
-</div></div>
+
+<div id="login">
+<div class="box">
+<h2 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h2>
+<p style="font-size:10px;letter-spacing:3px;color:#7a85a6;margin-bottom:16px">OPERATOR LOGIN SYSTEM</p>
+<input id="opId" class="inp" placeholder="ID टाका - उदा. 1011">
+<input id="opName" class="inp" placeholder="नाव टाका - उदा. Akash Patil">
+<select id="opShift" class="inp"><option>Day Shift (7-7)</option><option>Night Shift (7-7)</option><option>General</option></select>
+<button class="btn" onclick="login()">LOGIN →</button>
+<p id="err" style="color:#ff4444;font-size:11px;margin-top:8px"></p>
+</div>
+</div>
+
+<div class="top"><div><b style="color:#ff1a1a">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><button onclick="logout()" style="background:#1a254a;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:10px">LOGOUT</button></div>
+
+<div class="cards" id="topCards"></div>
+<div class="sGrid" id="sGrid"></div>
+
+<div class="mobWrap">
+<div style="text-align:center;font-weight:900;font-size:13px;margin-bottom:10px;letter-spacing:1px">OPERATOR MOBILE FLOW - FINAL</div>
+<div class="mobGrid">
+<div class="phone"><b>1. Select Series</b><div id="pSeries" style="margin-top:10px"></div></div>
+<div class="phone"><b id="mTitle">2. Machines</b><div id="pMachines" style="margin-top:10px"></div></div>
+<div class="phone"><b>3. Selected Machine</b><div id="pSel" style="margin-top:10px"></div><div id="opInfoBox"></div></div>
+<div class="phone"><b>4. Update Status</b><div id="pStatus" style="margin-top:10px"></div></div>
+</div>
+</div>
+
 <script>
-const NUMBERS={
-  SUPERVISOR:"919881097236",
-  MAINT:"919822434776",
-  TOOL:"919359499867",
-  LOADING:"919012683322",
-  QUALITY:"919881097236"
-};
-let curSeries='E',curMid='E-06',machines={};
-function initM(){for(let i=1;i<=14;i++){machines['M1-'+String(i).padStart(2,'0')]={s:'RUNNING'}}for(let i=1;i<=32;i++){machines['E-'+String(i).padStart(2,'0')]={s:i<=21?'RUNNING':i<=24?'BREAKDOWN':i<=27?'CMM NOT OK':'LOT READY'}}for(let i=1;i<=8;i++){machines['MK-'+String(i).padStart(2,'0')]={s:'RUNNING'}}for(let i=1;i<=4;i++){machines['PN-0'+i]={s:'RUNNING'};machines['L-0'+i]={s:'RUNNING'}}for(let i=1;i<=3;i++){machines['BR-0'+i]={s:'RUNNING'}}machines['E-06'].s='CMM NOT OK';renderSeries();renderMList('E');renderStatusOpts();setInterval(()=>{document.getElementById('liveClock').innerText=new Date().toLocaleTimeString()},1000);}
-function renderSeries(){let d=[{id:'M1',n:'M1 SERIES',c:14,cls:'m1',col:'#60a5fa'},{id:'E',n:'E SERIES',c:32,cls:'e',col:'#22c55e'},{id:'MK',n:'MK SERIES',c:8,cls:'mk',col:'#f59e0b'},{id:'PN',n:'PN SERIES',c:4,cls:'pn',col:'#a78bfa'},{id:'L',n:'L SERIES',c:4,cls:'l',col:'#22d3ee'},{id:'BR',n:'BR SERIES',c:3,cls:'br',col:'#f87171'}];document.getElementById('sg').innerHTML=d.map(x=>`<div class="sb ${x.cls} ${curSeries==x.id?'active':''}" onclick="selectSeries('${x.id}')"><div style="display:flex;gap:8px;align-items:center"><div class="badge" style="background:${x.col}">${x.id}</div><div><div style="font-weight:900;font-size:12px">${x.n}</div><div style="font-size:10px;opacity:.7">${x.c} Machines</div></div></div><div style="font-size:30px;font-weight:900;margin:10px 0">${x.c}</div><div style="font-size:10px;color:#60a5fa">${curSeries==x.id?'✓ SELECTED':'View Machines →'}</div></div>`).join('');document.getElementById('phoneSeries').innerHTML=d.map(x=>`<div class="opt ${curSeries==x.id?'sel':''}" onclick="selectSeries('${x.id}')"><span>${x.n} (${x.c})</span><span>${curSeries==x.id?'→':''}</span></div>`).join('');}
-function selectSeries(s){curSeries=s;document.getElementById('seriesTitle').innerText=s+' SERIES MACHINES';renderSeries();renderMList(s);}
-function renderMList(series){let ids=Object.keys(machines).filter(k=>k.startsWith(series+'-')).sort();let h='';ids.forEach(id=>{let st=machines[id].s;let col=st=='RUNNING'?'#22c55e':st.includes('BREAKDOWN')?'#ef4444':'#f59e0b';h+=`<div class="opt ${id==curMid?'sel':''}" onclick="pickM('${id}')"><span>${id}</span><span style="color:${col};font-size:9px">${st}</span></div>`});document.getElementById('mlist').innerHTML=h;}
-function pickM(id){curMid=id;document.getElementById('selMid').innerText=id;document.getElementById('upId').innerText=id;document.getElementById('selMidStatus').innerText=machines[id].s;renderMList(curSeries);renderStatusOpts();}
-function renderStatusOpts(){let o=[['RUNNING','🟢'],['BREAKDOWN','🔴'],['CMM NOT OK','🟠'],['FIXTURE NOT OK','🟡'],['LOT HOLD','🟣'],['LOT READY','✅']];let cur=machines[curMid].s;document.getElementById('statusOpts').innerHTML=o.map(x=>`<div class="opt ${x[0]==cur?'sel':''}" onclick="updateSt('${x[0]}')"><span>${x[1]} ${x[0]}</span></div>`).join('');}
-function updateSt(st){
-  machines[curMid].s=st;renderStatusOpts();renderMList(curSeries);
-  let msg=`*BREMBO ALERT*\nMachine: ${curMid}\nProblem: ${st}\nOperator: Akash Patil\nShift: Night\nTime: ${new Date().toLocaleString()}\nPlease check immediately.`;
-  let target=NUMBERS.SUPERVISOR;
-  if(st=='BREAKDOWN'){target=NUMBERS.MAINT;}
-  else if(st=='CMM NOT OK'){target=NUMBERS.QUALITY;}
-  else if(st=='FIXTURE NOT OK'){target=NUMBERS.TOOL;}
-  else if(st.includes('LOT')){target=NUMBERS.LOADING;}
-  // Open WhatsApp to respective person + always also to Supervisor as second tab after 1.5 sec
-  window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`,'_blank');
-  setTimeout(()=>{if(target!=NUMBERS.SUPERVISOR) window.open(`https://wa.me/${NUMBERS.SUPERVISOR}?text=${encodeURIComponent(msg)}`,'_blank');},1500);
-  alert(`WhatsApp Sent: ${curMid} -> ${st}\nTo: ${target} + Supervisor`);
+const REAL_NUMS={SUPERVISOR:"919881097236",MAINT:"919822434776",TOOL:"919359499867",LOADING:"919012683322"};
+let curSeries='E',curMachine='E-06',curFilter='ALL',operator=null;
+let machines={};
+function initMachines(){
+  for(let i=1;i<=14;i++){let id='M1-'+String(i).padStart(2,'0');machines[id]={status:'RUNNING',op:null};}
+  for(let i=1;i<=32;i++){let id='E-'+String(i).padStart(2,'0');let s=i<=20?'RUNNING':i<=24?'BREAKDOWN':i<=28?'CMM NOT OK':i<=30?'FIXTURE NOT OK':'LOT READY';machines[id]={status:s,op:null};}
+  for(let i=1;i<=8;i++){machines['MK-0'+i]={status:'RUNNING',op:null};}
+  for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null};}
+  for(let i=1;i<=3;i++){machines['BR-0'+i]={status:'RUNNING',op:null};}
+  // Demo operators assigned
+  machines['E-01'].op={name:'Rohit K.',id:'1001',shift:'Day'};machines['E-06'].op={name:'Akash P.',id:'1011',shift:'Day'};
 }
-initM();
-</script></body></html>
+function login(){
+  let id=document.getElementById('opId').value.trim(),name=document.getElementById('opName').value.trim();
+  if(!id||!name){document.getElementById('err').innerText='ID आणि नाव टाका!';return;}
+  operator={id,name,shift:document.getElementById('opShift').value,time:new Date().toLocaleTimeString()};
+  localStorage.setItem('brembo_op_final',JSON.stringify(operator));
+  document.getElementById('login').style.display='none';
+  document.getElementById('wel').innerText='👷 '+name+' (ID:'+id+') | '+operator.shift;
+  renderAll();
+}
+function logout(){localStorage.removeItem('brembo_op_final');location.reload();}
+function renderTop(){
+  let total=Object.keys(machines).length;
+  let run=Object.values(machines).filter(m=>m.status=='RUNNING').length;
+  let br=Object.values(machines).filter(m=>m.status=='BREAKDOWN').length;
+  let cmm=Object.values(machines).filter(m=>m.status=='CMM NOT OK').length;
+  let fix=Object.values(machines).filter(m=>m.status=='FIXTURE NOT OK').length;
+  let lot=Object.values(machines).filter(m=>m.status=='LOT READY').length;
+  let cards=[
+    {k:'ALL',t:'TOTAL',v:total,c:'#60a5fa'},
+    {k:'RUNNING',t:'RUNNING',v:run,c:'#22c55e'},
+    {k:'BREAKDOWN',t:'BREAKDOWN',v:br,c:'#ef4444'},
+    {k:'CMM NOT OK',t:'CMM NOT OK',v:cmm,c:'#f59e0b'},
+    {k:'FIXTURE NOT OK',t:'FIXTURE NOT OK',v:fix,c:'#fbbf24'},
+    {k:'LOT READY',t:'LOT READY',v:lot,c:'#22c55e'}
+  ];
+  document.getElementById('topCards').innerHTML=cards.map(x=>`<div class="c ${curFilter==x.k?'active':''}" onclick="setFilter('${x.k}')" style="border-left:4px solid ${x.c}"><p>${x.t}</p><h3 style="color:${x.c}">${x.v}</h3><p style="font-size:8px">CLICK TO VIEW LIST →</p></div>`).join('');
+}
+function setFilter(f){curFilter=f;renderTop();renderMachineList();}
+function renderSeries(){
+  let list=[{id:'M1',n:'M1 SERIES',c:14},{id:'E',n:'E SERIES',c:32},{id:'MK',n:'MK SERIES',c:8},{id:'PN',n:'PN SERIES',c:4},{id:'L',n:'L SERIES',c:4},{id:'BR',n:'BR SERIES',c:3}];
+  document.getElementById('sGrid').innerHTML=list.map(s=>`<div class="s" onclick="selSeries('${s.id}')" style="${curSeries==s.id?'border:2px solid #fff':''}"><b>${s.n}</b><div style="font-size:11px;opacity:.7">${s.c} Machines</div></div>`).join('');
+  document.getElementById('pSeries').innerHTML=list.map(s=>`<div class="opt ${curSeries==s.id?'sel':''}" onclick="selSeries('${s.id}')"><span>${s.n} (${s.c})</span><span>→</span></div>`).join('');
+}
+function selSeries(id){curSeries=id;curFilter='ALL';renderTop();renderSeries();renderMachineList();}
+function renderMachineList(){
+  let ids=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort();
+  if(curFilter!='ALL'){ids=ids.filter(k=>machines[k].status==curFilter);}
+  document.getElementById('mTitle').innerText=curSeries+' SERIES - '+curFilter+' ('+ids.length+')';
+  document.getElementById('pMachines').innerHTML=ids.map(id=>`<div class="opt ${id==curMachine?'sel':''}" onclick="selMachine('${id}')"><span>${id}</span><span style="font-size:9px;padding:2px 5px;border-radius:4px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'}">${machines[id].status}</span></div>`).join('')||'<div style="font-size:11px;opacity:.6">या Status ची Machine नाही</div>';
+  selMachine(curMachine,false);
+}
+function selMachine(id,doAssign=true){
+  if(!machines[id]) id=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-'))[0];
+  curMachine=id;
+  // Operator assign to machine when he selects
+  if(doAssign && operator &&!machines[id].op){
+    machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
+  }
+  document.getElementById('pSel').innerHTML=`<div style="font-size:28px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:11px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;background:#22c55e;font-weight:900" onclick="assignMe('${id}')">I AM WORKING HERE - माझं नाव लावा</button>`;
+  let op=machines[id].op;
+  if(op){
+    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo">👷 <b>काम करणारा:</b><br>नाव: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>वेळ: ${op.time||'आज'}<br>Status: ${machines[id].status}</div>`;
+  }else{
+    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo" style="background:#2a1a1a">⚠️ कोणीच Operator नाही<br>कोणी काम करत नाहीय</div>`;
+  }
+  renderStatusBtns();
+  // highlight
+  document.querySelectorAll('#pMachines.opt').forEach(el=>{if(el.innerHTML.includes(id))el.classList.add('sel')});
+}
+function assignMe(id){if(!operator){alert('Login करा!');return;}machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};selMachine(id,false);alert('तुझं नाव '+id+' वर लागलं!');}
+function renderStatusBtns(){
+  let sts=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY'];
+  document.getElementById('pStatus').innerHTML=sts.map(s=>`<div class="opt" style="${machines[curMachine].status==s?'background:#fff;color:#000;font-weight:900':''}" onclick="changeStatus('${s}')"><span>● ${s}</span><span>${s==machines[curMachine].status?'✓':''}</span></div>`).join('')+`<div style="font-size:9px;color:#7a85a6;margin-top:10px">WhatsApp Real Numbers वर जाईल<br>Operator: ${operator?operator.name:'-'}</div>`;
+}
+function changeStatus(s){
+  if(!operator){alert('पहिला Login कर!');document.getElementById('login').style.display='flex';return;}
+  machines[curMachine].status=s;
+  if(!machines[curMachine].op) machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
+  renderTop();renderMachineList();
+  let msg=`*BREMBO ALERT*%0AMachine: ${curMachine}%0AProblem: ${s}%0AOperator: ${operator.name} (ID:${operator.id})%0AShift: ${operator.shift}%0ATime: ${new Date().toLocaleString()}`;
+  let target=REAL_NUMS.SUPERVISOR;
+  if(s=='BREAKDOWN')target=REAL_NUMS.MAINT;else if(s=='FIXTURE NOT OK')target=REAL_NUMS.TOOL;else if(s.includes('LOT'))target=REAL_NUMS.LOADING;
+  window.open(`https://wa.me/${target}?text=${msg}`,'_blank');
+  setTimeout(()=>{if(target!=REAL_NUMS.SUPERVISOR)window.open(`https://wa.me/${REAL_NUMS.SUPERVISOR}?text=${msg}`,'_blank');},1000);
+}
+function renderAll(){renderTop();renderSeries();renderMachineList();}
+initMachines();
+let saved=localStorage.getItem('brembo_op_final');
+if(saved){operator=JSON.parse(saved);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';document.getElementById('opId').value=operator.id;document.getElementById('opName').value=operator.name;}
+renderAll();
+</script>
+</body>
+</html>
