@@ -1,155 +1,108 @@
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Brembo - Final Operator System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BREMBO Chakan - Machine Shop Dashboard</title>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// Your Firebase Config from Screenshot
+const firebaseConfig = {
+  apiKey: "AIzaSyBCfxWERD0IZGcwoScujYeyI_Wjrnol0",
+  authDomain: "brembo--63.firebaseapp.com",
+  databaseURL: "https://brembo--63-default-rtdb.firebaseio.com",
+  projectId: "brembo--63",
+  storageBucket: "brembo--63.firebasestorage.app",
+  messagingSenderId: "364747204826",
+  appId: "1:364747204826:web:7ae3762bd0dd0a7a935de3",
+  measurementId: "G-7DR8YP7VZR"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Realtime Listener - Reads data live from Firebase
+const machinesRef = ref(db, 'machines');
+onValue(machinesRef, (snapshot) => {
+  const data = snapshot.val();
+  const list = document.getElementById('machineList');
+  const count = document.getElementById('count');
+  list.innerHTML = "";
+  let total = 0;
+  if(data){
+    Object.keys(data).forEach(key => {
+      total++;
+      const m = data[key];
+      const color = m.status=='RUN'? '#16a34a' : m.status=='STOP'? '#dc2626' : '#f59e0b';
+      list.innerHTML += `
+      <div class="machine-card">
+        <div style="display:flex;justify-content:space-between">
+          <b>${m.name}</b>
+          <span style="background:${color};color:white;padding:2px 10px;border-radius:20px;font-size:12px">${m.status}</span>
+        </div>
+        <div style="margin-top:8px;font-size:14px;color:#555">Operator: ${m.operator} | Output: ${m.output}</div>
+      </div>`;
+    });
+    count.innerText = `Total Machines: ${total}`;
+  } else {
+    list.innerHTML = "<p>No machines found. Add one.</p>";
+    count.innerText = "Total Machines: 0";
+  }
+});
+
+// Function to Add Machine to Firebase
+window.addMachine = () => {
+  const name = document.getElementById('mName').value.trim();
+  const status = document.getElementById('mStatus').value;
+  const operator = document.getElementById('mOperator').value.trim();
+  if(!name) return alert("Please enter Machine Name");
+  push(ref(db, 'machines'), {
+    name: name,
+    status: status,
+    operator: operator || "Operator-1",
+    output: Math.floor(Math.random()*500)+50,
+    createdAt: new Date().toISOString()
+  });
+  document.getElementById('mName').value = "";
+  document.getElementById('mOperator').value = "";
+}
+</script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
-body{background:#080c1c;color:#fff}
-#login{position:fixed;inset:0;background:#080c1c;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
-.box{background:#111a33;border:1px solid #1e2c5a;border-radius:20px;padding:24px;width:100%;max-width:400px;text-align:center}
-.inp{width:100%;padding:13px;border-radius:10px;background:#080c1c;border:1.5px solid #233363;color:#fff;margin:8px 0}
-.btn{width:100%;padding:13px;border-radius:10px;border:none;background:#ff1a1a;color:#fff;font-weight:900;cursor:pointer}
-.top{display:flex;justify-content:space-between;padding:10px 14px;background:#0c122b;border-bottom:1px solid #1a2650}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;max-width:1200px;margin:auto}
-.c{background:#111a33;border-radius:14px;padding:12px;text-align:center;border:1px solid #1e2c5a;cursor:pointer}
-.c.active{border:2px solid #fff;transform:scale(1.03)}
-.c h3{font-size:22px}
-.c p{font-size:9px;opacity:.7;letter-spacing:1px}
-.sGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 12px;max-width:1200px;margin:auto}
-.s{background:#111a33;padding:12px;border-radius:14px;border:1px solid #1e2c5a;cursor:pointer}
-.mobWrap{background:#eef2ff;border-radius:18px;padding:14px;margin:14px 12px;color:#000;max-width:1200px;margin:auto;margin-top:16px}
-.mobGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.phone{background:#0a0e1f;border-radius:18px;padding:10px;min-height:420px;color:#fff;border:2px solid #222}
-.opt{padding:8px 9px;background:#141e3b;border-radius:8px;margin:4px 0;font-size:11px;display:flex;justify-content:space-between;cursor:pointer;border:1px solid #22305c}
-.opt.sel{background:#fff;color:#000;font-weight:900}
-.opInfo{background:#1a254a;padding:10px;border-radius:10px;margin-top:10px;font-size:11px;line-height:1.6}
-@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.sGrid{grid-template-columns:repeat(1,1fr)}.mobGrid{grid-template-columns:repeat(1,1fr)}}
+body{margin:0;font-family:Segoe UI, Arial;background:#f3f4f6}
+.header{background:#c40000;color:white;padding:20px;text-align:center}
+.header h1{margin:0;font-size:24px;letter-spacing:1px}
+.header p{margin:5px 0 0 0;font-size:13px;opacity:0.9}
+.container{max-width:700px;margin:20px auto;padding:0 15px}
+.card{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08);margin-bottom:20px}
+input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #d1d5db;border-radius:10px;font-size:15px;box-sizing:border-box}
+.btn{width:100%;padding:13px;background:#c40000;color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn:hover{background:#a00000}
+.machine-card{background:white;padding:16px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:12px;border-left:4px solid #c40000}
+.footer{text-align:center;font-size:12px;color:#9ca3af;margin:30px 0}
 </style>
 </head>
 <body>
-
-<div id="login">
-<div class="box">
-<h2 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h2>
-<p style="font-size:10px;letter-spacing:3px;color:#7a85a6;margin-bottom:16px">OPERATOR LOGIN SYSTEM</p>
-<input id="opId" class="inp" placeholder="ID टाका - उदा. 1011">
-<input id="opName" class="inp" placeholder="नाव टाका - उदा. Akash Patil">
-<select id="opShift" class="inp"><option>Day Shift (7-7)</option><option>Night Shift (7-7)</option><option>General</option></select>
-<button class="btn" onclick="login()">LOGIN →</button>
-<p id="err" style="color:#ff4444;font-size:11px;margin-top:8px"></p>
+<div class="header">
+  <h1>BREMBO - Chakan MIDC</h1>
+  <p>Machine Shop Live Production Dashboard</p>
 </div>
+<div class="container">
+  <div class="card">
+    <h3 style="margin-top:0">Add Machine Data</h3>
+    <input id="mName" placeholder="Machine Name e.g. CNC-05 / VMC-02">
+    <input id="mOperator" placeholder="Operator Name e.g. Akash P.">
+    <select id="mStatus">
+      <option value="RUN">RUN</option>
+      <option value="STOP">STOP</option>
+      <option value="IDLE">IDLE</option>
+    </select>
+    <button class="btn" onclick="addMachine()">SAVE TO FIREBASE</button>
+  </div>
+  <h3 id="count">Total Machines: 0</h3>
+  <div id="machineList">Loading live data from Firebase...</div>
+  <div class="footer">Connected to Firebase Project: brembo--63<br>Database: brembo--63-default-rtdb.firebaseio.com<br>GitHub Pages: akashpatil191175-lab.github.io/brembo-dashboard</div>
 </div>
-
-<div class="top"><div><b style="color:#ff1a1a">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><button onclick="logout()" style="background:#1a254a;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:10px">LOGOUT</button></div>
-
-<div class="cards" id="topCards"></div>
-<div class="sGrid" id="sGrid"></div>
-
-<div class="mobWrap">
-<div style="text-align:center;font-weight:900;font-size:13px;margin-bottom:10px;letter-spacing:1px">OPERATOR MOBILE FLOW - FINAL</div>
-<div class="mobGrid">
-<div class="phone"><b>1. Select Series</b><div id="pSeries" style="margin-top:10px"></div></div>
-<div class="phone"><b id="mTitle">2. Machines</b><div id="pMachines" style="margin-top:10px"></div></div>
-<div class="phone"><b>3. Selected Machine</b><div id="pSel" style="margin-top:10px"></div><div id="opInfoBox"></div></div>
-<div class="phone"><b>4. Update Status</b><div id="pStatus" style="margin-top:10px"></div></div>
-</div>
-</div>
-
-<script>
-const REAL_NUMS={SUPERVISOR:"919881097236",MAINT:"919822434776",TOOL:"919359499867",LOADING:"919012683322"};
-let curSeries='E',curMachine='E-06',curFilter='ALL',operator=null;
-let machines={};
-function initMachines(){
-  for(let i=1;i<=14;i++){let id='M1-'+String(i).padStart(2,'0');machines[id]={status:'RUNNING',op:null};}
-  for(let i=1;i<=32;i++){let id='E-'+String(i).padStart(2,'0');let s=i<=20?'RUNNING':i<=24?'BREAKDOWN':i<=28?'CMM NOT OK':i<=30?'FIXTURE NOT OK':'LOT READY';machines[id]={status:s,op:null};}
-  for(let i=1;i<=8;i++){machines['MK-0'+i]={status:'RUNNING',op:null};}
-  for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null};}
-  for(let i=1;i<=3;i++){machines['BR-0'+i]={status:'RUNNING',op:null};}
-  // Demo operators assigned
-  machines['E-01'].op={name:'Rohit K.',id:'1001',shift:'Day'};machines['E-06'].op={name:'Akash P.',id:'1011',shift:'Day'};
-}
-function login(){
-  let id=document.getElementById('opId').value.trim(),name=document.getElementById('opName').value.trim();
-  if(!id||!name){document.getElementById('err').innerText='ID आणि नाव टाका!';return;}
-  operator={id,name,shift:document.getElementById('opShift').value,time:new Date().toLocaleTimeString()};
-  localStorage.setItem('brembo_op_final',JSON.stringify(operator));
-  document.getElementById('login').style.display='none';
-  document.getElementById('wel').innerText='👷 '+name+' (ID:'+id+') | '+operator.shift;
-  renderAll();
-}
-function logout(){localStorage.removeItem('brembo_op_final');location.reload();}
-function renderTop(){
-  let total=Object.keys(machines).length;
-  let run=Object.values(machines).filter(m=>m.status=='RUNNING').length;
-  let br=Object.values(machines).filter(m=>m.status=='BREAKDOWN').length;
-  let cmm=Object.values(machines).filter(m=>m.status=='CMM NOT OK').length;
-  let fix=Object.values(machines).filter(m=>m.status=='FIXTURE NOT OK').length;
-  let lot=Object.values(machines).filter(m=>m.status=='LOT READY').length;
-  let cards=[
-    {k:'ALL',t:'TOTAL',v:total,c:'#60a5fa'},
-    {k:'RUNNING',t:'RUNNING',v:run,c:'#22c55e'},
-    {k:'BREAKDOWN',t:'BREAKDOWN',v:br,c:'#ef4444'},
-    {k:'CMM NOT OK',t:'CMM NOT OK',v:cmm,c:'#f59e0b'},
-    {k:'FIXTURE NOT OK',t:'FIXTURE NOT OK',v:fix,c:'#fbbf24'},
-    {k:'LOT READY',t:'LOT READY',v:lot,c:'#22c55e'}
-  ];
-  document.getElementById('topCards').innerHTML=cards.map(x=>`<div class="c ${curFilter==x.k?'active':''}" onclick="setFilter('${x.k}')" style="border-left:4px solid ${x.c}"><p>${x.t}</p><h3 style="color:${x.c}">${x.v}</h3><p style="font-size:8px">CLICK TO VIEW LIST →</p></div>`).join('');
-}
-function setFilter(f){curFilter=f;renderTop();renderMachineList();}
-function renderSeries(){
-  let list=[{id:'M1',n:'M1 SERIES',c:14},{id:'E',n:'E SERIES',c:32},{id:'MK',n:'MK SERIES',c:8},{id:'PN',n:'PN SERIES',c:4},{id:'L',n:'L SERIES',c:4},{id:'BR',n:'BR SERIES',c:3}];
-  document.getElementById('sGrid').innerHTML=list.map(s=>`<div class="s" onclick="selSeries('${s.id}')" style="${curSeries==s.id?'border:2px solid #fff':''}"><b>${s.n}</b><div style="font-size:11px;opacity:.7">${s.c} Machines</div></div>`).join('');
-  document.getElementById('pSeries').innerHTML=list.map(s=>`<div class="opt ${curSeries==s.id?'sel':''}" onclick="selSeries('${s.id}')"><span>${s.n} (${s.c})</span><span>→</span></div>`).join('');
-}
-function selSeries(id){curSeries=id;curFilter='ALL';renderTop();renderSeries();renderMachineList();}
-function renderMachineList(){
-  let ids=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort();
-  if(curFilter!='ALL'){ids=ids.filter(k=>machines[k].status==curFilter);}
-  document.getElementById('mTitle').innerText=curSeries+' SERIES - '+curFilter+' ('+ids.length+')';
-  document.getElementById('pMachines').innerHTML=ids.map(id=>`<div class="opt ${id==curMachine?'sel':''}" onclick="selMachine('${id}')"><span>${id}</span><span style="font-size:9px;padding:2px 5px;border-radius:4px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'}">${machines[id].status}</span></div>`).join('')||'<div style="font-size:11px;opacity:.6">या Status ची Machine नाही</div>';
-  selMachine(curMachine,false);
-}
-function selMachine(id,doAssign=true){
-  if(!machines[id]) id=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-'))[0];
-  curMachine=id;
-  // Operator assign to machine when he selects
-  if(doAssign && operator &&!machines[id].op){
-    machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
-  }
-  document.getElementById('pSel').innerHTML=`<div style="font-size:28px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:11px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;background:#22c55e;font-weight:900" onclick="assignMe('${id}')">I AM WORKING HERE - माझं नाव लावा</button>`;
-  let op=machines[id].op;
-  if(op){
-    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo">👷 <b>काम करणारा:</b><br>नाव: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>वेळ: ${op.time||'आज'}<br>Status: ${machines[id].status}</div>`;
-  }else{
-    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo" style="background:#2a1a1a">⚠️ कोणीच Operator नाही<br>कोणी काम करत नाहीय</div>`;
-  }
-  renderStatusBtns();
-  // highlight
-  document.querySelectorAll('#pMachines.opt').forEach(el=>{if(el.innerHTML.includes(id))el.classList.add('sel')});
-}
-function assignMe(id){if(!operator){alert('Login करा!');return;}machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};selMachine(id,false);alert('तुझं नाव '+id+' वर लागलं!');}
-function renderStatusBtns(){
-  let sts=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY'];
-  document.getElementById('pStatus').innerHTML=sts.map(s=>`<div class="opt" style="${machines[curMachine].status==s?'background:#fff;color:#000;font-weight:900':''}" onclick="changeStatus('${s}')"><span>● ${s}</span><span>${s==machines[curMachine].status?'✓':''}</span></div>`).join('')+`<div style="font-size:9px;color:#7a85a6;margin-top:10px">WhatsApp Real Numbers वर जाईल<br>Operator: ${operator?operator.name:'-'}</div>`;
-}
-function changeStatus(s){
-  if(!operator){alert('पहिला Login कर!');document.getElementById('login').style.display='flex';return;}
-  machines[curMachine].status=s;
-  if(!machines[curMachine].op) machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
-  renderTop();renderMachineList();
-  let msg=`*BREMBO ALERT*%0AMachine: ${curMachine}%0AProblem: ${s}%0AOperator: ${operator.name} (ID:${operator.id})%0AShift: ${operator.shift}%0ATime: ${new Date().toLocaleString()}`;
-  let target=REAL_NUMS.SUPERVISOR;
-  if(s=='BREAKDOWN')target=REAL_NUMS.MAINT;else if(s=='FIXTURE NOT OK')target=REAL_NUMS.TOOL;else if(s.includes('LOT'))target=REAL_NUMS.LOADING;
-  window.open(`https://wa.me/${target}?text=${msg}`,'_blank');
-  setTimeout(()=>{if(target!=REAL_NUMS.SUPERVISOR)window.open(`https://wa.me/${REAL_NUMS.SUPERVISOR}?text=${msg}`,'_blank');},1000);
-}
-function renderAll(){renderTop();renderSeries();renderMachineList();}
-initMachines();
-let saved=localStorage.getItem('brembo_op_final');
-if(saved){operator=JSON.parse(saved);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';document.getElementById('opId').value=operator.id;document.getElementById('opName').value=operator.name;}
-renderAll();
-</script>
 </body>
 </html>
