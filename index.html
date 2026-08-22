@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Brembo - Machine List on Click - FINAL</title>
+<title>Brembo - LIVE Firebase - FINAL</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
@@ -28,8 +31,8 @@ body{background:#070d1f;color:#fff}
 </style>
 </head>
 <body>
-<div id="login"><div class="loginBox"><h1 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h1><p style="font-size:9px;letter-spacing:2px;opacity:.6;margin-bottom:16px">FACTORY MACHINE TRACKING - FINAL</p><input id="opId" class="inp" placeholder="Employee ID - 5878"><input id="opName" class="inp" placeholder="Name - Akash Patil"><select id="opShift" class="inp"><option>Day Shift (7AM-7PM)</option><option>Night Shift</option><option>General Shift</option></select><button class="btnLogin" onclick="doLogin()">LOGIN</button></div></div>
-<div class="topBar"><div><b style="color:#ff1a1a;font-size:18px">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><div><span style="font-size:10px;background:#0f2218;color:#22c55e;padding:4px 8px;border-radius:12px">● LIVE</span> <button onclick="localStorage.clear();location.reload()" style="background:#1a254a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;margin-left:8px">LOGOUT</button></div></div>
+<div id="login"><div class="loginBox"><h1 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h1><p style="font-size:9px;letter-spacing:2px;opacity:.6;margin-bottom:16px">LIVE FIREBASE CONNECTED</p><input id="opId" class="inp" placeholder="Employee ID - 5878"><input id="opName" class="inp" placeholder="Name - Akash Patil"><select id="opShift" class="inp"><option>Day Shift (7AM-7PM)</option><option>Night Shift</option><option>General Shift</option></select><button class="btnLogin" onclick="doLogin()">LOGIN & GO LIVE</button><p id="fbStat" style="font-size:10px;color:#fbbf24;margin-top:8px">Connecting Firebase...</p></div></div>
+<div class="topBar"><div><b style="color:#ff1a1a;font-size:18px">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><div><span id="liveDot" style="font-size:10px;background:#0f2218;color:#22c55e;padding:4px 8px;border-radius:12px">● CONNECTING</span> <button onclick="localStorage.clear();location.reload()" style="background:#1a254a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;margin-left:8px">LOGOUT</button></div></div>
 <div class="cards" id="cards"></div>
 <div class="seriesGrid" id="seriesGrid"></div>
 <div class="mainBox">
@@ -37,8 +40,25 @@ body{background:#070d1f;color:#fff}
 <div class="phone"><div style="font-size:12px;font-weight:900;color:#8fa0c7;margin-bottom:10px">SELECTED MACHINE + OPERATOR INFO</div><div id="machineDetail"></div><div id="operatorBox"></div><div id="statusList" style="margin-top:14px"></div></div>
 </div>
 <script>
+// FIREBASE CONFIG - तुझाच आहे
+const firebaseConfig = {apiKey:"AIzaSyCnkcQZwYgDkyFVoib8eeDCv3V9r6WbqQU",authDomain:"brembo-dashboard.firebaseapp.com",databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",projectId:"brembo-dashboard",storageBucket:"brembo-dashboard.firebasestorage.app",messagingSenderId:"935783960863",appId:"1:935783960863:web:115a5380ab005c50da602a"};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 let curSeries='E', curMachine='E-06', curFilter='ALL', operator=null, machines={};
-function init(){for(let i=1;i<=14;i++)machines['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null};for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';machines['E-'+String(i).padStart(2,'0')]={status:s,op:null}}for(let i=1;i<=8;i++)machines['MK-0'+i]={status:'RUNNING',op:null};for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null}}for(let i=1;i<=3;i++)machines['BR-0'+i]={status:'RUNNING',op:null};machines['E-06'].op={name:'Akash Patil',id:'5878',shift:'Day',time:'07:10 AM'};}
+
+function initDefault(){for(let i=1;i<=14;i++)machines['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null};for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';machines['E-'+String(i).padStart(2,'0')]={status:s,op:null}}for(let i=1;i<=8;i++)machines['MK-0'+i]={status:'RUNNING',op:null};for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null}}for(let i=1;i<=3;i++)machines['BR-0'+i]={status:'RUNNING',op:null};machines['E-06'].op={name:'Akash Patil',id:'5878',shift:'Day',time:'07:10 AM'};}
+
+function saveToFirebase(){db.ref('machines').set(machines);}
+
+function loadFromFirebase(){
+ db.ref('machines').on('value', snap=>{
+  const data=snap.val();
+  if(data){machines=data; document.getElementById('fbStat').innerText="✅ Firebase LIVE Connected!"; document.getElementById('liveDot').innerText="● LIVE ONLINE"; document.getElementById('liveDot').style.background="#0f2218"; renderAll();}
+  else{initDefault(); saveToFirebase();}
+ });
+}
+
 function doLogin(){let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim();if(!id||!nm)return alert('Enter ID and Name');operator={id,name:nm,shift:document.getElementById('opShift').value};localStorage.setItem('brembo_final_eng',JSON.stringify(operator));document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+nm+' (ID:'+id+')';renderAll();}
 function getCount(k){if(k=='ALL')return Object.keys(machines).length;return Object.values(machines).filter(m=>m.status==k).length;}
 function renderCards(){let list=[{k:'ALL',t:'TOTAL',c:'#60a5fa'},{k:'RUNNING',t:'RUNNING',c:'#22c55e'},{k:'BREAKDOWN',t:'BREAKDOWN',c:'#ef4444'},{k:'CMM NOT OK',t:'CMM NOT OK',c:'#f59e0b'},{k:'FIXTURE NOT OK',t:'FIXTURE NOT OK',c:'#fbbf24'},{k:'LOT READY',t:'LOT READY',c:'#22d3ee'},{k:'LOT HOLD',t:'LOT HOLD',c:'#a855f7'},{k:'SIGN PENDING',t:'SIGN PENDING',c:'#60a5fa'}];document.getElementById('cards').innerHTML=list.map(x=>`<div class="card ${curFilter==x.k?'active':''}" onclick="setFilter('${x.k}')" style="border-left:4px solid ${x.c}"><p style="font-size:9px;opacity:.6">${x.t}</p><h2 style="color:${x.c};font-size:20px">${getCount(x.k)}</h2><p style="font-size:8px;color:#60a5fa">CLICK TO VIEW LIST →</p></div>`).join('');}
@@ -46,9 +66,10 @@ function setFilter(f){curFilter=f;renderCards();renderMachineList();}
 function setSeries(s){curSeries=s;curFilter='ALL';renderCards();renderSeries();renderMachineList();}
 function renderSeries(){let d=[{id:'M1',name:'M1 SERIES',c:14,col:'#3b82f6'},{id:'E',name:'E SERIES',c:32,col:'#22c55e'},{id:'MK',name:'MK SERIES',c:8,col:'#f59e0b'},{id:'PN',name:'PN SERIES',c:4,col:'#a855f7'},{id:'L',name:'L SERIES',c:4,col:'#14b8a6'},{id:'BR',name:'BR SERIES',c:3,col:'#ef4444'}];document.getElementById('seriesGrid').innerHTML=d.map(x=>`<div class="sCard ${curSeries==x.id?'active':''}" onclick="setSeries('${x.id}')"><div style="width:36px;height:36px;background:${x.col};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000">${x.id}</div><div><div style="font-size:12px;font-weight:800">${x.name}</div><div style="font-size:10px;opacity:.6">${x.c} Machines - CLICK TO VIEW</div></div><div style="margin-left:auto;font-size:20px;font-weight:900">${x.c}</div></div>`).join('');}
 function renderMachineList(){let ids=curFilter=='ALL'?Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();document.getElementById('listTitle').innerText=`MACHINES - ${curFilter} (${ids.length}) - ${curSeries} SERIES - CLICK ANY MACHINE`;document.getElementById('machineList').innerHTML=ids.map(id=>`<div class="mItem ${id==curMachine?'active':''}" onclick="selectMachine('${id}')"><span><b>${id}</b></span><span style="font-size:8px;padding:3px 6px;border-radius:4px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};color:#fff">${machines[id].status}</span></div>`).join('')||'<div style="opacity:.5;padding:20px;text-align:center">No machines</div>';if(ids.length)selectMachine(ids.includes(curMachine)?curMachine:ids[0],false);}
-function selectMachine(id,auto=true){if(!machines[id])return;curMachine=id;if(auto&&operator&&!machines[id].op){machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};}document.getElementById('machineDetail').innerHTML=`<div style="font-size:32px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button class="btnAssign" onclick="assignMe()">I AM WORKING HERE - Assign My Name</button>`;let op=machines[id].op;document.getElementById('operatorBox').innerHTML=op?`<div class="opCard"><b>OPERATOR INFO:</b><br>Name: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>Time: ${op.time}<br>Machine: ${id}</div>`:`<div class="opCard" style="background:#3a1a2a">No Operator Assigned</div>`;document.getElementById('statusList').innerHTML='<div style="font-size:11px;font-weight:800;margin-bottom:6px">UPDATE STATUS:</div>'+['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'].map(s=>`<div class="mItem ${machines[id].status==s?'active':''}" onclick="updateStatus('${s}')"><span>● ${s}</span><span>${machines[id].status==s?'✓':''}</span></div>`).join('');}
-function assignMe(){if(!operator)return;machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};selectMachine(curMachine,false);}
-function updateStatus(s){if(!operator){document.getElementById('login').style.display='flex';return;}machines[curMachine].status=s;renderCards();renderMachineList();let msg=`*BREMBO ${s}*%0AMachine:${curMachine}%0AOperator:${operator.name} (${operator.id})`;window.location.href=`https://wa.me/919881097236?text=${msg}`;}
+function selectMachine(id,auto=true){if(!machines[id])return;curMachine=id;if(auto&&operator&&!machines[id].op){machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()}; saveToFirebase();}document.getElementById('machineDetail').innerHTML=`<div style="font-size:32px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button class="btnAssign" onclick="assignMe()">I AM WORKING HERE - Assign My Name</button>`;let op=machines[id].op;document.getElementById('operatorBox').innerHTML=op?`<div class="opCard"><b>OPERATOR INFO:</b><br>Name: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>Time: ${op.time}<br>Machine: ${id}</div>`:`<div class="opCard" style="background:#3a1a2a">No Operator Assigned</div>`;document.getElementById('statusList').innerHTML='<div style="font-size:11px;font-weight:800;margin-bottom:6px">UPDATE STATUS (LIVE - सगळ्यांना दिसेल):</div>'+['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'].map(s=>`<div class="mItem ${machines[id].status==s?'active':''}" onclick="updateStatus('${s}')"><span>● ${s}</span><span>${machines[id].status==s?'✓':''}</span></div>`).join('');}
+function assignMe(){if(!operator)return;machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()}; saveToFirebase(); selectMachine(curMachine,false);}
+function updateStatus(s){if(!operator){document.getElementById('login').style.display='flex';return;}machines[curMachine].status=s; saveToFirebase(); renderCards(); renderMachineList();}
 function renderAll(){renderCards();renderSeries();renderMachineList();}
-init();let sv=localStorage.getItem('brembo_final_eng');if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';}renderAll();
+loadFromFirebase();
+let sv=localStorage.getItem('brembo_final_eng');if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';}
 </script></body></html>
