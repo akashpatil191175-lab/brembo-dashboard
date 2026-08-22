@@ -1,4 +1,70 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Brembo V5 Auto Route</title><script src="https://cdn.tailwindcss.com"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script><style>*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}body{background:#070d1f;color:#fff}#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center}#notifBig{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ff1a1a;color:#fff;padding:30px;border-radius:20px;font-weight:900;font-size:20px;display:none;z-index:99999;text-align:center;box-shadow:0 0 50px #ff1a1a;border:4px solid #fff;max-width:90%}.topBar{padding:12px;background:#0a1430;display:flex;justify-content:space-between;position:sticky;top:0;z-index:50}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}.card{background:#0e1731;border:1px solid #1c2a4e;border-radius:12px;padding:12px;text-align:center;cursor:pointer}.mainBox{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}.phone{background:#0a1430;border:1px solid #1c2a4e;border-radius:12px;padding:10px}.mItem{padding:10px;background:#16224a;border-radius:8px;margin:5px 0;display:flex;justify-content:space-between;cursor:pointer}.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:900;margin-top:8px;cursor:pointer}</style></head><body><div id="notifBig"></div><div id="login"><div style="background:#0e1731;padding:20px;border-radius:16px;width:340px;text-align:center;border:1px solid #333"><h1 style="color:#ff1a1a;font-weight:900">BREMBO V5</h1><p style="font-size:10px;color:#aaa">AUTO WHATSAPP ROUTING SYSTEM</p><input id="opId" placeholder="Your Operator ID" style="width:100%;padding:12px;margin:8px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333"><input id="opName" placeholder="Your Full Name" style="width:100%;padding:12px;margin:8px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333"><button onclick="doLogin()" style="width:100%;padding:12px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:10px">LOGIN</button><p id="fbStat" style="font-size:10px;color:yellow;margin-top:8px">Connecting LIVE...</p></div></div><div class="topBar"><b style="color:#ff1a1a">BREMBO V5 AUTO</b><span id="wel" style="font-size:10px;color:#22c55e"></span><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 8px;border-radius:10px">● LIVE</span></div><div class="cards" id="cards"></div><div class="mainBox"><div class="phone"><div id="listTitle" style="font-weight:900;margin-bottom:8px">MACHINES LIST</div><div id="machineList"></div></div><div class="phone"><div id="machineDetail"></div><div id="operatorBox" style="margin:8px 0;font-size:12px;color:#aaa"></div><div id="statusList"></div><div id="routeInfo" style="margin-top:10px;padding:10px;background:#1a0f00;border:1px dashed #f59e0b;border-radius:8px;display:none;font-size:11px"></div><button id="waBtn" onclick="openWA()" style="width:100%;padding:14px;background:#25D366;color:#000;font-weight:900;border:none;border-radius:10px;margin-top:10px;display:none">SEND WHATSAPP</button></div></div><script>const firebaseConfig={apiKey:"AIzaSyCnkcQZwYgDkyFVoib8eeDCv3V9r6WbqQU",authDomain:"brembo-dashboard.firebaseapp.com",databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",projectId:"brembo-dashboard",storageBucket:"brembo-dashboard.firebasestorage.app",messagingSenderId:"935783960863",appId:"1:935783960863:web:115a5380ab005c50da602a"};firebase.initializeApp(firebaseConfig);const db=firebase.database();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brembo V5 - Auto WhatsApp Routing</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#070d1f;color:#fff}
+#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center}
+#notifBig{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ff1a1a;color:#fff;padding:30px;border-radius:20px;font-weight:900;font-size:20px;display:none;z-index:99999;text-align:center;box-shadow:0 0 50px #ff1a1a;border:4px solid #fff;max-width:90%}
+.topBar{padding:12px;background:#0a1430;display:flex;justify-content:space-between;position:sticky;top:0;z-index:50}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
+.card{background:#0e1731;border:1px solid #1c2a4e;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
+.mainBox{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.phone{background:#0a1430;border:1px solid #1c2a4e;border-radius:12px;padding:12px}
+.mItem{padding:11px;background:#16224a;border-radius:8px;margin:5px 0;display:flex;justify-content:space-between;cursor:pointer;font-size:13px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:900;margin-top:8px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="notifBig"></div>
+
+<div id="login">
+<div style="background:#0e1731;padding:24px;border-radius:16px;width:340px;text-align:center;border:1px solid #333">
+<h1 style="color:#ff1a1a;font-weight:900;font-size:24px">BREMBO V5</h1>
+<p style="font-size:10px;color:#aaa;margin-bottom:12px">AUTO WHATSAPP ROUTING SYSTEM</p>
+<input id="opId" placeholder="Your Operator ID" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
+<input id="opName" placeholder="Your Full Name" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
+<button onclick="doLogin()" style="width:100%;padding:13px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:12px">LOGIN</button>
+<p id="fbStat" style="font-size:10px;color:yellow;margin-top:8px">Connecting LIVE...</p>
+<p style="font-size:9px;color:#666;margin-top:10px">BREAKDOWN->Pravin Kole<br>FIXTURE->Prashant Tarte<br>CMM->Santosh Shirurkar<br>LOT HOLD->Mahesh Andhale<br>LOT READY->Sonpal Ram</p>
+</div>
+</div>
+
+<div class="topBar">
+<b style="color:#ff1a1a">BREMBO V5 AUTO</b>
+<span id="wel" style="font-size:11px;color:#22c55e"></span>
+<span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">● LIVE</span>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="mainBox">
+<div class="phone">
+<div id="listTitle" style="font-weight:900;margin-bottom:8px">MACHINES</div>
+<div id="machineList"></div>
+</div>
+<div class="phone">
+<div id="machineDetail"></div>
+<div id="operatorBox" style="margin:10px 0;font-size:12px;color:#aaa"></div>
+<div id="statusList"></div>
+<div id="routeInfo" style="margin-top:12px;padding:10px;background:#1a0f00;border:1px dashed #f59e0b;border-radius:8px;display:none;font-size:11px;line-height:1.5"></div>
+<button id="waBtn" onclick="openWA()" style="width:100%;padding:14px;background:#25D366;color:#000;font-weight:900;border:none;border-radius:10px;margin-top:12px;display:none">SEND WHATSAPP</button>
+</div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyCnkcQZwYgDkyFVoib8eeDCv3V9r6WbqQU",authDomain:"brembo-dashboard.firebaseapp.com",databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",projectId:"brembo-dashboard",storageBucket:"brembo-dashboard.firebasestorage.app",messagingSenderId:"935783960863",appId:"1:935783960863:web:115a5380ab005c50da602a"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+// YOUR ROUTING AS PER YOUR PAPER
 const ROUTE_MAP={
 "BREAKDOWN":{name:"Pravin Kole (Maintenance)",no:"919822434776"},
 "FIXTURE NOT OK":{name:"Prashant Tarte (Tool Room)",no:"919359499867"},
@@ -9,19 +75,94 @@ const ROUTE_MAP={
 "SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687549"},
 "RUNNING":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"}
 };
-let curSeries='E',curMachine='E-06',curFilter='ALL',operator=null,machines={},lastWa="",prev={};
-function init(){for(let i=1;i<=14;i++)machines['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null};for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';machines['E-'+String(i).padStart(2,'0')]={status:s,op:null}}for(let i=1;i<=8;i++)machines['MK-0'+i]={status:'RUNNING',op:null};for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null}}for(let i=1;i<=3;i++)machines['BR-0'+i]={status:'RUNNING',op:null}}
+
+let curMachine='E-06',curFilter='ALL',operator=null,machines={},lastWa="",prev={};
+
+function init(){
+for(let i=1;i<=14;i++)machines['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null};
+for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';machines['E-'+String(i).padStart(2,'0')]={status:s,op:null}}
+for(let i=1;i<=8;i++)machines['MK-0'+i]={status:'RUNNING',op:null};
+for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null}}
+for(let i=1;i<=3;i++)machines['BR-0'+i]={status:'RUNNING',op:null}
+}
 function save(){db.ref('machines').set(machines)}
-function loudPopup(mid,st,who,routeTo){const b=document.getElementById('notifBig');b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900;background:#fff;color:#ff1a1a">CLOSE</button>`;b.style.display='block';if(navigator.vibrate)navigator.vibrate([600,200,600,200,600]);try{let a=new Audio("https://cdn.pixabay.com/audio/2024/08/02/audio_8d832d1e7b.mp3");a.volume=1;a.play()}catch(e){}setTimeout(()=>b.style.display='none',9000)}
-function load(){db.ref('machines').on('value',s=>{let d=s.val();if(d){for(let id in d){if(prev[id]&&prev[id].status!=d[id].status){let who=d[id].op?d[id].op.name:"Someone";let route=ROUTE_MAP[d[id].status]||ROUTE_MAP["RUNNING"];loudPopup(id,d[id].status,who,route)}}prev=JSON.parse(JSON.stringify(d));machines=d;document.getElementById('fbStat').innerText="LIVE CONNECTED";render()}else{init();save()}})}
-function doLogin(){let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim();if(!id||!nm)return alert('Enter ID and Name');operator={id,name:nm};localStorage.setItem('brembo_v5',JSON.stringify(operator));document.getElementById('login').style.display='none';document.getElementById('wel').innerText=nm;render()}
+
+function loudPopup(mid,st,who,routeTo){
+const b=document.getElementById('notifBig');
+b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900;background:#fff;color:#ff1a1a">CLOSE</button>`;
+b.style.display='block';
+if(navigator.vibrate)navigator.vibrate([600,200,600,200,600]);
+try{let a=new Audio("https://cdn.pixabay.com/audio/2024/08/02/audio_8d832d1e7b.mp3");a.volume=1;a.play()}catch(e){}
+setTimeout(()=>b.style.display='none',9000)
+}
+
+function load(){
+db.ref('machines').on('value',s=>{
+let d=s.val();
+if(d){
+for(let id in d){if(prev[id]&&prev[id].status!=d[id].status){let who=d[id].op?d[id].op.name:"Someone";let route=ROUTE_MAP[d[id].status]||ROUTE_MAP["RUNNING"];loudPopup(id,d[id].status,who,route)}}
+prev=JSON.parse(JSON.stringify(d));
+machines=d;
+document.getElementById('fbStat').innerText="✅ LIVE CONNECTED";
+render();
+}else{init();save()}
+})
+}
+
+function doLogin(){
+let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim();
+if(!id||!nm)return alert('Enter ID and Name');
+operator={id,name:nm};
+localStorage.setItem('brembo_v5',JSON.stringify(operator));
+document.getElementById('login').style.display='none';
+document.getElementById('wel').innerText=nm;
+render()
+}
 function getCount(k){if(k=='ALL')return Object.keys(machines).length;return Object.values(machines).filter(m=>m.status==k).length}
-function renderCards(){let list=[{k:'ALL',t:'TOTAL'},{k:'RUNNING',t:'RUN'},{k:'BREAKDOWN',t:'BREAK'},{k:'CMM NOT OK',t:'CMM'},{k:'FIXTURE NOT OK',t:'FIX'},{k:'LOT READY',t:'READY'},{k:'LOT HOLD',t:'HOLD'}];document.getElementById('cards').innerHTML=list.map(x=>`<div class="card" onclick="setF('${x.k}')"><p style="font-size:8px;color:#aaa">${x.t}</p><h2 style="color:${x.k=='BREAKDOWN'?'#ef4444':'#22c55e'}">${getCount(x.k)}</h2></div>`).join('')}
+function renderCards(){
+let list=[{k:'ALL',t:'TOTAL'},{k:'RUNNING',t:'RUN'},{k:'BREAKDOWN',t:'BREAK'},{k:'CMM NOT OK',t:'CMM'},{k:'FIXTURE NOT OK',t:'FIX'},{k:'LOT READY',t:'READY'},{k:'LOT HOLD',t:'HOLD'}];
+document.getElementById('cards').innerHTML=list.map(x=>`<div class="card" onclick="setF('${x.k}')"><p style="font-size:8px;color:#aaa">${x.t}</p><h2 style="color:${x.k=='BREAKDOWN'?'#ef4444':'#22c55e'}">${getCount(x.k)}</h2></div>`).join('')
+}
 function setF(f){curFilter=f;renderList()}
-function renderList(){let ids=curFilter=='ALL'?Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();document.getElementById('listTitle').innerText=curFilter+' ('+ids.length+')';document.getElementById('machineList').innerHTML=ids.map(id=>`<div class="mItem" onclick="sel('${id}')"><b>${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`).join('');if(ids.length)sel(ids[0])}
-function sel(id){if(!machines[id])return;curMachine=id;document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${machines[id].status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME</button>`;let op=machines[id].op;document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Time: ${op.time}`:'No Operator Assigned';let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];document.getElementById('statusList').innerHTML=statuses.map(s=>{let r=ROUTE_MAP[s];return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${machines[id].status==s?'✓':''}</span></div>`}).join('');}
+function renderList(){
+let ids=curFilter=='ALL'?Object.keys(machines).filter(k=>k.startsWith('E-')).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();
+document.getElementById('listTitle').innerText=curFilter+' ('+ids.length+')';
+document.getElementById('machineList').innerHTML=ids.map(id=>`<div class="mItem" onclick="sel('${id}')"><b>${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`).join('');
+if(ids.length)sel(ids[0])
+}
+function sel(id){
+if(!machines[id])return;
+curMachine=id;
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${machines[id].status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME</button>`;
+let op=machines[id].op;
+document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Time: ${op.time}`:'No Operator Assigned';
+let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
+document.getElementById('statusList').innerHTML=statuses.map(s=>{
+let r=ROUTE_MAP[s];
+return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${machines[id].status==s?'✓':''}</span></div>`
+}).join('');
+}
 function assign(){if(!operator)return;machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString()};save();sel(curMachine)}
 function openWA(){if(lastWa)window.open(lastWa,'_blank')}
-function upd(s){if(!operator){document.getElementById('login').style.display='flex';return}machines[curMachine].status=s;save();let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];loudPopup(curMachine,s,operator.name,route);let date=new Date().toLocaleString('en-IN');let msg=`*🚨 BREMBO ALERT V5*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;lastWa=`https://wa.me/${route.no}?text=${msg}`;document.getElementById('routeInfo').style.display='block';document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>${route.name}<br>Number: ${route.no}<br><br>Click below button to send!`;document.getElementById('waBtn').style.display='block';document.getElementById('waBtn').innerText=`SEND WHATSAPP TO ${route.name.toUpperCase()}`;setTimeout(()=>window.open(lastWa,'_blank'),700);renderCards();renderList()}
-function render(){renderCards();renderList();sel(curMachine)}load();let sv=localStorage.getItem('brembo_v5');if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText=operator.name}
-</script></body></html>
+function upd(s){
+if(!operator){document.getElementById('login').style.display='flex';return}
+machines[curMachine].status=s;save();
+let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
+loudPopup(curMachine,s,operator.name,route);
+let date=new Date().toLocaleString('en-IN');
+let msg=`*🚨 BREMBO ALERT V5*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
+lastWa=`https://wa.me/${route.no}?text=${msg}`;
+document.getElementById('routeInfo').style.display='block';
+document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}<br><br>Click below button to send!`;
+document.getElementById('waBtn').style.display='block';
+document.getElementById('waBtn').innerText=`📱 SEND TO ${route.name.toUpperCase()}`;
+setTimeout(()=>window.open(lastWa,'_blank'),700);
+renderCards();renderList()
+}
+function render(){renderCards();renderList();sel(curMachine)}
+load();
+let sv=localStorage.getItem('brembo_v5');
+if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText=operator.name}
+</script>
+</body>
+</html>
