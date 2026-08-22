@@ -2,7 +2,7 @@
 <html lang="mr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Brembo - Final Operator System + Firebase</title>
+<title>Brembo - Final Operator System</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
@@ -27,46 +27,24 @@ body{background:#080c1c;color:#fff}
 .opInfo{background:#1a254a;padding:10px;border-radius:10px;margin-top:10px;font-size:11px;line-height:1.6}
 @media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.sGrid{grid-template-columns:repeat(1,1fr)}.mobGrid{grid-template-columns:repeat(1,1fr)}}
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBCfxWERD0IZGcwoScujYeyI_Wjrnol0",
-  authDomain: "brembo--63.firebaseapp.com",
-  databaseURL: "https://brembo--63-default-rtdb.firebaseio.com",
-  projectId: "brembo--63",
-  storageBucket: "brembo--63.firebasestorage.app",
-  messagingSenderId: "364747204826",
-  appId: "1:364747204826:web:7ae3762bd0dd0a7a935de3"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-window.db = db; window.dbRef = ref; window.dbSet = set; window.dbUpdate = update; window.dbOnValue = onValue; window.dbGet = get;
-</script>
 </head>
 <body>
-
 <div id="login">
 <div class="box">
 <h2 style="color:#ff1a1a;font-weight:900;font-size:28px">brembo</h2>
-<p style="font-size:10px;letter-spacing:3px;color:#7a85a6;margin-bottom:16px">OPERATOR LOGIN SYSTEM - FIREBASE LIVE</p>
+<p style="font-size:10px;letter-spacing:3px;color:#7a85a6;margin-bottom:16px">OPERATOR LOGIN SYSTEM</p>
 <input id="opId" class="inp" placeholder="ID टाका - उदा. 1011">
 <input id="opName" class="inp" placeholder="नाव टाका - उदा. Akash Patil">
 <select id="opShift" class="inp"><option>Day Shift (7-7)</option><option>Night Shift (7-7)</option><option>General</option></select>
 <button class="btn" onclick="login()">LOGIN →</button>
 <p id="err" style="color:#ff4444;font-size:11px;margin-top:8px"></p>
-<p style="font-size:9px;color:#5a6aa6;margin-top:10px">Firebase: brembo--63 Connected ✓</p>
 </div>
 </div>
-
-<div class="top"><div><b style="color:#ff1a1a">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span> <span id="fbStatus" style="font-size:9px;color:#60a5fa;margin-left:8px">● LIVE</span></div><button onclick="logout()" style="background:#1a254a;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:10px">LOGOUT</button></div>
-
+<div class="top"><div><b style="color:#ff1a1a">brembo</b> <span id="wel" style="font-size:11px;color:#22c55e;margin-left:10px"></span></div><button onclick="logout()" style="background:#1a254a;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:10px">LOGOUT</button></div>
 <div class="cards" id="topCards"></div>
 <div class="sGrid" id="sGrid"></div>
-
 <div class="mobWrap">
-<div style="text-align:center;font-weight:900;font-size:13px;margin-bottom:10px;letter-spacing:1px">OPERATOR MOBILE FLOW - FIREBASE FINAL</div>
+<div style="text-align:center;font-weight:900;font-size:13px;margin-bottom:10px;letter-spacing:1px">OPERATOR MOBILE FLOW - FINAL</div>
 <div class="mobGrid">
 <div class="phone"><b>1. Select Series</b><div id="pSeries" style="margin-top:10px"></div></div>
 <div class="phone"><b id="mTitle">2. Machines</b><div id="pMachines" style="margin-top:10px"></div></div>
@@ -74,42 +52,18 @@ window.db = db; window.dbRef = ref; window.dbSet = set; window.dbUpdate = update
 <div class="phone"><b>4. Update Status</b><div id="pStatus" style="margin-top:10px"></div></div>
 </div>
 </div>
-
 <script>
 const REAL_NUMS={SUPERVISOR:"919881097236",MAINT:"919822434776",TOOL:"919359499867",LOADING:"919012683322"};
 let curSeries='E',curMachine='E-06',curFilter='ALL',operator=null;
 let machines={};
-
-async function initFirebaseMachines(){
-  const machinesRef = window.dbRef(window.db, 'brembo_machines');
-  window.dbOnValue(machinesRef, (snap)=>{
-    const data = snap.val();
-    if(data && Object.keys(data).length > 0){
-      machines = data;
-      document.getElementById('fbStatus').innerText = "● LIVE - "+Object.keys(machines).length+" Machines";
-      renderAll();
-    } else {
-      // First time - create default machines in Firebase
-      createDefaultInFirebase();
-    }
-  });
+function initMachines(){
+  for(let i=1;i<=14;i++){let id='M1-'+String(i).padStart(2,'0');machines[id]={status:'RUNNING',op:null};}
+  for(let i=1;i<=32;i++){let id='E-'+String(i).padStart(2,'0');let s=i<=20?'RUNNING':i<=24?'BREAKDOWN':i<=28?'CMM NOT OK':i<=30?'FIXTURE NOT OK':'LOT READY';machines[id]={status:s,op:null};}
+  for(let i=1;i<=8;i++){machines['MK-0'+i]={status:'RUNNING',op:null};}
+  for(let i=1;i<=4;i++){machines['PN-0'+i]={status:'RUNNING',op:null};machines['L-0'+i]={status:'RUNNING',op:null};}
+  for(let i=1;i<=3;i++){machines['BR-0'+i]={status:'RUNNING',op:null};}
+  machines['E-01'].op={name:'Rohit K.',id:'1001',shift:'Day'};machines['E-06'].op={name:'Akash P.',id:'1011',shift:'Day'};
 }
-
-async function createDefaultInFirebase(){
-  let defaultMachines = {};
-  for(let i=1;i<=14;i++){let id='M1-'+String(i).padStart(2,'0');defaultMachines[id]={status:'RUNNING',op:null};}
-  for(let i=1;i<=32;i++){let id='E-'+String(i).padStart(2,'0');let s=i<=20?'RUNNING':i<=24?'BREAKDOWN':i<=28?'CMM NOT OK':i<=30?'FIXTURE NOT OK':'LOT READY';defaultMachines[id]={status:s,op:null};}
-  for(let i=1;i<=8;i++){defaultMachines['MK-0'+i]={status:'RUNNING',op:null};}
-  for(let i=1;i<=4;i++){defaultMachines['PN-0'+i]={status:'RUNNING',op:null};defaultMachines['L-0'+i]={status:'RUNNING',op:null};}
-  for(let i=1;i<=3;i++){defaultMachines['BR-0'+i]={status:'RUNNING',op:null};}
-  defaultMachines['E-01'].op={name:'Rohit K.',id:'1001',shift:'Day'};defaultMachines['E-06'].op={name:'Akash P.',id:'1011',shift:'Day'};
-  await window.dbSet(window.dbRef(window.db, 'brembo_machines'), defaultMachines);
-}
-
-function saveMachineToFirebase(id){
-  window.dbUpdate(window.dbRef(window.db, 'brembo_machines/'+id), machines[id]);
-}
-
 function login(){
   let id=document.getElementById('opId').value.trim(),name=document.getElementById('opName').value.trim();
   if(!id||!name){document.getElementById('err').innerText='ID आणि नाव टाका!';return;}
@@ -153,51 +107,40 @@ function renderMachineList(){
 }
 function selMachine(id,doAssign=true){
   if(!machines[id]) id=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-'))[0];
-  if(!id) return;
   curMachine=id;
   if(doAssign && operator &&!machines[id].op){
     machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
-    saveMachineToFirebase(id);
   }
   document.getElementById('pSel').innerHTML=`<div style="font-size:28px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:11px;margin-top:6px">Status: <b>${machines[id].status}</b></div><button style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;background:#22c55e;font-weight:900" onclick="assignMe('${id}')">I AM WORKING HERE - माझं नाव लावा</button>`;
   let op=machines[id].op;
   if(op){
-    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo">👷 <b>काम करणारा:</b><br>नाव: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>वेळ: ${op.time||'आज'}<br>Status: ${machines[id].status}<br><span style="color:#22c55e">● Firebase LIVE</span></div>`;
+    document.getElementById('opInfoBox').innerHTML=`<div class="opInfo">👷 <b>काम करणारा:</b><br>नाव: ${op.name}<br>ID: ${op.id}<br>Shift: ${op.shift}<br>वेळ: ${op.time||'आज'}<br>Status: ${machines[id].status}</div>`;
   }else{
     document.getElementById('opInfoBox').innerHTML=`<div class="opInfo" style="background:#2a1a1a">⚠️ कोणीच Operator नाही<br>कोणी काम करत नाहीय</div>`;
   }
   renderStatusBtns();
 }
-function assignMe(id){
-  if(!operator){alert('Login करा!');return;}
-  machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
-  saveMachineToFirebase(id);
-  selMachine(id,false);
-  alert('तुझं नाव '+id+' वर लागलं! Firebase मध्ये Save झालं!');
-}
+function assignMe(id){if(!operator){alert('Login करा!');return;}machines[id].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};selMachine(id,false);alert('तुझं नाव '+id+' वर लागलं!');}
 function renderStatusBtns(){
   let sts=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY'];
-  document.getElementById('pStatus').innerHTML=sts.map(s=>`<div class="opt" style="${machines[curMachine].status==s?'background:#fff;color:#000;font-weight:900':''}" onclick="changeStatus('${s}')"><span>● ${s}</span><span>${s==machines[curMachine].status?'✓':''}</span></div>`).join('')+`<div style="font-size:9px;color:#7a85a6;margin-top:10px">Firebase Real-time Update<br>Operator: ${operator?operator.name:'-'}</div>`;
+  document.getElementById('pStatus').innerHTML=sts.map(s=>`<div class="opt" style="${machines[curMachine].status==s?'background:#fff;color:#000;font-weight:900':''}" onclick="changeStatus('${s}')"><span>● ${s}</span><span>${s==machines[curMachine].status?'✓':''}</span></div>`).join('')+`<div style="font-size:9px;color:#7a85a6;margin-top:10px">WhatsApp Real Numbers वर जाईल<br>Operator: ${operator?operator.name:'-'}</div>`;
 }
 function changeStatus(s){
   if(!operator){alert('पहिला Login कर!');document.getElementById('login').style.display='flex';return;}
   machines[curMachine].status=s;
   if(!machines[curMachine].op) machines[curMachine].op={name:operator.name,id:operator.id,shift:operator.shift,time:new Date().toLocaleTimeString()};
-  saveMachineToFirebase(curMachine);
   renderTop();renderMachineList();
-  let msg=`*BREMBO ALERT*%0AMachine: ${curMachine}%0AProblem: ${s}%0AOperator: ${operator.name} (ID:${operator.id})%0AShift: ${operator.shift}%0ATime: ${new Date().toLocaleString()}%0A---%0AFirebase Live System`;
+  let msg=`*BREMBO ALERT*%0AMachine: ${curMachine}%0AProblem: ${s}%0AOperator: ${operator.name} (ID:${operator.id})%0AShift: ${operator.shift}%0ATime: ${new Date().toLocaleString()}`;
   let target=REAL_NUMS.SUPERVISOR;
   if(s=='BREAKDOWN')target=REAL_NUMS.MAINT;else if(s=='FIXTURE NOT OK')target=REAL_NUMS.TOOL;else if(s.includes('LOT'))target=REAL_NUMS.LOADING;
   window.open(`https://wa.me/${target}?text=${msg}`,'_blank');
   setTimeout(()=>{if(target!=REAL_NUMS.SUPERVISOR)window.open(`https://wa.me/${REAL_NUMS.SUPERVISOR}?text=${msg}`,'_blank');},1000);
 }
-function renderAll(){if(Object.keys(machines).length==0)return;renderTop();renderSeries();renderMachineList();}
-
+function renderAll(){renderTop();renderSeries();renderMachineList();}
+initMachines();
 let saved=localStorage.getItem('brembo_op_final');
 if(saved){operator=JSON.parse(saved);document.getElementById('login').style.display='none';document.getElementById('wel').innerText='👷 '+operator.name+' (ID:'+operator.id+')';document.getElementById('opId').value=operator.id;document.getElementById('opName').value=operator.name;}
-
-// START FIREBASE
-initFirebaseMachines();
+renderAll();
 </script>
 </body>
 </html>
