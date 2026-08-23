@@ -145,6 +145,14 @@ select option{
 background:#fff;
 color:#000
 }
+.viewBox{
+background:#0e1731;
+border:1px solid #22c55e;
+padding:10px;
+border-radius:8px;
+margin:10px 0;
+line-height:1.8
+}
 </style>
 </head>
 <body>
@@ -158,7 +166,6 @@ color:#000
 <select id="opMachine"></select>
 <button onclick="doLogin()" style="width:100%;padding:13px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:12px">LOGIN & START SHIFT</button>
 <p id="fbStat" style="font-size:10px;color:yellow;margin-top:8px">Connecting LIVE...</p>
-<p style="font-size:9px;color:#666;margin-top:10px">Notification can only be sent after login. Second operator can login only after logout.</p>
 </div>
 </div>
 <div class="topBar">
@@ -318,30 +325,43 @@ return `<div class="${cls}" onclick="sel('${id}')"><b>${star}${id}</b><span styl
 if(ids.length &&!curMachine) sel(ids[0])
 else if(curMachine) sel(curMachine)
 }
+// --- VIEW ONLY FIX ---
 function sel(id){
 if(!machines[id])return;
-if(operator && id!==operator.machine){
-document.getElementById('lockMsg').innerText=`You are logged in on ${operator.machine}. You can only send notification for that machine!`;
-curMachine=operator.machine;
-}else{
 curMachine=id;
-}
-let m=machines[curMachine] || machines[id];
-let displayId = operator? operator.machine : id;
-document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${displayId}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${displayId})</button>`;
+let m=machines[id];
 let op=m.op;
-document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Machine: ${op.machine||displayId}<br>Time: ${op.time}`:'No Operator Assigned';
+let isMyMachine = operator && operator.machine===id;
+
+if(isMyMachine){
+// MY MACHINE - FULL ACCESS
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>`;
+document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#22c55e">YOUR DETAILS:</b><br>ID: ${operator.id}<br>Name: ${operator.name}<br>Machine: ${id}<br>Time: ${op?op.time:new Date().toLocaleTimeString()}</div>`;
 let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
 document.getElementById('statusList').innerHTML=statuses.map(s=>{
 let r=ROUTE_MAP[s];
 return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${m.status==s?'✓':''}</span></div>`
 }).join('');
+document.getElementById('lockMsg').innerText=`You can change status for ${id}`;
+}else{
+// OTHER MACHINE - VIEW ONLY ID NAME MACHINE
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#888">${id}</div><div style="font-size:11px;color:#888">VIEW ONLY MODE</div><div style="font-size:12px;margin-top:4px">Status: <b style="color:#aaa">${m.status}</b></div>`;
+if(op){
+document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#f59e0b">OPERATOR ON ${id}:</b><br><b>ID:</b> ${op.id}<br><b>Name:</b> ${op.name}<br><b>Machine:</b> ${op.machine||id}<br><b>Time:</b> ${op.time}</div>`;
+}else{
+document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#666">No Operator on ${id}</b><br>ID: -<br>Name: -<br>Machine: ${id}</div>`;
+}
+document.getElementById('statusList').innerHTML=`<div style="font-size:10px;color:#666;padding:8px;text-align:center">You cannot change status of other machines<br>Only view ID, Name, Machine</div>`;
+document.getElementById('lockMsg').innerText=`View Only - This machine belongs to ${op?op.name:'Nobody'}. You can only edit ${operator?operator.machine:''}`;
+document.getElementById('routeInfo').style.display='none';
+document.getElementById('waBtn').style.display='none';
+}
 }
 function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine};save();sel(curMachine)}
 function openWA(){if(lastWa)window.open(lastWa,'_blank')}
 function upd(s){
 if(!operator){document.getElementById('login').style.display='flex';return}
-if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); curMachine=operator.machine; sel(curMachine); return; }
+if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); return; }
 machines[curMachine].status=s;save();
 let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
 loudPopup(curMachine,s,operator.name,route);
@@ -362,4 +382,4 @@ let sv=localStorage.getItem('brembo_v7') || localStorage.getItem('brembo_v6');
 if(sv){operator=JSON.parse(sv); if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); localStorage.removeItem('brembo_v6'); } else { document.getElementById('login').style.display='none'; applyOperator(); } }
 </script>
 </body>
-                    </html>
+</html>
