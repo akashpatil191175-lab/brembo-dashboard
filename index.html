@@ -221,6 +221,12 @@ document.getElementById('waBtn').innerText=`SEND TO ${route.name.toUpperCase()}`
 setTimeout(()=>window.open(lastWa,'_blank'),700);
 renderCards();renderList()
 }
+function resetAll(){
+ let pass=prompt("Enter ADMIN PIN to RESET ALL:");
+ if(pass!=="191175") return alert("Wrong PIN! Only Admin can RESET");
+ if(!confirm("Are you sure? All 68 Machines will become RUNNING!")) return;
+ let m={}; ALL_MACHINES_LIST.forEach(id=>{m[id]={status:"RUNNING",op:null}}); db.ref('machines').set(m); alert("Done! All 68 Machines RUNNING");
+}
 function render(){renderCards();renderList();if(curMachine)sel(curMachine)}
 fillMachineDropdown();
 load();
