@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/png" href="icon.png?v=5">
-<link rel="apple-touch-icon" href="icon.png?v=5">
-<link rel="manifest" href="manifest.json?v=5">
-<meta name="theme-color" content="#E30613"><title>Brembo V6 - All Machines</title>
+<link rel="icon" type="image/png" href="icon.png?v=7">
+<link rel="apple-touch-icon" href="icon.png?v=7">
+<link rel="manifest" href="manifest.json?v=7">
+<meta name="theme-color" content="#E30613"><title>Brembo V7 - 68 Machines</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#070d1f;color:#fff}
-#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center}
+#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
 #notifBig{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ff1a1a;color:#fff;padding:30px;border-radius:20px;font-weight:900;font-size:20px;display:none;z-index:99999;text-align:center;box-shadow:0 0 50px #ff1a1a;border:4px solid #fff;max-width:90%}
-.topBar{padding:12px;background:#0a1430;display:flex;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topBar{padding:12px;background:#0a1430;display:flex;justify-content:space-between;position:sticky;top:0;z-index:50;align-items:center}
 .seriesBar{padding:8px;background:#0e1731;display:flex;gap:6px;overflow:auto}
 .sBtn{padding:6px 12px;border-radius:20px;border:1px solid #333;background:#070d1f;color:#fff;font-size:11px;cursor:pointer;white-space:nowrap}
 .sBtn.active{background:#ff1a1a;color:#fff}
@@ -24,33 +24,37 @@ body{background:#070d1f;color:#fff}
 .mainBox{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
 .phone{background:#0a1430;border:1px solid #1c2a4e;border-radius:12px;padding:12px}
 .mItem{padding:11px;background:#16224a;border-radius:8px;margin:5px 0;display:flex;justify-content:space-between;cursor:pointer;font-size:13px}
+.mItem.active{border-color:#ff1a1a;border:2px solid #ff1a1a}
 .btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:900;margin-top:8px;cursor:pointer}
+select{width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333}
 </style>
 </head>
 <body>
 <div id="notifBig"></div>
 <div id="login">
-<div style="background:#0e1731;padding:24px;border-radius:16px;width:340px;text-align:center;border:1px solid #333">
-<h1 style="color:#ff1a1a;font-weight:900;font-size:24px">BREMBO V6</h1>
-<p style="font-size:10px;color:#aaa;margin-bottom:12px">61 MACHINES</p>
-<input id="opId" placeholder="Operator ID" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
-<input id="opName" placeholder="Operator Name" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
-<button onclick="doLogin()" style="width:100%;padding:13px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:12px">LOGIN</button>
+<div style="background:#0e1731;padding:24px;border-radius:16px;width:360px;text-align:center;border:1px solid #333">
+<h1 style="color:#ff1a1a;font-weight:900;font-size:24px">BREMBO V7</h1>
+<p style="font-size:10px;color:#aaa;margin-bottom:12px">68 MACHINES - LOGIN REQUIRED</p>
+<input id="opId" placeholder="EMPLOYEE ID" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
+<input id="opName" placeholder="EMPLOYEE NAME" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
+<select id="opMachine"></select>
+<button onclick="doLogin()" style="width:100%;padding:13px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:12px">LOGIN & START SHIFT</button>
 <p id="fbStat" style="font-size:10px;color:yellow;margin-top:8px">Connecting LIVE...</p>
+<p style="font-size:9px;color:#666;margin-top:10px">Notification can only be sent after login. Second operator can login only after logout.</p>
 </div>
 </div>
 <div class="topBar">
-<b style="color:#ff1a1a">BREMBO V6</b>
-<span id="wel" style="font-size:11px;color:#22c55e"></span>
-<span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">● LIVE</span>
+<div><b style="color:#ff1a1a">BREMBO V7</b><br><span id="wel" style="font-size:11px;color:#22c55e"></span> <span id="welMc" style="font-size:11px;background:#16224a;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span></div>
+<div style="display:flex;gap:8px;align-items:center"><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="doLogout()" style="font-size:10px;background:#222;padding:6px 10px;border-radius:6px">LOGOUT</button></div>
 </div>
 <div class="seriesBar">
-<button class="sBtn active" onclick="setSeries('E')" id="btnE">E-Series (32)</button>
-<button class="sBtn" onclick="setSeries('M1')" id="btnM1">M1 (15)</button>
-<button class="sBtn" onclick="setSeries('MK')" id="btnMK">MK (6)</button>
-<button class="sBtn" onclick="setSeries('PN')" id="btnPN">PN (4)</button>
+<button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (68)</button>
+<button class="sBtn" onclick="setSeries('EN')" id="btnEN">EN (35)</button>
+<button class="sBtn" onclick="setSeries('MK')" id="btnMK">MK (7)</button>
+<button class="sBtn" onclick="setSeries('M')" id="btnM">M (15)</button>
 <button class="sBtn" onclick="setSeries('L')" id="btnL">L (4)</button>
-<button class="sBtn" onclick="setSeries('ALL')" id="btnALL">ALL (61)</button>
+<button class="sBtn" onclick="setSeries('PN')" id="btnPN">PN (4)</button>
+<button class="sBtn" onclick="setSeries('BR')" id="btnBR">BR (3)</button>
 </div>
 <div class="cards" id="cards"></div>
 <div class="mainBox">
@@ -62,6 +66,7 @@ body{background:#070d1f;color:#fff}
 <div id="machineDetail"></div>
 <div id="operatorBox" style="margin:10px 0;font-size:12px;color:#aaa"></div>
 <div id="statusList"></div>
+<div id="lockMsg" style="margin-top:8px;font-size:11px;color:#ff6b6b"></div>
 <div id="routeInfo" style="margin-top:12px;padding:10px;background:#1a0f00;border:1px dashed #f59e0b;border-radius:8px;display:none;font-size:11px;line-height:1.5"></div>
 <button id="waBtn" onclick="openWA()" style="width:100%;padding:14px;background:#25D366;color:#000;font-weight:900;border:none;border-radius:10px;margin-top:12px;display:none">SEND WHATSAPP</button>
 </div>
@@ -73,21 +78,21 @@ const db=firebase.database();
 const ROUTE_MAP={
 "BREAKDOWN":{name:"Pravin Kole (Maintenance)",no:"919822434776"},
 "FIXTURE NOT OK":{name:"Prashant Tarte (Tool Room)",no:"919359499867"},
-"CMM NOT OK":{name:"Santosh Shirurkar (Quality)",no:"917498687549"},
+"CMM NOT OK":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
 "LOT HOLD":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"},
 "LOT READY":{name:"Sonpal Ram (Loading)",no:"919012683322"},
-"LOT READY FOR SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687549"},
-"SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687549"},
+"LOT READY FOR SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
+"SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
 "RUNNING":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"}
 };
-let curSeries='E',curMachine='E-06',curFilter='ALL',operator=null,machines={},lastWa="",prev={};
+const ALL_MACHINES_LIST = (()=>{ let a=[]; for(let i=1;i<=35;i++) a.push("EN"+i); ["MK3","MK8","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x)); for(let i=1;i<=15;i++) a.push("M"+i); for(let i=1;i<=4;i++) a.push("L"+i); for(let i=1;i<=4;i++) a.push("PN"+i); for(let i=1;i<=3;i++) a.push("BR"+i); return a; })();
+let curSeries='ALL',curMachine=null,curFilter='ALL',operator=null,machines={},lastWa="",prev={};
 function getAllMachines(){
 let m={};
-for(let i=1;i<=32;i++){let s=i<=18?'RUNNING':i<=22?'BREAKDOWN':i<=26?'CMM NOT OK':i<=28?'FIXTURE NOT OK':i<=30?'LOT READY':'LOT HOLD';m['E-'+String(i).padStart(2,'0')]={status:s,op:null}}
-for(let i=1;i<=15;i++){m['M1-'+String(i).padStart(2,'0')]={status:'RUNNING',op:null}}
-[3,8,11,25,27,28].forEach(n=>{m['MK-'+String(n).padStart(2,'0')]={status:'RUNNING',op:null}});
-for(let i=1;i<=4;i++){m['PN-0'+i]={status:'RUNNING',op:null}}
-for(let i=1;i<=4;i++){m['L-0'+i]={status:'RUNNING',op:null}}
+ALL_MACHINES_LIST.forEach((id,idx)=>{
+ let s= idx%7==1?'BREAKDOWN': idx%7==2?'CMM NOT OK': idx%7==3?'FIXTURE NOT OK': idx%7==4?'LOT READY': idx%7==5?'LOT HOLD':'RUNNING';
+ m[id]={status:s,op:null}
+});
 return m;
 }
 function init(){machines=getAllMachines();}
@@ -107,23 +112,43 @@ let all=getAllMachines();
 if(d){
 let needSave=false;
 for(let k in all){if(!d[k]){d[k]=all[k];needSave=true;}}
+for(let k in d){ if(k.includes('-')) { delete d[k]; needSave=true; } }
 machines=d;
 if(needSave){save();}
 for(let id in d){if(prev[id]&&prev[id].status!=d[id].status){let who=d[id].op?d[id].op.name:"Someone";let route=ROUTE_MAP[d[id].status]||ROUTE_MAP["RUNNING"];loudPopup(id,d[id].status,who,route)}}
 prev=JSON.parse(JSON.stringify(d));
-document.getElementById('fbStat').innerText="✅ LIVE - "+Object.keys(machines).length+" M/C";
+document.getElementById('fbStat').innerText="LIVE - "+Object.keys(machines).length+" M/C";
 render();
 }else{init();save()}
 })
 }
+function fillMachineDropdown(){
+ const sel=document.getElementById("opMachine");
+ sel.innerHTML='<option value="">-- SELECT MACHINE --</option>'+ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");
+}
 function doLogin(){
-let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim();
-if(!id||!nm)return alert('Enter ID and Name');
-operator={id,name:nm};
-localStorage.setItem('brembo_v6',JSON.stringify(operator));
+let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim(),mc=document.getElementById('opMachine').value;
+if(!id||!nm||!mc)return alert('Please fill ID, Name and Machine!');
+operator={id,name:nm,machine:mc,time:new Date().toLocaleString()};
+localStorage.setItem('brembo_v7',JSON.stringify(operator));
 document.getElementById('login').style.display='none';
-document.getElementById('wel').innerText=nm;
-render()
+applyOperator();
+}
+function applyOperator(){
+ if(!operator) return;
+ document.getElementById('wel').innerText=operator.name+" ("+operator.id+")";
+ document.getElementById('welMc').innerText=operator.machine;
+ curMachine=operator.machine;
+ document.getElementById('lockMsg').innerText=`You can only send notification for ${operator.machine}.`;
+ if(machines[operator.machine]){ machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine}; save(); }
+ render();
+}
+function doLogout(){
+ if(confirm("Logout? Next operator can login after this.")){
+  localStorage.removeItem('brembo_v7');
+  operator=null;
+  location.reload();
+ }
 }
 function setSeries(series){
 curSeries=series;
@@ -142,48 +167,65 @@ function setF(f){curFilter=f;renderList()}
 function renderList(){
 let ids=[];
 if(curSeries=='ALL'){
-ids=curFilter=='ALL'?Object.keys(machines).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();
+ ids=curFilter=='ALL'?Object.keys(machines).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();
 }else{
-ids=Object.keys(machines).filter(k=>k.startsWith(curSeries+'-')).sort();
-if(curFilter!='ALL')ids=ids.filter(k=>machines[k].status==curFilter);
+ ids=Object.keys(machines).filter(k=>k.startsWith(curSeries)).sort((a,b)=>{
+  let na=parseInt(a.replace(/\D/g,''))||0, nb=parseInt(b.replace(/\D/g,''))||0; return na-nb;
+ });
+ if(curFilter!='ALL')ids=ids.filter(k=>machines[k].status==curFilter);
 }
 document.getElementById('listTitle').innerText=curSeries+' ('+ids.length+') - '+curFilter;
-document.getElementById('machineList').innerHTML=ids.map(id=>`<div class="mItem" onclick="sel('${id}')"><b>${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`).join('');
-if(ids.length)sel(ids[0])
+document.getElementById('machineList').innerHTML=ids.map(id=>{
+ let isMine = operator && operator.machine===id;
+ let cls = curMachine===id?'mItem active':'mItem';
+ let star = isMine?'⭐ ':'';
+ return `<div class="${cls}" onclick="sel('${id}')"><b>${star}${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`
+}).join('');
+if(ids.length &&!curMachine) sel(ids[0])
+else if(curMachine) sel(curMachine)
 }
 function sel(id){
 if(!machines[id])return;
-curMachine=id;
-document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${machines[id].status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME</button>`;
-let op=machines[id].op;
-document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Time: ${op.time}`:'No Operator Assigned';
+if(operator && id!==operator.machine){
+ document.getElementById('lockMsg').innerText=`You are logged in on ${operator.machine}. You can only send notification for that machine!`;
+ curMachine=operator.machine;
+}else{
+ curMachine=id;
+}
+let m=machines[curMachine] || machines[id];
+let displayId = operator? operator.machine : id;
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${displayId}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${displayId})</button>`;
+let op=m.op;
+document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Machine: ${op.machine||displayId}<br>Time: ${op.time}`:'No Operator Assigned';
 let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
 document.getElementById('statusList').innerHTML=statuses.map(s=>{
 let r=ROUTE_MAP[s];
-return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${machines[id].status==s?'✓':''}</span></div>`
+return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${m.status==s?'✓':''}</span></div>`
 }).join('');
 }
-function assign(){if(!operator)return;machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString()};save();sel(curMachine)}
+function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine};save();sel(curMachine)}
 function openWA(){if(lastWa)window.open(lastWa,'_blank')}
 function upd(s){
 if(!operator){document.getElementById('login').style.display='flex';return}
+if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); curMachine=operator.machine; sel(curMachine); return; }
 machines[curMachine].status=s;save();
 let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
 loudPopup(curMachine,s,operator.name,route);
 let date=new Date().toLocaleString('en-IN');
-let msg=`*🚨 BREMBO ALERT V6*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
+let msg=`*🚨 BREMBO ALERT V7*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
 lastWa=`https://wa.me/${route.no}?text=${msg}`;
 document.getElementById('routeInfo').style.display='block';
 document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}`;
 document.getElementById('waBtn').style.display='block';
-document.getElementById('waBtn').innerText=`📱 SEND TO ${route.name.toUpperCase()}`;
+document.getElementById('waBtn').innerText=`SEND TO ${route.name.toUpperCase()}`;
 setTimeout(()=>window.open(lastWa,'_blank'),700);
 renderCards();renderList()
 }
-function render(){renderCards();renderList();sel(curMachine)}
+function render(){renderCards();renderList();if(curMachine)sel(curMachine)}
+fillMachineDropdown();
 load();
-let sv=localStorage.getItem('brembo_v6');
-if(sv){operator=JSON.parse(sv);document.getElementById('login').style.display='none';document.getElementById('wel').innerText=operator.name}
+let sv=localStorage.getItem('brembo_v7') || localStorage.getItem('brembo_v6');
+if(sv){operator=JSON.parse(sv); if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); localStorage.removeItem('brembo_v6'); } else { document.getElementById('login').style.display='none'; applyOperator(); } }
 </script>
 </body>
 </html>
