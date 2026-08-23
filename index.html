@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" href="icon.png?v=7">
 <link rel="manifest" href="manifest.json?v=7">
 <meta name="theme-color" content="#E30613">
-<title>Brembo V7 - 68 Machines</title>
+<title>Brembo V7 - 69 Machines</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -132,14 +132,15 @@ cursor:pointer
 }
 select{
 width:100%;
-padding:12px;
+padding:14px;
 margin:6px 0;
 border-radius:8px;
-background:#ffffff;
-color:#000000;
-border:1px solid #333;
+background:#ffffff!important;
+color:#000000!important;
+border:2px solid #ff1a1a!important;
 font-weight:900;
-font-size:14px
+font-size:16px;
+display:block!important;
 }
 select option{
 background:#fff;
@@ -160,7 +161,7 @@ line-height:1.8
 <div id="login">
 <div style="background:#0e1731;padding:24px;border-radius:16px;width:360px;text-align:center;border:1px solid #333">
 <h1 style="color:#ff1a1a;font-weight:900;font-size:24px">BREMBO V7</h1>
-<p style="font-size:10px;color:#aaa;margin-bottom:12px">68 MACHINES - LOGIN REQUIRED</p>
+<p style="font-size:10px;color:#aaa;margin-bottom:12px">69 MACHINES - LOGIN REQUIRED</p>
 <input id="opId" placeholder="EMPLOYEE ID" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
 <input id="opName" placeholder="EMPLOYEE NAME" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
 <select id="opMachine"></select>
@@ -173,9 +174,9 @@ line-height:1.8
 <div style="display:flex;gap:6px;align-items:center"><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:6px;border:none;font-weight:900">RESET ALL</button><button onclick="doLogout()" style="font-size:10px;background:#222;color:#fff;padding:6px 10px;border-radius:6px;border:none">LOGOUT</button></div>
 </div>
 <div class="seriesBar">
-<button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (68)</button>
+<button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (69)</button>
 <button class="sBtn" onclick="setSeries('EN')" id="btnEN">EN (35)</button>
-<button class="sBtn" onclick="setSeries('MK')" id="btnMK">MK (7)</button>
+<button class="sBtn" onclick="setSeries('MK')" id="btnMK">MK (8)</button>
 <button class="sBtn" onclick="setSeries('M')" id="btnM">M (15)</button>
 <button class="sBtn" onclick="setSeries('L')" id="btnL">L (4)</button>
 <button class="sBtn" onclick="setSeries('PN')" id="btnPN">PN (4)</button>
@@ -211,7 +212,7 @@ const ROUTE_MAP={
 "SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
 "RUNNING":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"}
 };
-const ALL_MACHINES_LIST = (()=>{ let a=[]; for(let i=1;i<=35;i++) a.push("EN"+i); ["MK3","MK8","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x)); for(let i=1;i<=15;i++) a.push("M"+i); for(let i=1;i<=4;i++) a.push("L"+i); for(let i=1;i<=4;i++) a.push("PN"+i); for(let i=1;i<=3;i++) a.push("BR"+i); return a; })();
+const ALL_MACHINES_LIST = (()=>{ let a=[]; for(let i=1;i<=35;i++) a.push("EN"+i); ["MK3","MK8","MK11","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x)); for(let i=1;i<=15;i++) a.push("M"+i); for(let i=1;i<=4;i++) a.push("L"+i); for(let i=1;i<=4;i++) a.push("PN"+i); for(let i=1;i<=3;i++) a.push("BR"+i); return a; })();
 let curSeries='ALL',curMachine=null,curFilter='ALL',operator=null,machines={},lastWa="",prev={};
 function getAllMachines(){
 let m={};
@@ -227,15 +228,15 @@ function resetAll(){
 let pin=prompt("ENTER ADMIN PIN:");
 if(pin===null)return;
 if(pin!==ADMIN_PIN){
-alert("Wrong PIN! Correct is 191175");
+alert("Wrong PIN! Access Denied!");
 return;
 }
-if(!confirm("Reset all 68 machines to RUNNING?"))return;
+if(!confirm("Reset all 69 machines to RUNNING?"))return;
 for(let k in machines){
 machines[k]={status:"RUNNING",op:null};
 }
 save();
-alert("All 68 RUNNING!");
+alert("All 69 RUNNING!");
 location.reload();
 }
 function loudPopup(mid,st,who,routeTo){
@@ -325,16 +326,13 @@ return `<div class="${cls}" onclick="sel('${id}')"><b>${star}${id}</b><span styl
 if(ids.length &&!curMachine) sel(ids[0])
 else if(curMachine) sel(curMachine)
 }
-// --- VIEW ONLY FIX ---
 function sel(id){
 if(!machines[id])return;
 curMachine=id;
 let m=machines[id];
 let op=m.op;
 let isMyMachine = operator && operator.machine===id;
-
 if(isMyMachine){
-// MY MACHINE - FULL ACCESS
 document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>`;
 document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#22c55e">YOUR DETAILS:</b><br>ID: ${operator.id}<br>Name: ${operator.name}<br>Machine: ${id}<br>Time: ${op?op.time:new Date().toLocaleTimeString()}</div>`;
 let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
@@ -344,7 +342,6 @@ return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="f
 }).join('');
 document.getElementById('lockMsg').innerText=`You can change status for ${id}`;
 }else{
-// OTHER MACHINE - VIEW ONLY ID NAME MACHINE
 document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#888">${id}</div><div style="font-size:11px;color:#888">VIEW ONLY MODE</div><div style="font-size:12px;margin-top:4px">Status: <b style="color:#aaa">${m.status}</b></div>`;
 if(op){
 document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#f59e0b">OPERATOR ON ${id}:</b><br><b>ID:</b> ${op.id}<br><b>Name:</b> ${op.name}<br><b>Machine:</b> ${op.machine||id}<br><b>Time:</b> ${op.time}</div>`;
