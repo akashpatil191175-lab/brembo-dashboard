@@ -6,27 +6,145 @@
 <link rel="icon" type="image/png" href="icon.png?v=7">
 <link rel="apple-touch-icon" href="icon.png?v=7">
 <link rel="manifest" href="manifest.json?v=7">
-<meta name="theme-color" content="#E30613"><title>Brembo V7 - 68 Machines</title>
+<meta name="theme-color" content="#E30613">
+<title>Brembo V7 - 68 Machines</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#070d1f;color:#fff}
-#login{position:fixed;inset:0;background:#070d1f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
-#notifBig{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ff1a1a;color:#fff;padding:30px;border-radius:20px;font-weight:900;font-size:20px;display:none;z-index:99999;text-align:center;box-shadow:0 0 50px #ff1a1a;border:4px solid #fff;max-width:90%}
-.topBar{padding:12px;background:#0a1430;display:flex;justify-content:space-between;position:sticky;top:0;z-index:50;align-items:center}
-.seriesBar{padding:8px;background:#0e1731;display:flex;gap:6px;overflow:auto}
-.sBtn{padding:6px 12px;border-radius:20px;border:1px solid #333;background:#070d1f;color:#fff;font-size:11px;cursor:pointer;white-space:nowrap}
-.sBtn.active{background:#ff1a1a;color:#fff}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
-.card{background:#0e1731;border:1px solid #1c2a4e;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
-.mainBox{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
-.phone{background:#0a1430;border:1px solid #1c2a4e;border-radius:12px;padding:12px}
-.mItem{padding:11px;background:#16224a;border-radius:8px;margin:5px 0;display:flex;justify-content:space-between;cursor:pointer;font-size:13px}
-.mItem.active{border-color:#ff1a1a;border:2px solid #ff1a1a}
-.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:900;margin-top:8px;cursor:pointer}
-select{width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif
+}
+body{
+background:#070d1f;
+color:#fff
+}
+#login{
+position:fixed;
+inset:0;
+background:#070d1f;
+z-index:9999;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px
+}
+#notifBig{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#ff1a1a;
+color:#fff;
+padding:30px;
+border-radius:20px;
+font-weight:900;
+font-size:20px;
+display:none;
+z-index:99999;
+text-align:center;
+box-shadow:0 0 50px #ff1a1a;
+border:4px solid #fff;
+max-width:90%
+}
+.topBar{
+padding:12px;
+background:#0a1430;
+display:flex;
+justify-content:space-between;
+position:sticky;
+top:0;
+z-index:50;
+align-items:center
+}
+.seriesBar{
+padding:8px;
+background:#0e1731;
+display:flex;
+gap:6px;
+overflow:auto
+}
+.sBtn{
+padding:6px 12px;
+border-radius:20px;
+border:1px solid #333;
+background:#070d1f;
+color:#fff;
+font-size:11px;
+cursor:pointer;
+white-space:nowrap
+}
+.sBtn.active{
+background:#ff1a1a;
+color:#fff
+}
+.cards{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:8px;
+padding:10px
+}
+.card{
+background:#0e1731;
+border:1px solid #1c2a4e;
+border-radius:12px;
+padding:12px;
+text-align:center;
+cursor:pointer
+}
+.mainBox{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+padding:10px
+}
+.phone{
+background:#0a1430;
+border:1px solid #1c2a4e;
+border-radius:12px;
+padding:12px
+}
+.mItem{
+padding:11px;
+background:#16224a;
+border-radius:8px;
+margin:5px 0;
+display:flex;
+justify-content:space-between;
+cursor:pointer;
+font-size:13px
+}
+.mItem.active{
+border-color:#ff1a1a;
+border:2px solid #ff1a1a
+}
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+font-weight:900;
+margin-top:8px;
+cursor:pointer
+}
+select{
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:8px;
+background:#ffffff;
+color:#000000;
+border:1px solid #333;
+font-weight:900;
+font-size:14px
+}
+select option{
+background:#fff;
+color:#000
+}
 </style>
 </head>
 <body>
@@ -91,14 +209,28 @@ let curSeries='ALL',curMachine=null,curFilter='ALL',operator=null,machines={},la
 function getAllMachines(){
 let m={};
 ALL_MACHINES_LIST.forEach((id,idx)=>{
- let s= idx%7==1?'BREAKDOWN': idx%7==2?'CMM NOT OK': idx%7==3?'FIXTURE NOT OK': idx%7==4?'LOT READY': idx%7==5?'LOT HOLD':'RUNNING';
- m[id]={status:s,op:null}
+let s= idx%7==1?'BREAKDOWN': idx%7==2?'CMM NOT OK': idx%7==3?'FIXTURE NOT OK': idx%7==4?'LOT READY': idx%7==5?'LOT HOLD':'RUNNING';
+m[id]={status:s,op:null}
 });
 return m;
 }
 function init(){machines=getAllMachines();}
 function save(){db.ref('machines').set(machines)}
-function resetAll(){let pin=prompt("ENTER ADMIN PIN:");if(pin===null)return;if(pin!==ADMIN_PIN){alert("Wrong PIN! - Correct PIN is 191175");return;}if(!confirm("Reset all 68 machines to RUNNING?"))return;for(let k in machines){machines[k]={status:"RUNNING",op:null};}save();alert("All 68 RUNNING!");location.reload();}
+function resetAll(){
+let pin=prompt("ENTER ADMIN PIN:");
+if(pin===null)return;
+if(pin!==ADMIN_PIN){
+alert("Wrong PIN! Correct is 191175");
+return;
+}
+if(!confirm("Reset all 68 machines to RUNNING?"))return;
+for(let k in machines){
+machines[k]={status:"RUNNING",op:null};
+}
+save();
+alert("All 68 RUNNING!");
+location.reload();
+}
 function loudPopup(mid,st,who,routeTo){
 const b=document.getElementById('notifBig');
 b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900;background:#fff;color:#ff1a1a">CLOSE</button>`;
@@ -125,8 +257,8 @@ render();
 })
 }
 function fillMachineDropdown(){
- const sel=document.getElementById("opMachine");
- sel.innerHTML='<option value="">-- SELECT MACHINE --</option>'+ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");
+const sel=document.getElementById("opMachine");
+sel.innerHTML='<option value="">-- SELECT MACHINE --</option>'+ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");
 }
 function doLogin(){
 let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim(),mc=document.getElementById('opMachine').value;
@@ -137,20 +269,20 @@ document.getElementById('login').style.display='none';
 applyOperator();
 }
 function applyOperator(){
- if(!operator) return;
- document.getElementById('wel').innerText=operator.name+" ("+operator.id+")";
- document.getElementById('welMc').innerText=operator.machine;
- curMachine=operator.machine;
- document.getElementById('lockMsg').innerText=`You can only send notification for ${operator.machine}.`;
- if(machines[operator.machine]){ machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine}; save(); }
- render();
+if(!operator) return;
+document.getElementById('wel').innerText=operator.name+" ("+operator.id+")";
+document.getElementById('welMc').innerText=operator.machine;
+curMachine=operator.machine;
+document.getElementById('lockMsg').innerText=`You can only send notification for ${operator.machine}.`;
+if(machines[operator.machine]){ machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine}; save(); }
+render();
 }
 function doLogout(){
- if(confirm("Logout? Next operator can login after this.")){
-  localStorage.removeItem('brembo_v7');
-  operator=null;
-  location.reload();
- }
+if(confirm("Logout? Next operator can login after this.")){
+localStorage.removeItem('brembo_v7');
+operator=null;
+location.reload();
+}
 }
 function setSeries(series){
 curSeries=series;
@@ -163,4 +295,71 @@ renderList();
 function getCount(k){if(k=='ALL')return Object.keys(machines).length;return Object.values(machines).filter(m=>m.status==k).length}
 function renderCards(){
 let list=[{k:'ALL',t:'TOTAL'},{k:'RUNNING',t:'RUN'},{k:'BREAKDOWN',t:'BREAK'},{k:'CMM NOT OK',t:'CMM'},{k:'FIXTURE NOT OK',t:'FIX'},{k:'LOT READY',t:'READY'},{k:'LOT HOLD',t:'HOLD'}];
-document.getElementById
+document.getElementById('cards').innerHTML=list.map(x=>`<div class="card" onclick="setF('${x.k}')"><p style="font-size:8px;color:#aaa">${x.t}</p><h2 style="color:${x.k=='BREAKDOWN'?'#ef4444':'#22c55e'}">${getCount(x.k)}</h2></div>`).join('')
+}
+function setF(f){curFilter=f;renderList()}
+function renderList(){
+let ids=[];
+if(curSeries=='ALL'){
+ids=curFilter=='ALL'?Object.keys(machines).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();
+}else{
+ids=Object.keys(machines).filter(k=>k.startsWith(curSeries)).sort((a,b)=>{
+let na=parseInt(a.replace(/[^0-9]/g,''))||0, nb=parseInt(b.replace(/[^0-9]/g,''))||0; return na-nb;
+});
+if(curFilter!='ALL')ids=ids.filter(k=>machines[k].status==curFilter);
+}
+document.getElementById('listTitle').innerText=curSeries+' ('+ids.length+') - '+curFilter;
+document.getElementById('machineList').innerHTML=ids.map(id=>{
+let isMine = operator && operator.machine===id;
+let cls = curMachine===id?'mItem active':'mItem';
+let star = isMine?'⭐ ':'';
+return `<div class="${cls}" onclick="sel('${id}')"><b>${star}${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`
+}).join('');
+if(ids.length &&!curMachine) sel(ids[0])
+else if(curMachine) sel(curMachine)
+}
+function sel(id){
+if(!machines[id])return;
+if(operator && id!==operator.machine){
+document.getElementById('lockMsg').innerText=`You are logged in on ${operator.machine}. You can only send notification for that machine!`;
+curMachine=operator.machine;
+}else{
+curMachine=id;
+}
+let m=machines[curMachine] || machines[id];
+let displayId = operator? operator.machine : id;
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${displayId}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${displayId})</button>`;
+let op=m.op;
+document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Machine: ${op.machine||displayId}<br>Time: ${op.time}`:'No Operator Assigned';
+let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
+document.getElementById('statusList').innerHTML=statuses.map(s=>{
+let r=ROUTE_MAP[s];
+return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${m.status==s?'✓':''}</span></div>`
+}).join('');
+}
+function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine};save();sel(curMachine)}
+function openWA(){if(lastWa)window.open(lastWa,'_blank')}
+function upd(s){
+if(!operator){document.getElementById('login').style.display='flex';return}
+if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); curMachine=operator.machine; sel(curMachine); return; }
+machines[curMachine].status=s;save();
+let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
+loudPopup(curMachine,s,operator.name,route);
+let date=new Date().toLocaleString('en-IN');
+let msg=`*🚨 BREMBO ALERT V7*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
+lastWa=`https://wa.me/${route.no}?text=${msg}`;
+document.getElementById('routeInfo').style.display='block';
+document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}`;
+document.getElementById('waBtn').style.display='block';
+document.getElementById('waBtn').innerText=`SEND TO ${route.name.toUpperCase()}`;
+setTimeout(()=>window.open(lastWa,'_blank'),700);
+renderCards();renderList()
+}
+function render(){renderCards();renderList();if(curMachine)sel(curMachine)}
+fillMachineDropdown();
+load();
+let sv=localStorage.getItem('brembo_v7') || localStorage.getItem('brembo_v6');
+if(sv){operator=JSON.parse(sv); if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); localStorage.removeItem('brembo_v6'); } else { document.getElementById('login').style.display='none'; applyOperator(); } }
+</script>
+</body>
+                    </html>
