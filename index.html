@@ -165,13 +165,19 @@ line-height:1.8
 <input id="opId" placeholder="EMPLOYEE ID" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
 <input id="opName" placeholder="EMPLOYEE NAME" style="width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f;color:#fff;border:1px solid #333">
 <select id="opMachine"></select>
+<select id="opShift" style="background:#fff3cd!important;border-color:#ffc107!important;">
+<option value="A">Shift A (7:45 AM - 4:15 PM)</option>
+<option value="B">Shift B (4:15 PM - 12:00 AM)</option>
+<option value="C">Shift C (12:00 AM - 7:45 AM)</option>
+</select>
+<p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:6px;font-weight:900"></p>
 <button onclick="doLogin()" style="width:100%;padding:13px;background:#ff1a1a;color:#fff;border:none;border-radius:10px;font-weight:900;margin-top:12px">LOGIN & START SHIFT</button>
 <p id="fbStat" style="font-size:10px;color:yellow;margin-top:8px">Connecting LIVE...</p>
 </div>
 </div>
 <div class="topBar">
-<div><b style="color:#ff1a1a">BREMBO V7</b><br><span id="wel" style="font-size:11px;color:#22c55e"></span> <span id="welMc" style="font-size:11px;background:#16224a;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span></div>
-<div style="display:flex;gap:6px;align-items:center"><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:6px;border:none;font-weight:900">RESET ALL</button><button onclick="doLogout()" style="font-size:10px;background:#222;color:#fff;padding:6px 10px;border-radius:6px;border:none">LOGOUT</button></div>
+<div><b style="color:#ff1a1a">BREMBO V7</b><br><span id="wel" style="font-size:11px;color:#22c55e"></span> <span id="welMc" style="font-size:11px;background:#16224a;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span> <span id="welShift" style="font-size:11px;background:#ffc107;color:#000;padding:2px 8px;border-radius:10px;font-weight:900"></span></div>
+<div style="display:flex;gap:6px;align-items:center"><span id="liveShiftBadge" style="font-size:9px;background:#ffc107;color:#000;padding:4px 10px;border-radius:10px;font-weight:900">SHIFT: -</span><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:6px;border:none;font-weight:900">RESET ALL</button><button onclick="doLogout()" style="font-size:10px;background:#222;color:#fff;padding:6px 10px;border-radius:6px;border:none">LOGOUT</button></div>
 </div>
 <div class="seriesBar">
 <button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (69)</button>
@@ -212,6 +218,37 @@ const ROUTE_MAP={
 "SIGN PENDING":{name:"Santosh Shipurkar (Quality)",no:"919921862590"},
 "RUNNING":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"}
 };
+// SHIFT LOGIC ADDED - ONLY THIS PART NEW
+function getCurrentShift(){
+  const t = new Date().getHours()*60 + new Date().getMinutes();
+  if(t>=465 && t<975) return "A";
+  if(t>=975 && t<1440) return "B";
+  return "C";
+}
+function getShiftRange(s){
+  if(s=="A") return "7:45 AM - 4:15 PM";
+  if(s=="B") return "4:15 PM - 12:00 AM";
+  return "12:00 AM - 7:45 AM";
+}
+function checkShiftAutoReset(){
+  let saved = localStorage.getItem('brembo_shift');
+  let live = getCurrentShift();
+  document.getElementById('liveShiftBadge').innerText="SHIFT: "+live;
+  let at = document.getElementById('autoShiftTxt');
+  if(at) at.innerText="Current Running Shift: "+live+" ("+getShiftRange(live)+") Auto";
+  if(saved && saved!==live){
+    alert("Shift "+saved+" Ended! Shift "+live+" Started. Auto Reset & Logout.");
+    for(let k in machines){ machines[k]={status:"RUNNING",op:null}; }
+    db.ref('machines').set(machines).then(()=>{
+      localStorage.clear();
+      location.reload();
+    });
+    return true;
+  }
+  return false;
+}
+setInterval(checkShiftAutoReset,30000);
+
 const ALL_MACHINES_LIST = (()=>{ let a=[]; for(let i=1;i<=35;i++) a.push("EN"+i); ["MK3","MK8","MK11","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x)); for(let i=1;i<=15;i++) a.push("M"+i); for(let i=1;i<=4;i++) a.push("L"+i); for(let i=1;i<=4;i++) a.push("PN"+i); for(let i=1;i<=3;i++) a.push("BR"+i); return a; })();
 let curSeries='ALL',curMachine=null,curFilter='ALL',operator=null,machines={},lastWa="",prev={};
 function getAllMachines(){
@@ -267,12 +304,16 @@ render();
 function fillMachineDropdown(){
 const sel=document.getElementById("opMachine");
 sel.innerHTML='<option value="">-- SELECT MACHINE --</option>'+ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");
+document.getElementById("opShift").value=getCurrentShift();
+checkShiftAutoReset();
 }
 function doLogin(){
-let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim(),mc=document.getElementById('opMachine').value;
-if(!id||!nm||!mc)return alert('Please fill ID, Name and Machine!');
-operator={id,name:nm,machine:mc,time:new Date().toLocaleString()};
+let id=document.getElementById('opId').value.trim(),nm=document.getElementById('opName').value.trim(),mc=document.getElementById('opMachine').value,sh=document.getElementById('opShift').value;
+if(!id||!nm||!mc||!sh)return alert('Please fill ID, Name, Machine and Shift!');
+operator={id,name:nm,machine:mc,shift:sh,time:new Date().toLocaleString()};
 localStorage.setItem('brembo_v7',JSON.stringify(operator));
+localStorage.setItem('brembo_shift',sh);
+localStorage.setItem('brembo_login_time',Date.now());
 document.getElementById('login').style.display='none';
 applyOperator();
 }
@@ -280,14 +321,16 @@ function applyOperator(){
 if(!operator) return;
 document.getElementById('wel').innerText=operator.name+" ("+operator.id+")";
 document.getElementById('welMc').innerText=operator.machine;
+document.getElementById('welShift').innerText="Shift "+operator.shift;
 curMachine=operator.machine;
 document.getElementById('lockMsg').innerText=`You can only send notification for ${operator.machine}.`;
-if(machines[operator.machine]){ machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine}; save(); }
+if(machines[operator.machine]){ machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine,shift:operator.shift}; save(); }
 render();
 }
 function doLogout(){
 if(confirm("Logout? Next operator can login after this.")){
 localStorage.removeItem('brembo_v7');
+localStorage.removeItem('brembo_shift');
 operator=null;
 location.reload();
 }
@@ -333,8 +376,8 @@ let m=machines[id];
 let op=m.op;
 let isMyMachine = operator && operator.machine===id;
 if(isMyMachine){
-document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>`;
-document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#22c55e">YOUR DETAILS:</b><br>ID: ${operator.id}<br>Name: ${operator.name}<br>Machine: ${id}<br>Time: ${op?op.time:new Date().toLocaleTimeString()}</div>`;
+document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b> | Shift: ${operator.shift}</div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>`;
+document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#22c55e">YOUR DETAILS:</b><br>ID: ${operator.id}<br>Name: ${operator.name}<br>Machine: ${id}<br>Shift: ${operator.shift}<br>Time: ${op?op.time:new Date().toLocaleTimeString()}</div>`;
 let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
 document.getElementById('statusList').innerHTML=statuses.map(s=>{
 let r=ROUTE_MAP[s];
@@ -344,7 +387,7 @@ document.getElementById('lockMsg').innerText=`You can change status for ${id}`;
 }else{
 document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#888">${id}</div><div style="font-size:11px;color:#888">VIEW ONLY MODE</div><div style="font-size:12px;margin-top:4px">Status: <b style="color:#aaa">${m.status}</b></div>`;
 if(op){
-document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#f59e0b">OPERATOR ON ${id}:</b><br><b>ID:</b> ${op.id}<br><b>Name:</b> ${op.name}<br><b>Machine:</b> ${op.machine||id}<br><b>Time:</b> ${op.time}</div>`;
+document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#f59e0b">OPERATOR ON ${id}:</b><br><b>ID:</b> ${op.id}<br><b>Name:</b> ${op.name}<br><b>Machine:</b> ${op.machine||id}<br><b>Shift:</b> ${op.shift||'-'}<br><b>Time:</b> ${op.time}</div>`;
 }else{
 document.getElementById('operatorBox').innerHTML=`<div class="viewBox"><b style="color:#666">No Operator on ${id}</b><br>ID: -<br>Name: -<br>Machine: ${id}</div>`;
 }
@@ -354,7 +397,7 @@ document.getElementById('routeInfo').style.display='none';
 document.getElementById('waBtn').style.display='none';
 }
 }
-function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine};save();sel(curMachine)}
+function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine,shift:operator.shift};save();sel(curMachine)}
 function openWA(){if(lastWa)window.open(lastWa,'_blank')}
 function upd(s){
 if(!operator){document.getElementById('login').style.display='flex';return}
@@ -363,7 +406,7 @@ machines[curMachine].status=s;save();
 let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
 loudPopup(curMachine,s,operator.name,route);
 let date=new Date().toLocaleString('en-IN');
-let msg=`*🚨 BREMBO ALERT V7*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
+let msg=`*🚨 BREMBO ALERT V7*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0AShift: ${operator.shift} (${getShiftRange(operator.shift)})%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
 lastWa=`https://wa.me/${route.no}?text=${msg}`;
 document.getElementById('routeInfo').style.display='block';
 document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}`;
@@ -376,7 +419,14 @@ function render(){renderCards();renderList();if(curMachine)sel(curMachine)}
 fillMachineDropdown();
 load();
 let sv=localStorage.getItem('brembo_v7') || localStorage.getItem('brembo_v6');
-if(sv){operator=JSON.parse(sv); if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); localStorage.removeItem('brembo_v6'); } else { document.getElementById('login').style.display='none'; applyOperator(); } }
+if(sv){
+  operator=JSON.parse(sv);
+  if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); }
+  else {
+    if(checkShiftAutoReset()){}
+    else { document.getElementById('login').style.display='none'; applyOperator(); }
+  }
+}
 </script>
 </body>
 </html>
