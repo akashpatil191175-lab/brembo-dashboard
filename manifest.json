@@ -1,0 +1,15 @@
+{
+  "name": "Brembo V7 - 69 Machines",
+  "short_name": "Brembo",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#070d1f",
+  "theme_color": "#E30613",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
