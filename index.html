@@ -45,7 +45,7 @@ select{width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f
 </div>
 <div class="topBar">
 <div><b style="color:#ff1a1a">BREMBO V7</b><br><span id="wel" style="font-size:11px;color:#22c55e"></span> <span id="welMc" style="font-size:11px;background:#16224a;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span></div>
-<div style="display:flex;gap:8px;align-items:center"><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="doLogout()" style="font-size:10px;background:#222;padding:6px 10px;border-radius:6px">LOGOUT</button></div>
+<div style="display:flex;gap:6px;align-items:center"><span style="font-size:9px;background:#22c55e;color:#000;padding:4px 10px;border-radius:10px">LIVE</span><button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:6px;border:none;font-weight:900">RESET ALL</button><button onclick="doLogout()" style="font-size:10px;background:#222;color:#fff;padding:6px 10px;border-radius:6px;border:none">LOGOUT</button></div>
 </div>
 <div class="seriesBar">
 <button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (68)</button>
@@ -75,6 +75,7 @@ select{width:100%;padding:12px;margin:6px 0;border-radius:8px;background:#070d1f
 const firebaseConfig={apiKey:"AIzaSyCnkcQZwYgDkyFVoib8eeDCv3V9r6WbqQU",authDomain:"brembo-dashboard.firebaseapp.com",databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",projectId:"brembo-dashboard",storageBucket:"brembo-dashboard.firebasestorage.app",messagingSenderId:"935783960863",appId:"1:935783960863:web:115a5380ab005c50da602a"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+const ADMIN_PIN="191175";
 const ROUTE_MAP={
 "BREAKDOWN":{name:"Pravin Kole (Maintenance)",no:"919822434776"},
 "FIXTURE NOT OK":{name:"Prashant Tarte (Tool Room)",no:"919359499867"},
@@ -97,6 +98,7 @@ return m;
 }
 function init(){machines=getAllMachines();}
 function save(){db.ref('machines').set(machines)}
+function resetAll(){let pin=prompt("ENTER ADMIN PIN:");if(pin===null)return;if(pin!==ADMIN_PIN){alert("Wrong PIN! - Correct PIN is 191175");return;}if(!confirm("Reset all 68 machines to RUNNING?"))return;for(let k in machines){machines[k]={status:"RUNNING",op:null};}save();alert("All 68 RUNNING!");location.reload();}
 function loudPopup(mid,st,who,routeTo){
 const b=document.getElementById('notifBig');
 b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900;background:#fff;color:#ff1a1a">CLOSE</button>`;
@@ -161,77 +163,4 @@ renderList();
 function getCount(k){if(k=='ALL')return Object.keys(machines).length;return Object.values(machines).filter(m=>m.status==k).length}
 function renderCards(){
 let list=[{k:'ALL',t:'TOTAL'},{k:'RUNNING',t:'RUN'},{k:'BREAKDOWN',t:'BREAK'},{k:'CMM NOT OK',t:'CMM'},{k:'FIXTURE NOT OK',t:'FIX'},{k:'LOT READY',t:'READY'},{k:'LOT HOLD',t:'HOLD'}];
-document.getElementById('cards').innerHTML=list.map(x=>`<div class="card" onclick="setF('${x.k}')"><p style="font-size:8px;color:#aaa">${x.t}</p><h2 style="color:${x.k=='BREAKDOWN'?'#ef4444':'#22c55e'}">${getCount(x.k)}</h2></div>`).join('')
-}
-function setF(f){curFilter=f;renderList()}
-function renderList(){
-let ids=[];
-if(curSeries=='ALL'){
- ids=curFilter=='ALL'?Object.keys(machines).sort():Object.keys(machines).filter(k=>machines[k].status==curFilter).sort();
-}else{
- ids=Object.keys(machines).filter(k=>k.startsWith(curSeries)).sort((a,b)=>{
-  let na=parseInt(a.replace(/\D/g,''))||0, nb=parseInt(b.replace(/\D/g,''))||0; return na-nb;
- });
- if(curFilter!='ALL')ids=ids.filter(k=>machines[k].status==curFilter);
-}
-document.getElementById('listTitle').innerText=curSeries+' ('+ids.length+') - '+curFilter;
-document.getElementById('machineList').innerHTML=ids.map(id=>{
- let isMine = operator && operator.machine===id;
- let cls = curMachine===id?'mItem active':'mItem';
- let star = isMine?'⭐ ':'';
- return `<div class="${cls}" onclick="sel('${id}')"><b>${star}${id}</b><span style="font-size:8px;background:${machines[id].status=='RUNNING'?'#22c55e':'#ef4444'};padding:3px 7px;border-radius:10px;color:#fff">${machines[id].status}</span></div>`
-}).join('');
-if(ids.length &&!curMachine) sel(ids[0])
-else if(curMachine) sel(curMachine)
-}
-function sel(id){
-if(!machines[id])return;
-if(operator && id!==operator.machine){
- document.getElementById('lockMsg').innerText=`You are logged in on ${operator.machine}. You can only send notification for that machine!`;
- curMachine=operator.machine;
-}else{
- curMachine=id;
-}
-let m=machines[curMachine] || machines[id];
-let displayId = operator? operator.machine : id;
-document.getElementById('machineDetail').innerHTML=`<div style="font-size:30px;font-weight:900;color:#22c55e">${displayId}</div><div style="font-size:12px">Status: <b style="color:#ff1a1a">${m.status}</b></div><button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${displayId})</button>`;
-let op=m.op;
-document.getElementById('operatorBox').innerHTML=op?`Operator: ${op.name} (${op.id})<br>Machine: ${op.machine||displayId}<br>Time: ${op.time}`:'No Operator Assigned';
-let statuses=['RUNNING','BREAKDOWN','CMM NOT OK','FIXTURE NOT OK','LOT HOLD','LOT READY','SIGN PENDING'];
-document.getElementById('statusList').innerHTML=statuses.map(s=>{
-let r=ROUTE_MAP[s];
-return `<div class="mItem" onclick="upd('${s}')"><span>${s}</span><span style="font-size:9px;color:#f59e0b">${r?r.name.split('(')[0]:''} ${m.status==s?'✓':''}</span></div>`
-}).join('');
-}
-function assign(){if(!operator){document.getElementById('login').style.display='flex';return;} machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine};save();sel(curMachine)}
-function openWA(){if(lastWa)window.open(lastWa,'_blank')}
-function upd(s){
-if(!operator){document.getElementById('login').style.display='flex';return}
-if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); curMachine=operator.machine; sel(curMachine); return; }
-machines[curMachine].status=s;save();
-let route=ROUTE_MAP[s]||ROUTE_MAP["RUNNING"];
-loudPopup(curMachine,s,operator.name,route);
-let date=new Date().toLocaleString('en-IN');
-let msg=`*🚨 BREMBO ALERT V7*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*%0AOperator: ${operator.name}%0AID: ${operator.id}%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
-lastWa=`https://wa.me/${route.no}?text=${msg}`;
-document.getElementById('routeInfo').style.display='block';
-document.getElementById('routeInfo').innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}`;
-document.getElementById('waBtn').style.display='block';
-document.getElementById('waBtn').innerText=`SEND TO ${route.name.toUpperCase()}`;
-setTimeout(()=>window.open(lastWa,'_blank'),700);
-renderCards();renderList()
-}
-function resetAll(){
- let pass=prompt("Enter ADMIN PIN to RESET ALL:");
- if(pass!=="191175") return alert("Wrong PIN! Only Admin can RESET");
- if(!confirm("Are you sure? All 68 Machines will become RUNNING!")) return;
- let m={}; ALL_MACHINES_LIST.forEach(id=>{m[id]={status:"RUNNING",op:null}}); db.ref('machines').set(m); alert("Done! All 68 Machines RUNNING");
-}
-function render(){renderCards();renderList();if(curMachine)sel(curMachine)}
-fillMachineDropdown();
-load();
-let sv=localStorage.getItem('brembo_v7') || localStorage.getItem('brembo_v6');
-if(sv){operator=JSON.parse(sv); if(!operator.machine){ document.getElementById('login').style.display='flex'; localStorage.removeItem('brembo_v7'); localStorage.removeItem('brembo_v6'); } else { document.getElementById('login').style.display='none'; applyOperator(); } }
-</script>
-</body>
-</html>
+document.getElementById
