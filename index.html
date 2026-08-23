@@ -203,13 +203,13 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const ADMIN_PIN="191197";
 const ROUTE_MAP={
-"BREAKDOWN":{name:"Pravin Kole (Maintenance)",no:"919822434776"},
-"FIXTURE NOT OK":{name:"Prashant Tarte (Tool Room)",no:"919359499867"},
-"CMM NOT OK":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
+"BREAKDOWN":{name:"Pravin Kolhe Bbi (Maintenance)",no:"919822431776"},
+"FIXTURE NOT OK":{name:"Prashant Tarate (Tool Room)",no:"917350090376"},
+"CMM NOT OK":{name:"Santosh Shipurkar (Quality)",no:"919921862590"},
 "LOT HOLD":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"},
 "LOT READY":{name:"Sonpal Ram (Loading)",no:"919012683322"},
-"LOT READY FOR SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
-"SIGN PENDING":{name:"Santosh Shirurkar (Quality)",no:"917498687547"},
+"LOT READY FOR SIGN PENDING":{name:"Santosh Shipurkar (Quality)",no:"919921862590"},
+"SIGN PENDING":{name:"Santosh Shipurkar (Quality)",no:"919921862590"},
 "RUNNING":{name:"Mahesh Andhale (Supervisor)",no:"919881097236"}
 };
 const ALL_MACHINES_LIST = (()=>{ let a=[]; for(let i=1;i<=35;i++) a.push("EN"+i); ["MK3","MK8","MK11","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x)); for(let i=1;i<=15;i++) a.push("M"+i); for(let i=1;i<=4;i++) a.push("L"+i); for(let i=1;i<=4;i++) a.push("PN"+i); for(let i=1;i<=3;i++) a.push("BR"+i); return a; })();
