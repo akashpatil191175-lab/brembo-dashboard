@@ -1,13 +1,25 @@
 {
-  "name": "Brembo Machine Monitor",
+  "name": "Brembo 69 Machines Live Monitoring",
   "short_name": "Brembo",
-  "description": "Brembo 69 Machines Live Monitoring",
-  "start_url": "/",
+  "start_url": "/brembo-dashboard/",
+  "scope": "/brembo-dashboard/",
   "display": "standalone",
-  "background_color": "#0b132b",
-  "theme_color": "#ff0033",
+  "background_color": "#0a1931",
+  "theme_color": "#0a1931",
+  "orientation": "any",
+  "id": "/brembo-dashboard/",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
