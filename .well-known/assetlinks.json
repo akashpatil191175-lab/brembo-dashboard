@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.akashpatil191175_lab.twa",
+    "sha256_cert_fingerprints": ["4A:DF:04:2F:CC:0A:A0:4B:68:37:A4:B9:18:DE:6E:CD:B7:2F:A2:79:CE:BE:E3:88:4B:8F:A9:60:9F:5D:C4:27"]
+  }
+}]
