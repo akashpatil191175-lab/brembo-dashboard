@@ -10,10 +10,11 @@
   "scope": "./",
 
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "orientation": "portrait",
 
-  "background_color": "#ffffff",
-  "theme_color": "#E30613",
+  "background_color": "#070d1f",
+  "theme_color": "#070d1f",
 
   "icons": [
     {
