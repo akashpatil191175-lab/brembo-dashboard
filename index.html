@@ -422,6 +422,11 @@ background:#22c55e;
 color:#000
 }
 
+.fixtureOk{
+background:#22c55e;
+color:#000
+}
+
 .viewOnly{
 background:#16224a;
 border:1px solid #64748b;
@@ -511,6 +516,7 @@ grid-template-columns:repeat(3,1fr)
 <option value="maintenance">Maintenance</option>
 <option value="loading">Loading</option>
 <option value="quality">Quality</option>
+<option value="toolroom">Tool Room</option>
 <option value="supervisor">Supervisor</option>
 </select>
 <input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">
@@ -647,7 +653,7 @@ loading:{
 name:"LOADING",
 pin:"2024",
 color:"#f59e0b",
-issueStatus:"LOT READY", // Loading handles LOT READY issues
+issueStatus:"LOT READY",
 actions:[
 { label:"LOT TAKEN", status:"RUNNING", className:"lotTaken" }
 ]
@@ -661,6 +667,15 @@ actions:[
 { label:"OK", status:"RUNNING", className:"cmmOk" }
 ]
 },
+toolroom:{
+name:"TOOL ROOM",
+pin:"2027",
+color:"#06b6d4",
+issueStatus:"FIXTURE NOT OK",
+actions:[
+{ label:"FIXTURE OK", status:"RUNNING", className:"fixtureOk" }
+]
+},
 supervisor:{
 name:"SUPERVISOR",
 pin:"Ampa123",
@@ -672,6 +687,7 @@ actions:[]
 const ROUTE_MAP={
 "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776" },
 "FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },
+"FIXTURE OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },
 "CMM NOT OK":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },
 "LOT HOLD":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" },
 "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },
@@ -1177,7 +1193,7 @@ Time: ${op?op.time:new Date().toLocaleTimeString()}
 </div>
 `;
 
-let statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","LOT HOLD","LOT READY","SIGN PENDING"];
+let statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING"];
 document.getElementById("statusList").innerHTML=statuses.map(s=>{
 let r=ROUTE_MAP[s];
 return `
