@@ -1,6 +1,7 @@
 {
   "name": "Brembo Machine Dashboard",
   "short_name": "Brembo",
+  "id": "/brembo-dashboard/",
   "description": "Brembo Machine Live Dashboard for operator, maintenance, quality, fixture and loading status management.",
   "lang": "en",
   "dir": "ltr",
