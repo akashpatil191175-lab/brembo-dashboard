@@ -11,7 +11,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-
 <title>Brembo V8 - 69 Machines</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -444,39 +443,16 @@ line-height:1.5
 }
 
 @media(max-width:700px){
-
-.topBar{
-align-items:flex-start
-}
-
-.cards{
-grid-template-columns:repeat(4,1fr)
-}
-
-.mainBox{
-grid-template-columns:1fr
-}
-
-.deptMachineGrid{
-grid-template-columns:repeat(4,1fr)
-}
-
+.topBar{ align-items:flex-start }
+.cards{ grid-template-columns:repeat(4,1fr) }
+.mainBox{ grid-template-columns:1fr }
+.deptMachineGrid{ grid-template-columns:repeat(4,1fr) }
 }
 
 @media(max-width:450px){
-
-.deptMachineGrid{
-grid-template-columns:repeat(3,1fr)
-}
-
-.actionGrid{
-grid-template-columns:1fr
-}
-
-.deptStats{
-grid-template-columns:repeat(3,1fr)
-}
-
+.deptMachineGrid{ grid-template-columns:repeat(3,1fr) }
+.actionGrid{ grid-template-columns:1fr }
+.deptStats{ grid-template-columns:repeat(3,1fr) }
 }
 </style>
 </head>
@@ -499,6 +475,7 @@ grid-template-columns:repeat(3,1fr)
 <div id="operatorLogin">
 <input id="opId" class="loginInput" placeholder="EMPLOYEE ID">
 <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">
+<input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">
 <select id="opMachine"></select>
 <select id="opShift" style="background:#fff3cd!important;border-color:#ffc107!important;">
 <option value="A">Shift A (7:45 AM - 4:15 PM)</option>
@@ -638,6 +615,7 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
 const ADMIN_PIN="191197";
+const OPERATOR_PIN="1234"; // ऑपरेटर कॉमन पिन
 
 const DEPARTMENT_CONFIG={
 maintenance:{
@@ -718,13 +696,15 @@ if(badge) badge.innerText="SHIFT: "+live;
 const at=document.getElementById("autoShiftTxt");
 if(at) at.innerText="Current Running Shift: "+live+" ("+getShiftRange(live)+") Auto";
 
-if(saved && saved!==live && operator){
-alert("Shift "+saved+" Ended! Shift "+live+" Started. Auto Reset & Logout.");
-for(let k in machines){ machines[k]={status:"RUNNING",op:null}; }
-db.ref("machines").set(machines).then(()=>{
-localStorage.removeItem("brembo_v7");
-localStorage.removeItem("brembo_shift");
-localStorage.removeItem("brembo_login_time");
+// शिफ्ट बदलताच ऑटो-रीसेट आणि ऑटो-लॉगआउट सिस्टीम
+if(saved && saved!==live){
+alert("Shift "+saved+" Ended! Shift "+live+" Started. Auto Resetting System & Logging Out.");
+let resetData={};
+ALL_MACHINES_LIST.forEach(id=>{
+resetData[id]={status:"RUNNING",op:null};
+});
+db.ref("machines").set(resetData).then(()=>{
+localStorage.clear();
 location.reload();
 });
 return true;
@@ -732,7 +712,7 @@ return true;
 return false;
 }
 
-setInterval(checkShiftAutoReset,30000);
+setInterval(checkShiftAutoReset,10000);
 
 const ALL_MACHINES_LIST=(()=>{
 let a=[];
@@ -757,11 +737,11 @@ let deptSelectedMachine=null;
 let deptSeriesFilter="ALL";
 let deptStatusFilter="ALL";
 
+// १. फिक्स: डमी ब्रेकडाऊन लॉजिक काढून सर्व मशिन्स RUNNING करणे
 function getAllMachines(){
 let m={};
-ALL_MACHINES_LIST.forEach((id,idx)=>{
-let s=idx%7==1?"BREAKDOWN":idx%7==2?"CMM NOT OK":idx%7==3?"FIXTURE NOT OK":idx%7==4?"LOT READY":idx%7==5?"LOT HOLD":"RUNNING";
-m[id]={status:s,op:null};
+ALL_MACHINES_LIST.forEach((id)=>{
+m[id]={status:"RUNNING",op:null};
 });
 return m;
 }
@@ -846,12 +826,21 @@ document.getElementById("opShift").value=getCurrentShift();
 checkShiftAutoReset();
 }
 
+// २. फिक्स: ऑपरेटर पिन व्हेरिफिकेशन जोडले
 function doLogin(){
 let id=document.getElementById("opId").value.trim();
 let nm=document.getElementById("opName").value.trim();
+let pin=document.getElementById("opPin").value.trim();
 let mc=document.getElementById("opMachine").value;
 let sh=document.getElementById("opShift").value;
-if(!id||!nm||!mc||!sh){ alert("Please fill ID, Name, Machine and Shift!"); return; }
+
+if(!id||!nm||!pin||!mc||!sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }
+
+if(pin !== OPERATOR_PIN){
+alert("Wrong Operator PIN! Access Denied.");
+return;
+}
+
 operator={id:id,name:nm,machine:mc,shift:sh,time:new Date().toLocaleString()};
 department=null;
 localStorage.setItem("brembo_v7",JSON.stringify(operator));
