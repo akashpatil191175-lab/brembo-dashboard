@@ -19,7 +19,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- Excel XLSX Library -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -291,107 +290,163 @@ button:active{
   background:#141414
 }
 
-/* ================= DEPARTMENT TOP EXCEL ================= */
+/* ================= STATUS DASHBOARD CARDS ================= */
 
-.excelSmallBtn{
-  padding:9px 13px;
-  border-radius:10px;
-  border:1px solid #16a34a;
-  background:linear-gradient(180deg,#166534,#14532d);
-  color:#fff;
-  font-size:11px;
-  font-weight:900;
-  box-shadow:0 4px 14px rgba(34,197,94,.18)
-}
-
-.excelSmallBtn:hover{
-  background:linear-gradient(180deg,#22c55e,#15803d)
-}
-
-/* ================= SERIES ================= */
-
-.seriesBar{
-  padding:12px 26px;
-  background:#050505;
-  border-bottom:1px solid #171717;
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:10px
-}
-
-.sBtn{
-  height:46px;
-  border:1px solid #292929;
-  background:linear-gradient(180deg,#171717,#0d0d0d);
-  color:#eee;
-  border-radius:9px;
-  font-size:14px;
-  font-weight:800
-}
-
-.sBtn.active{
-  background:linear-gradient(180deg,#ed1b24,#b40000);
-  border-color:#ff3434;
-  box-shadow:0 0 18px rgba(229,9,20,.35)
-}
-
-/* ================= STATUS CARDS ================= */
-
-.cards{
+.statusCards{
   display:grid;
   grid-template-columns:repeat(9,1fr);
-  gap:8px;
-  padding:14px 26px
+  gap:9px;
+  padding:16px 26px 10px;
+  background:#050505
 }
 
-.card{
-  min-height:110px;
+.statusCard{
+  min-height:118px;
   background:linear-gradient(180deg,#111,#080808);
-  border:1px solid #282828;
-  border-radius:10px;
-  padding:12px;
+  border:1px solid #292929;
+  border-radius:13px;
+  padding:14px 13px 12px;
   cursor:pointer;
   position:relative;
+  overflow:hidden;
   display:flex;
   flex-direction:column;
-  justify-content:space-between
+  justify-content:space-between;
+  transition:.2s ease
 }
 
-.cardTitle{
-  font-size:10px;
-  font-weight:800;
-  color:#aaa;
-  letter-spacing:.5px;
-  display:flex;
-  align-items:center;
-  gap:6px
+.statusCard:hover{
+  transform:translateY(-2px);
+  border-color:#555
 }
 
-.cardCount{
-  font-size:30px;
-  font-weight:900;
-  color:var(--accent);
-  margin-bottom:4px
+.statusCard.active{
+  border-color:var(--accent);
+  box-shadow:
+    0 0 20px color-mix(in srgb,var(--accent) 20%,transparent),
+    inset 0 0 18px color-mix(in srgb,var(--accent) 7%,transparent)
 }
 
-.card::after{
+.statusCard::after{
   content:"";
   position:absolute;
   left:12px;
   right:12px;
   bottom:0;
-  height:3px;
+  height:4px;
   background:var(--accent);
-  border-top-left-radius:3px;
-  border-top-right-radius:3px;
-  box-shadow:0 0 10px var(--accent)
+  border-radius:5px 5px 0 0;
+  box-shadow:0 0 13px var(--accent)
+}
+
+.statusCardTitle{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#bdbdbd;
+  font-size:11px;
+  font-weight:900;
+  line-height:1.2
+}
+
+.statusIcon{
+  font-size:18px;
+  line-height:1
+}
+
+.statusCardCount{
+  font-size:38px;
+  font-weight:900;
+  line-height:1;
+  color:var(--accent);
+  margin-top:12px
+}
+
+.statusCardHint{
+  font-size:8px;
+  color:#666;
+  font-weight:700;
+  margin-top:7px
+}
+
+/* ================= MACHINE RESULT AREA ================= */
+
+.statusMachineArea{
+  padding:8px 26px 15px
+}
+
+.statusMachinePanel{
+  background:linear-gradient(180deg,#0e0e0e,#070707);
+  border:1px solid #292929;
+  border-radius:14px;
+  overflow:hidden
+}
+
+.statusMachineHeader{
+  padding:14px 18px;
+  border-bottom:1px solid #292929;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap
+}
+
+.statusMachineTitle{
+  font-size:14px;
+  font-weight:900;
+  color:#eee
+}
+
+.statusMachineSub{
+  color:#777;
+  font-size:10px
+}
+
+.machineResultGrid{
+  padding:12px;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  max-height:310px;
+  overflow:auto
+}
+
+.machineResult{
+  background:#131313;
+  border:1px solid #292929;
+  border-radius:9px;
+  padding:11px 7px;
+  text-align:center;
+  cursor:pointer;
+  font-weight:900;
+  min-height:62px
+}
+
+.machineResult:hover{
+  border-color:#666;
+  background:#191919
+}
+
+.machineResult.selected{
+  border-color:#e50914;
+  background:#30090b;
+  box-shadow:0 0 12px rgba(229,9,20,.15)
+}
+
+.machineResultStatus{
+  display:block;
+  font-size:8px;
+  color:#777;
+  margin-top:5px;
+  line-height:1.2
 }
 
 /* ================= MAIN ================= */
 
 .mainBox{
   display:grid;
-  grid-template-columns:32% 68%;
+  grid-template-columns:1fr;
   gap:18px;
   padding:6px 26px 24px
 }
@@ -410,49 +465,6 @@ button:active{
   font-weight:900;
   color:#888;
   letter-spacing:1px
-}
-
-.machineList{
-  padding:10px;
-  max-height:650px;
-  overflow:auto
-}
-
-.mItem{
-  min-height:54px;
-  padding:10px 14px;
-  margin:6px 2px;
-  background:#101010;
-  border:1px solid #222;
-  border-radius:9px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  cursor:pointer
-}
-
-.mItem:hover{
-  border-color:#444
-}
-
-.mItem.active{
-  background:linear-gradient(90deg,#4d090c,#170707);
-  border-color:#e50914;
-  box-shadow:inset 0 0 18px rgba(229,9,20,.12)
-}
-
-.mName{
-  font-size:15px;
-  font-weight:800
-}
-
-.statusTag{
-  padding:6px 12px;
-  border-radius:6px;
-  font-size:11px;
-  font-weight:900;
-  white-space:nowrap
 }
 
 /* ================= DETAIL ================= */
@@ -699,41 +711,17 @@ button:active{
 }
 
 .deptContent{
-  padding:16px 26px;
-  max-width:1250px;
+  padding:0 0 20px;
+  max-width:1450px;
   margin:auto
 }
 
-.deptStats{
+/* Department status cards */
+.deptStatusCards{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-bottom:14px
-}
-
-.deptStat{
-  background:#0d0d0d;
-  border:1px solid #292929;
-  border-radius:12px;
-  padding:16px;
-  text-align:center;
-  cursor:pointer
-}
-
-.deptStat.active{
-  border-color:#e50914;
-  box-shadow:0 0 15px rgba(229,9,20,.12)
-}
-
-.deptStat small{
-  display:block;
-  color:#888;
-  font-size:10px;
-  font-weight:800
-}
-
-.deptStat b{
-  font-size:30px
+  grid-template-columns:repeat(9,1fr);
+  gap:9px;
+  padding:16px 26px 10px
 }
 
 .deptMachineBox{
@@ -741,12 +729,12 @@ button:active{
   border:1px solid #292929;
   border-radius:14px;
   padding:16px;
-  margin-bottom:14px
+  margin:10px 26px 14px
 }
 
 .deptMachineGrid{
   display:grid;
-  grid-template-columns:repeat(5,1fr);
+  grid-template-columns:repeat(6,1fr);
   gap:9px;
   max-height:430px;
   overflow:auto;
@@ -761,6 +749,10 @@ button:active{
   text-align:center;
   font-weight:900;
   cursor:pointer
+}
+
+.deptMachine:hover{
+  border-color:#666
 }
 
 .deptMachine.selected{
@@ -794,7 +786,7 @@ button:active{
 /* ================= STORE MATERIAL BUTTON ================= */
 
 .materialReqSpecial{
-  width:100%;
+  width:calc(100% - 52px);
   min-height:58px;
   border:1px solid #eab308;
   border-radius:12px;
@@ -803,7 +795,7 @@ button:active{
   font-size:14px;
   font-weight:900;
   letter-spacing:.4px;
-  margin-bottom:14px;
+  margin:16px 26px 4px;
   box-shadow:0 0 18px rgba(234,179,8,.12)
 }
 
@@ -858,9 +850,15 @@ button:active{
 
 /* ================= RESPONSIVE ================= */
 
-@media(max-width:1100px){
+@media(max-width:1200px){
 
-  .cards{
+  .statusCards,
+  .deptStatusCards{
+    grid-template-columns:repeat(5,1fr)
+  }
+
+  .machineResultGrid,
+  .deptMachineGrid{
     grid-template-columns:repeat(5,1fr)
   }
 
@@ -868,8 +866,28 @@ button:active{
     flex-wrap:wrap
   }
 
-  .mainBox{
+}
+
+@media(max-width:800px){
+
+  .statusCards,
+  .deptStatusCards{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .machineResultGrid,
+  .deptMachineGrid{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .detailTop{
     grid-template-columns:1fr
+  }
+
+  .routeTop{
+    border-left:0;
+    border-top:1px solid #222;
+    padding:12px 0 0
   }
 
 }
@@ -877,7 +895,7 @@ button:active{
 @media(max-width:700px){
 
   .topBar{
-    padding:12px;
+    padding:12px
   }
 
   .topLogo{
@@ -896,28 +914,43 @@ button:active{
     flex-wrap:wrap
   }
 
-  .seriesBar{
-    grid-template-columns:repeat(2,1fr);
-    padding:10px
+  .statusCards,
+  .deptStatusCards{
+    padding:10px;
+    gap:7px
   }
 
-  .cards{
-    grid-template-columns:repeat(3,1fr);
-    padding:10px
+  .statusCard{
+    min-height:105px;
+    padding:11px 9px
+  }
+
+  .statusCardTitle{
+    font-size:9px
+  }
+
+  .statusCardCount{
+    font-size:30px
+  }
+
+  .statusIcon{
+    font-size:15px
+  }
+
+  .statusMachineArea{
+    padding:6px 10px 12px
+  }
+
+  .machineResultGrid{
+    grid-template-columns:repeat(3,1fr)
   }
 
   .mainBox{
     padding:6px 10px 20px
   }
 
-  .detailTop{
-    grid-template-columns:1fr
-  }
-
-  .routeTop{
-    border-left:0;
-    border-top:1px solid #222;
-    padding:12px 0 0
+  .detailPanel{
+    padding:14px
   }
 
   .statusGrid{
@@ -929,24 +962,32 @@ button:active{
   }
 
   .deptContent{
-    padding:10px
+    padding:0 0 15px
+  }
+
+  .deptMachineBox{
+    margin:8px 10px 12px
   }
 
   .deptMachineGrid{
     grid-template-columns:repeat(3,1fr)
   }
 
-  .deptStats{
-    grid-template-columns:repeat(3,1fr)
+  .materialReqSpecial{
+    width:calc(100% - 20px);
+    margin:10px
   }
 
   .deptTitle{
     font-size:18px
   }
 
-  .excelSmallBtn{
-    padding:8px 10px;
-    font-size:10px
+  .infoGrid{
+    grid-template-columns:80px 1fr
+  }
+
+  .infoGrid .assignBtn{
+    grid-column:1 / -1
   }
 
 }
@@ -1187,8 +1228,10 @@ button:active{
 
       <span id="firebaseTopStatus"
             class="firebaseStatus">
+
         <span class="firebaseDot"></span>
         <span>CONNECTING</span>
+
       </span>
 
       <span class="pill livePill">
@@ -1210,11 +1253,50 @@ button:active{
 
   </div>
 
-  <!-- MAIN -->
+  <!-- OPERATOR STATUS ICON DASHBOARD -->
 
-  <div class="mainBox" style="grid-template-columns: 1fr; padding-top: 20px;">
+  <div id="operatorStatusCards"
+       class="statusCards">
+  </div>
 
-    <!-- DETAIL -->
+  <!-- OPERATOR STATUS MACHINE LIST -->
+
+  <div class="statusMachineArea">
+
+    <div class="statusMachinePanel">
+
+      <div class="statusMachineHeader">
+
+        <div>
+          <div id="operatorStatusMachineTitle"
+               class="statusMachineTitle">
+            ⚙️ SELECT STATUS
+          </div>
+
+          <div id="operatorStatusMachineSub"
+               class="statusMachineSub">
+            Click a status card to view machines.
+          </div>
+        </div>
+
+        <div id="operatorStatusMachineCount"
+             style="font-size:11px;color:#aaa;font-weight:900">
+          0 MACHINES
+        </div>
+
+      </div>
+
+      <div id="operatorMachineResultGrid"
+           class="machineResultGrid">
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MAIN MACHINE DETAIL -->
+
+  <div class="mainBox">
 
     <div class="panel detailPanel">
 
@@ -1276,15 +1358,14 @@ button:active{
 
       </span>
 
-      <!-- SMALL EXCEL BUTTON -->
-
       <button onclick="downloadShiftExcel()"
               class="excelSmallBtn">
         📥 EXCEL
       </button>
 
       <span class="deptBadge"
-            id="deptBadge"></span>
+            id="deptBadge">
+      </span>
 
       <button onclick="departmentLogout()"
               class="pill logoutBtn">
@@ -1297,7 +1378,7 @@ button:active{
 
   <div class="deptContent">
 
-    <!-- STORE SPECIAL MATERIAL BUTTON -->
+    <!-- STORE MATERIAL -->
 
     <button id="materialRequirementBtn"
             class="materialReqSpecial"
@@ -1313,99 +1394,35 @@ button:active{
 
     </button>
 
-    <!-- DEPARTMENT STATS -->
+    <!-- DEPARTMENT STATUS ICONS -->
 
-    <div class="deptStats" style="grid-template-columns: repeat(2, 1fr);">
-
-      <div class="deptStat active"
-           id="deptCardISSUE"
-           onclick="setDeptStatusFilter('ISSUE')">
-
-        <small id="deptIssueTitle">
-          MACHINES WITH ISSUE
-        </small>
-
-        <b id="deptIssue"
-           style="color:#ef4444">
-          0
-        </b>
-
-      </div>
-
-      <div class="deptStat"
-           id="deptCardALL"
-           onclick="setDeptStatusFilter('ALL')">
-
-        <small>
-          ALL MACHINES IN ISSUE LIST
-        </small>
-
-        <b>
-          VIEW ALL
-        </b>
-
-      </div>
-
+    <div id="departmentStatusCards"
+         class="deptStatusCards">
     </div>
 
-    <!-- SERIES -->
-
-    <div class="seriesBar">
-
-      <button class="sBtn active"
-              id="deptBtnALL"
-              onclick="setDeptSeries('ALL')">
-        ALL (69)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnEN"
-              onclick="setDeptSeries('EN')">
-        EN (35)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnMK"
-              onclick="setDeptSeries('MK')">
-        MK (8)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnM"
-              onclick="setDeptSeries('M')">
-        M (15)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnL"
-              onclick="setDeptSeries('L')">
-        L (4)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnPN"
-              onclick="setDeptSeries('PN')">
-        PN (4)
-      </button>
-
-      <button class="sBtn"
-              id="deptBtnBR"
-              onclick="setDeptSeries('BR')">
-        BR (3)
-      </button>
-
-    </div>
-
-    <!-- MACHINE GRID -->
+    <!-- DEPARTMENT MACHINE LIST -->
 
     <div class="deptMachineBox">
 
-      <b id="deptGridTitle">
-        SELECT MACHINE WITH ISSUE
-      </b>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
 
-      <div style="font-size:11px;color:#777;margin-top:4px">
-        Only machines requiring attention from your department are listed below.
+        <div>
+
+          <b id="deptGridTitle">
+            SELECT STATUS
+          </b>
+
+          <div style="font-size:11px;color:#777;margin-top:4px">
+            Click any status icon above to view machines.
+          </div>
+
+        </div>
+
+        <div id="deptGridCount"
+             style="font-size:11px;color:#aaa;font-weight:900">
+          0 MACHINES
+        </div>
+
       </div>
 
       <div id="deptMachineGrid"
@@ -1424,7 +1441,7 @@ button:active{
 
       <div id="deptSelected"
            class="deptSelected">
-        Please select machine.
+        Please select a status and machine.
       </div>
 
     </div>
@@ -1610,7 +1627,7 @@ const ROUTE_MAP = {
 
 
 /* =========================================================
-   MACHINE LIST
+   MACHINE LIST - 69
 ========================================================= */
 
 const ALL_MACHINES_LIST = (()=>{
@@ -1654,6 +1671,78 @@ const ALL_MACHINES_LIST = (()=>{
 
 
 /* =========================================================
+   STATUS CONFIG
+========================================================= */
+
+const STATUS_CONFIG = [
+
+  {
+    key:"TOTAL",
+    title:"TOTAL",
+    icon:"⚙️",
+    accent:"#ffffff"
+  },
+
+  {
+    key:"RUNNING",
+    title:"RUNNING",
+    icon:"⚙️",
+    accent:"#00ff18"
+  },
+
+  {
+    key:"BREAKDOWN",
+    title:"BREAKDOWN",
+    icon:"⚙️",
+    accent:"#ff1744"
+  },
+
+  {
+    key:"CMM NOT OK",
+    title:"CMM NOT OK",
+    icon:"⚙️",
+    accent:"#0099ff"
+  },
+
+  {
+    key:"FIXTURE NOT OK",
+    title:"FIXTURE NOT OK",
+    icon:"⚙️",
+    accent:"#c83cff"
+  },
+
+  {
+    key:"LOT READY",
+    title:"LOT READY",
+    icon:"⚙️",
+    accent:"#ff9800"
+  },
+
+  {
+    key:"LOT HOLD",
+    title:"LOT HOLD",
+    icon:"⚙️",
+    accent:"#ffd000"
+  },
+
+  {
+    key:"MATERIAL REQUIREMENT",
+    title:"MAT REQ",
+    icon:"⚙️",
+    accent:"#ffd000"
+  },
+
+  {
+    key:"MATERIAL SHORTAGE",
+    title:"SHORTAGE",
+    icon:"⚙️",
+    accent:"#ff1744"
+  }
+
+];
+
+
+/* =========================================================
    VARIABLES
 ========================================================= */
 
@@ -1665,21 +1754,17 @@ let department = null;
 
 let curMachine = null;
 
-let curSeries = "ALL";
-
-let curFilter = "ALL";
-
-let deptSelectedMachine = null;
-
-let deptSeriesFilter = "ALL";
-
-let deptStatusFilter = "ISSUE";
-
 let prev = {};
 
 let lastWa = "";
 
 let materialRequirementMode = false;
+
+let operatorStatusFilter = "TOTAL";
+
+let departmentStatusFilter = "TOTAL";
+
+let deptSelectedMachine = null;
 
 
 /* =========================================================
@@ -1865,15 +1950,19 @@ function checkShiftAutoReset(){
 
 
 /* =========================================================
-   DEFAULT MACHINE DATA
+   DEFAULT MACHINE
 ========================================================= */
 
 function getDefaultMachine(){
 
   return {
+
     status:"RUNNING",
+
     op:null,
+
     materialDetails:null
+
   };
 
 }
@@ -1895,15 +1984,17 @@ function getAllMachines(){
 
 
 /* =========================================================
-   FIREBASE MACHINE-WISE SAVE
+   SAVE MACHINE
 ========================================================= */
 
 function saveMachine(id){
 
   if(!id || !machines[id]){
+
     return Promise.reject(
       new Error("Invalid machine")
     );
+
   }
 
   return db
@@ -1914,7 +2005,7 @@ function saveMachine(id){
 
 
 /* =========================================================
-   RESET ALL FIREBASE
+   RESET ALL
 ========================================================= */
 
 function resetAllMachinesFirebase(){
@@ -1924,9 +2015,13 @@ function resetAllMachinesFirebase(){
   ALL_MACHINES_LIST.forEach(id=>{
 
     updates["machines/"+id]={
+
       status:"RUNNING",
+
       op:null,
+
       materialDetails:null
+
     };
 
   });
@@ -1960,9 +2055,7 @@ function load(){
 
       db.ref().update(updates);
 
-      render();
-
-      renderDepartmentDashboard();
+      renderAllDashboards();
 
       return;
 
@@ -2034,7 +2127,7 @@ function load(){
     }
 
 
-    prev=
+    prev =
       JSON.parse(
         JSON.stringify(machines)
       );
@@ -2054,9 +2147,7 @@ function load(){
 
     }
 
-    render();
-
-    renderDepartmentDashboard();
+    renderAllDashboards();
 
   },error=>{
 
@@ -2310,7 +2401,7 @@ function applyOperator(){
   });
 
 
-  render();
+  renderAllDashboards();
 
 }
 
@@ -2322,7 +2413,6 @@ function applyOperator(){
 function doLogout(){
 
   if(!confirm("Logout?")) return;
-
 
   localStorage.removeItem("brembo_v7");
 
@@ -2373,9 +2463,7 @@ function resetAll(){
         "All 69 machines are RUNNING!"
       );
 
-      render();
-
-      renderDepartmentDashboard();
+      renderAllDashboards();
 
     })
     .catch(err=>{
@@ -2467,32 +2555,302 @@ function loudPopup(
 
 
 /* =========================================================
-   SELECT MACHINE (Only Operator's own machine)
+   STATUS COUNTS
 ========================================================= */
 
-function render(){
+function getStatusCount(status){
 
-  if(!operator && !department){
-    return;
+  if(status==="TOTAL"){
+    return ALL_MACHINES_LIST.length;
   }
 
-  if(operator){
-    document.getElementById("operatorDashboard").style.display="block";
-    document.getElementById("departmentDashboard").style.display="none";
-    
-    // Always force operator to see only their assigned machine
-    curMachine = operator.machine;
-    sel(curMachine);
-  }
+  return ALL_MACHINES_LIST.filter(id=>{
 
-  if(department){
-    document.getElementById("operatorDashboard").style.display="none";
-    document.getElementById("departmentDashboard").style.display="block";
-    renderDepartmentDashboard();
-  }
+    const m =
+      machines[id] ||
+      getDefaultMachine();
+
+    return m.status===status;
+
+  }).length;
 
 }
 
+
+/* =========================================================
+   RENDER STATUS CARDS
+========================================================= */
+
+function renderStatusCards(containerId, activeStatus, clickFunction){
+
+  const container =
+    document.getElementById(containerId);
+
+  if(!container) return;
+
+  container.innerHTML =
+    STATUS_CONFIG.map(item=>{
+
+      const count =
+        getStatusCount(item.key);
+
+      const active =
+        activeStatus===item.key
+        ? "active"
+        : "";
+
+      return `
+
+        <div
+          class="statusCard ${active}"
+          style="--accent:${item.accent}"
+          onclick="${clickFunction}('${item.key}')">
+
+          <div class="statusCardTitle">
+
+            <span class="statusIcon">
+              ${item.icon}
+            </span>
+
+            <span>
+              ${item.title}
+            </span>
+
+          </div>
+
+          <div
+            class="statusCardCount">
+            ${count}
+          </div>
+
+          <div class="statusCardHint">
+            CLICK TO VIEW MACHINES
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   GET STATUS LABEL
+========================================================= */
+
+function getStatusDisplayName(status){
+
+  if(status==="MATERIAL REQUIREMENT"){
+    return "MAT REQ";
+  }
+
+  return status;
+
+}
+
+
+/* =========================================================
+   OPERATOR STATUS FILTER
+========================================================= */
+
+function setOperatorStatusFilter(status){
+
+  operatorStatusFilter=status;
+
+  renderOperatorStatusCards();
+
+  renderOperatorMachineList();
+
+}
+
+
+/* =========================================================
+   OPERATOR STATUS CARDS
+========================================================= */
+
+function renderOperatorStatusCards(){
+
+  renderStatusCards(
+    "operatorStatusCards",
+    operatorStatusFilter,
+    "setOperatorStatusFilter"
+  );
+
+}
+
+
+/* =========================================================
+   OPERATOR MACHINE LIST
+========================================================= */
+
+function renderOperatorMachineList(){
+
+  const grid =
+    document.getElementById(
+      "operatorMachineResultGrid"
+    );
+
+  const title =
+    document.getElementById(
+      "operatorStatusMachineTitle"
+    );
+
+  const sub =
+    document.getElementById(
+      "operatorStatusMachineSub"
+    );
+
+  const count =
+    document.getElementById(
+      "operatorStatusMachineCount"
+    );
+
+  if(!grid) return;
+
+
+  let filtered=[];
+
+
+  if(operatorStatusFilter==="TOTAL"){
+
+    filtered=ALL_MACHINES_LIST.slice();
+
+    title.innerText=
+      "⚙️ ALL MACHINES";
+
+    sub.innerText=
+      "Select a machine to view details. Operator updates are locked to your assigned machine.";
+
+  }else{
+
+    filtered =
+      ALL_MACHINES_LIST.filter(id=>{
+
+        const m =
+          machines[id] ||
+          getDefaultMachine();
+
+        return m.status===operatorStatusFilter;
+
+      });
+
+    title.innerText =
+      "⚙️ "+
+      getStatusDisplayName(
+        operatorStatusFilter
+      )+
+      " MACHINES";
+
+    sub.innerText =
+      "Machines currently showing this status.";
+
+  }
+
+
+  count.innerText =
+    filtered.length+
+    " MACHINES";
+
+
+  if(filtered.length===0){
+
+    grid.innerHTML=`
+
+      <div style="
+        grid-column:1/-1;
+        text-align:center;
+        color:#777;
+        padding:25px;
+        font-size:12px;
+        font-weight:700">
+
+        NO MACHINES IN THIS STATUS
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    filtered.map(id=>{
+
+      const m =
+        machines[id] ||
+        getDefaultMachine();
+
+      const selected =
+        curMachine===id
+        ? "selected"
+        : "";
+
+      return `
+
+        <div
+          class="machineResult ${selected}"
+          onclick="operatorSelectMachine('${id}')">
+
+          ${id}
+
+          <span
+            class="machineResultStatus">
+
+            ${getStatusDisplayName(m.status)}
+
+          </span>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   OPERATOR MACHINE SELECT
+========================================================= */
+
+function operatorSelectMachine(id){
+
+  if(!operator) return;
+
+  /*
+    Operator can view all machines,
+    but can update only assigned machine.
+  */
+
+  if(!machines[id]) return;
+
+  curMachine=id;
+
+  sel(id);
+
+  renderOperatorMachineList();
+
+  setTimeout(()=>{
+
+    document
+      .getElementById("machineDetail")
+      ?.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+      });
+
+  },100);
+
+}
+
+
+/* =========================================================
+   SELECT MACHINE DETAIL
+========================================================= */
 
 function sel(id){
 
@@ -2500,81 +2858,281 @@ function sel(id){
 
   curMachine=id;
 
-  const m = machines[id];
-  const op = m.op;
-  const route = ROUTE_MAP[m.status] || ROUTE_MAP.RUNNING;
+  const m =
+    machines[id];
+
+  const op =
+    m.op;
+
+  const route =
+    ROUTE_MAP[m.status]
+    ||
+    ROUTE_MAP.RUNNING;
 
   let matHtml="";
 
+
   if(m.materialDetails){
+
     matHtml=`
-      <div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:10px;font-size:12px;margin-top:8px;line-height:1.5">
-        <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>
-        Part No: ${escapeHtml(m.materialDetails.partNo)}<br>
-        Part Name: ${escapeHtml(m.materialDetails.partName)}<br>
-        Qty: ${escapeHtml(String(m.materialDetails.qty))}
+
+      <div style="
+        background:#2a2508;
+        border:1px dashed #eab308;
+        padding:10px;
+        border-radius:10px;
+        font-size:12px;
+        margin-top:8px;
+        line-height:1.5">
+
+        <b style="color:#eab308">
+          📦 MATERIAL REQUIREMENT DETAILS
+        </b>
+
+        <br>
+
+        Part No:
+        ${escapeHtml(
+          m.materialDetails.partNo
+        )}
+
+        <br>
+
+        Part Name:
+        ${escapeHtml(
+          m.materialDetails.partName
+        )}
+
+        <br>
+
+        Qty:
+        ${escapeHtml(
+          String(
+            m.materialDetails.qty
+          )
+        )}
+
       </div>
+
     `;
+
   }
 
+
   let badgeBg="#a30b11";
-  if(m.status==="MATERIAL REQUIREMENT"){
+
+  if(m.status==="RUNNING"){
+    badgeBg="#087f23";
+  }else if(m.status==="MATERIAL REQUIREMENT"){
     badgeBg="#ca8a04";
   }else if(m.status==="MATERIAL SHORTAGE"){
     badgeBg="#b91c1c";
+  }else if(m.status==="CMM NOT OK"){
+    badgeBg="#006fc9";
+  }else if(m.status==="FIXTURE NOT OK"){
+    badgeBg="#8b21b4";
+  }else if(m.status==="LOT READY"){
+    badgeBg="#d97706";
   }
 
-  document.getElementById("machineDetail").innerHTML=`
+
+  const isOwnMachine =
+    operator &&
+    id===operator.machine;
+
+
+  document.getElementById(
+    "machineDetail"
+  ).innerHTML=`
+
     <div class="detailTop">
+
       <div>
+
         <div>
-          <span class="machineTitle">${id}</span>
-          <span class="yours">☆ YOUR MACHINE</span>
+
+          <span class="machineTitle">
+            ${id}
+          </span>
+
+          ${
+            isOwnMachine
+            ?
+            `<span class="yours">
+              ☆ YOUR MACHINE
+            </span>`
+            :
+            `<span style="
+              color:#777;
+              font-size:12px;
+              font-weight:800;
+              margin-left:10px">
+              VIEW ONLY
+            </span>`
+          }
+
         </div>
+
         <div class="statusLine">
+
           Status:
-          <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">
+
+          <b style="
+            background:${badgeBg};
+            color:#fff;
+            padding:6px 10px;
+            border-radius:6px">
+
             ${m.status}
+
           </b>
-          &nbsp;|&nbsp; Shift:
-          <b style="color:#ffd000">
-            ${operator.shift} (${getShiftRange(operator.shift)})
-          </b>
+
+          ${
+            operator
+            ?
+            `
+            &nbsp;|&nbsp; Shift:
+
+            <b style="color:#ffd000">
+
+              ${operator.shift}
+              (${getShiftRange(operator.shift)})
+
+            </b>
+            `
+            :
+            ""
+          }
+
         </div>
+
       </div>
+
       <div class="routeTop">
-        <div class="routeTitle">WHATSAPP ROUTING</div>
-        <div class="routeLine">👤 ${route.name}</div>
-        <div class="routeLine">☎ +${route.no}</div>
+
+        <div class="routeTitle">
+          WHATSAPP ROUTING
+        </div>
+
+        <div class="routeLine">
+          👤 ${route.name}
+        </div>
+
+        <div class="routeLine">
+          ☎ +${route.no}
+        </div>
+
       </div>
+
     </div>
+
     ${matHtml}
+
   `;
 
-  document.getElementById("operatorBox").innerHTML=`
-    <div class="infoBox">
-      <div class="infoTitle">YOUR DETAILS</div>
-      <div class="infoGrid">
-        <div class="label">ID</div>
-        <div class="value">${escapeHtml(operator.id)}</div>
-        <div></div>
-        <div class="label">Name</div>
-        <div class="value">${escapeHtml(operator.name)}</div>
-        <button class="assignBtn" onclick="assign()">👤 ASSIGN ME (${id})</button>
-        <div class="label">Machine</div>
-        <div class="value">${id}</div>
-        <div></div>
-        <div class="label">Shift</div>
-        <div class="value" style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</div>
-        <div></div>
-        <div class="label">Login Time</div>
-        <div class="value">${op ? op.time : operator.time}</div>
-        <div></div>
+
+  if(operator){
+
+    document.getElementById(
+      "operatorBox"
+    ).innerHTML=`
+
+      <div class="infoBox">
+
+        <div class="infoTitle">
+          YOUR DETAILS
+        </div>
+
+        <div class="infoGrid">
+
+          <div class="label">
+            ID
+          </div>
+
+          <div class="value">
+            ${escapeHtml(operator.id)}
+          </div>
+
+          <div></div>
+
+
+          <div class="label">
+            Name
+          </div>
+
+          <div class="value">
+            ${escapeHtml(operator.name)}
+          </div>
+
+          ${
+            isOwnMachine
+            ?
+            `
+            <button
+              class="assignBtn"
+              onclick="assign()">
+
+              👤 ASSIGN ME (${id})
+
+            </button>
+            `
+            :
+            `<div></div>`
+          }
+
+
+          <div class="label">
+            Machine
+          </div>
+
+          <div class="value">
+            ${id}
+          </div>
+
+          <div></div>
+
+
+          <div class="label">
+            Shift
+          </div>
+
+          <div
+            class="value"
+            style="color:#ffd000">
+
+            ${operator.shift}
+            (${getShiftRange(operator.shift)})
+
+          </div>
+
+          <div></div>
+
+
+          <div class="label">
+            Login Time
+          </div>
+
+          <div class="value">
+            ${
+              op
+              ? op.time
+              : operator.time
+            }
+          </div>
+
+          <div></div>
+
+        </div>
+
       </div>
-    </div>
-  `;
+
+    `;
+
+  }
+
 
   const statuses=[
+
     "RUNNING",
     "BREAKDOWN",
     "CMM NOT OK",
@@ -2584,21 +3142,87 @@ function sel(id){
     "LOT READY",
     "SIGN PENDING",
     "MATERIAL REQUIREMENT"
+
   ];
 
-  document.getElementById("statusList").innerHTML=`
-    <div class="statusHeading">UPDATE MACHINE STATUS</div>
-    <div class="statusGrid">
-      ${statuses.map(s=>`
-        <button class="statusBtn" onclick="upd('${s}')">
-          <span>${s==="MATERIAL REQUIREMENT" ? "📦 MATERIAL REQUIREMENT (मागणी)" : s}</span>
-          <span>›</span>
-        </button>
-      `).join("")}
-    </div>
-  `;
 
-  document.getElementById("lockMsg").innerText = "You are viewing and updating your assigned machine: " + id;
+  if(operator && isOwnMachine){
+
+    document.getElementById(
+      "statusList"
+    ).innerHTML=`
+
+      <div class="statusHeading">
+        UPDATE MACHINE STATUS
+      </div>
+
+      <div class="statusGrid">
+
+        ${statuses.map(s=>`
+
+          <button
+            class="statusBtn"
+            onclick="upd('${s}')">
+
+            <span>
+
+              ${
+                s==="MATERIAL REQUIREMENT"
+                ?
+                "📦 MATERIAL REQUIREMENT (मागणी)"
+                :
+                s
+              }
+
+            </span>
+
+            <span>›</span>
+
+          </button>
+
+        `).join("")}
+
+      </div>
+
+    `;
+
+    document.getElementById(
+      "lockMsg"
+    ).innerText =
+      "You can update only your assigned machine: "+
+      operator.machine;
+
+  }else{
+
+    document.getElementById(
+      "statusList"
+    ).innerHTML=`
+
+      <div style="
+        margin-top:18px;
+        padding:14px;
+        border:1px dashed #444;
+        border-radius:10px;
+        color:#777;
+        font-size:12px;
+        font-weight:700;
+        text-align:center">
+
+        🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE
+        ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.
+
+      </div>
+
+    `;
+
+    document.getElementById(
+      "lockMsg"
+    ).innerText =
+      "View only. Your assigned machine is: "+
+      operator.machine;
+
+  }
+
 }
 
 
@@ -2609,25 +3233,77 @@ function sel(id){
 function assign(){
 
   if(!operator){
-    document.getElementById("login").style.display="flex";
+
+    document.getElementById(
+      "login"
+    ).style.display="flex";
+
     return;
+
   }
+
+
+  /*
+    Important:
+    Operator can assign only own machine.
+  */
+
+  if(curMachine!==operator.machine){
+
+    alert(
+      "You can assign only your own machine: "+
+      operator.machine
+    );
+
+    return;
+
+  }
+
 
   if(!machines[curMachine]){
-    machines[curMachine]=getDefaultMachine();
+
+    machines[curMachine]=
+      getDefaultMachine();
+
   }
 
+
   machines[curMachine].op={
+
     name:operator.name,
+
     id:operator.id,
-    time:new Date().toLocaleTimeString("en-IN"),
+
+    time:
+      new Date()
+        .toLocaleTimeString("en-IN"),
+
     machine:operator.machine,
+
     shift:operator.shift
+
   };
 
+
   saveMachine(curMachine)
-    .then(()=>{ sel(curMachine); })
-    .catch(err=>{ console.error(err); alert("Firebase save failed."); });
+
+    .then(()=>{
+
+      sel(curMachine);
+
+      renderOperatorMachineList();
+
+    })
+
+    .catch(err=>{
+
+      console.error(err);
+
+      alert(
+        "Firebase save failed."
+      );
+
+    });
 
 }
 
@@ -2639,16 +3315,39 @@ function assign(){
 function upd(s){
 
   if(!operator){
-    document.getElementById("login").style.display="flex";
+
+    document.getElementById(
+      "login"
+    ).style.display="flex";
+
     return;
+
   }
+
+
+  if(curMachine!==operator.machine){
+
+    alert(
+      "Access denied. You can update only your assigned machine: "+
+      operator.machine
+    );
+
+    return;
+
+  }
+
 
   if(s==="MATERIAL REQUIREMENT"){
+
     openMaterialModal();
+
     return;
+
   }
 
+
   machines[curMachine].materialDetails=null;
+
   executeStatusUpdate(s);
 
 }
@@ -2659,15 +3358,32 @@ function upd(s){
 ========================================================= */
 
 function openMaterialModal(){
-  document.getElementById("matPartNo").value="";
-  document.getElementById("matPartName").value="";
-  document.getElementById("matQty").value="";
-  document.getElementById("materialModal").style.display="flex";
+
+  document.getElementById(
+    "matPartNo"
+  ).value="";
+
+  document.getElementById(
+    "matPartName"
+  ).value="";
+
+  document.getElementById(
+    "matQty"
+  ).value="";
+
+  document.getElementById(
+    "materialModal"
+  ).style.display="flex";
+
 }
 
 
 function closeMaterialModal(){
-  document.getElementById("materialModal").style.display="none";
+
+  document.getElementById(
+    "materialModal"
+  ).style.display="none";
+
 }
 
 
@@ -2677,23 +3393,49 @@ function closeMaterialModal(){
 
 function submitMaterialRequirement(){
 
-  const partNo = document.getElementById("matPartNo").value.trim();
-  const partName = document.getElementById("matPartName").value.trim();
-  const qty = document.getElementById("matQty").value.trim();
+  const partNo =
+    document.getElementById(
+      "matPartNo"
+    ).value.trim();
+
+  const partName =
+    document.getElementById(
+      "matPartName"
+    ).value.trim();
+
+  const qty =
+    document.getElementById(
+      "matQty"
+    ).value.trim();
+
 
   if(!partNo || !partName || !qty){
-    alert("Please fill Part No, Part Name, and Quantity!");
+
+    alert(
+      "Please fill Part No, Part Name, and Quantity!"
+    );
+
     return;
+
   }
 
+
   machines[curMachine].materialDetails={
+
     partNo:partNo,
+
     partName:partName,
+
     qty:qty
+
   };
 
+
   closeMaterialModal();
-  executeStatusUpdate("MATERIAL REQUIREMENT");
+
+  executeStatusUpdate(
+    "MATERIAL REQUIREMENT"
+  );
 
 }
 
@@ -2704,62 +3446,173 @@ function submitMaterialRequirement(){
 
 function executeStatusUpdate(s){
 
-  if(!machines[curMachine]){
-    machines[curMachine]=getDefaultMachine();
+  if(!operator){
+
+    alert("Operator login required.");
+
+    return;
+
   }
+
+
+  if(curMachine!==operator.machine){
+
+    alert(
+      "Access denied. You can update only your assigned machine."
+    );
+
+    return;
+
+  }
+
+
+  if(!machines[curMachine]){
+
+    machines[curMachine]=
+      getDefaultMachine();
+
+  }
+
 
   machines[curMachine].status=s;
 
+
   return saveMachine(curMachine)
+
     .then(()=>{
 
-      const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;
+      const route =
+        ROUTE_MAP[s]
+        ||
+        ROUTE_MAP.RUNNING;
 
-      loudPopup(curMachine, s, operator.name, route);
 
-      let date = new Date().toLocaleString("en-IN");
+      loudPopup(
+        curMachine,
+        s,
+        operator.name,
+        route
+      );
+
+
+      let date =
+        new Date()
+          .toLocaleString("en-IN");
+
       let matInfo="";
 
-      if(machines[curMachine].materialDetails){
-        const d = machines[curMachine].materialDetails;
-        matInfo = "%0A%0A*📦 MATERIAL DETAILS:*"+
-                  "%0APart No: "+encodeURIComponent(d.partNo)+
-                  "%0APart Name: "+encodeURIComponent(d.partName)+
-                  "%0AQty: "+encodeURIComponent(d.qty);
+
+      if(
+        machines[curMachine]
+          .materialDetails
+      ){
+
+        const d =
+          machines[curMachine]
+            .materialDetails;
+
+        matInfo =
+          "%0A%0A*📦 MATERIAL DETAILS:*"+
+          "%0APart No: "+
+          encodeURIComponent(d.partNo)+
+          "%0APart Name: "+
+          encodeURIComponent(d.partName)+
+          "%0AQty: "+
+          encodeURIComponent(d.qty);
+
       }
 
-      const msg = "*🚨 BREMBO ALERT*"+
-                  "%0A%0AMachine: "+encodeURIComponent(curMachine)+
-                  "%0AStatus: *"+encodeURIComponent(s)+"*"+
-                  matInfo+
-                  "%0AOperator: "+encodeURIComponent(operator.name)+
-                  "%0AID: "+encodeURIComponent(operator.id)+
-                  "%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")"+
-                  "%0ATime: "+encodeURIComponent(date)+
-                  "%0A%0AAction Required By: "+encodeURIComponent(route.name);
 
-      lastWa = "https://wa.me/"+route.no+"?text="+msg;
+      const msg =
+        "*🚨 BREMBO ALERT*"+
+        "%0A%0AMachine: "+
+        encodeURIComponent(curMachine)+
+        "%0AStatus: *"+
+        encodeURIComponent(s)+
+        "*"+
+        matInfo+
+        "%0AOperator: "+
+        encodeURIComponent(operator.name)+
+        "%0AID: "+
+        encodeURIComponent(operator.id)+
+        "%0AShift: "+
+        operator.shift+
+        " ("+
+        encodeURIComponent(
+          getShiftRange(operator.shift)
+        )+
+        ")"+
+        "%0ATime: "+
+        encodeURIComponent(date)+
+        "%0A%0AAction Required By: "+
+        encodeURIComponent(route.name);
 
-      document.getElementById("routeInfo").style.display="block";
-      document.getElementById("routeInfo").innerHTML=`
-        <b style="color:#ffd000">ROUTE INFO</b><br>
-        Route To: ${route.name}<br>
+
+      lastWa =
+        "https://wa.me/"+
+        route.no+
+        "?text="+
+        msg;
+
+
+      document.getElementById(
+        "routeInfo"
+      ).style.display="block";
+
+
+      document.getElementById(
+        "routeInfo"
+      ).innerHTML=`
+
+        <b style="color:#ffd000">
+          ROUTE INFO
+        </b>
+
+        <br>
+
+        Route To:
+        ${route.name}
+
+        <br>
+
         ☎ +${route.no}
+
       `;
 
-      document.getElementById("waBtn").style.display="block";
-      document.getElementById("waBtn").innerText="◉ SEND WHATSAPP";
+
+      document.getElementById(
+        "waBtn"
+      ).style.display="block";
+
+
+      document.getElementById(
+        "waBtn"
+      ).innerText =
+        "◉ SEND WHATSAPP";
+
 
       setTimeout(()=>{
-        window.open(lastWa, "_blank");
+
+        window.open(
+          lastWa,
+          "_blank"
+        );
+
       },700);
 
-      render();
+
+      renderAllDashboards();
 
     })
+
     .catch(err=>{
+
       console.error(err);
-      alert("Firebase update failed. Please check Internet connection.");
+
+      alert(
+        "Firebase update failed. Please check Internet connection."
+      );
+
     });
 
 }
@@ -2770,9 +3623,16 @@ function executeStatusUpdate(s){
 ========================================================= */
 
 function openWA(){
+
   if(lastWa){
-    window.open(lastWa, "_blank");
+
+    window.open(
+      lastWa,
+      "_blank"
+    );
+
   }
+
 }
 
 
@@ -2781,12 +3641,19 @@ function openWA(){
 ========================================================= */
 
 function escapeHtml(value){
+
   return String(value ?? "")
+
     .replace(/&/g,"&amp;")
+
     .replace(/</g,"&lt;")
+
     .replace(/>/g,"&gt;")
+
     .replace(/"/g,"&quot;")
+
     .replace(/'/g,"&#039;");
+
 }
 
 
@@ -2797,87 +3664,284 @@ function escapeHtml(value){
 function downloadShiftExcel(){
 
   try{
+
     const rows=[];
 
+
     ALL_MACHINES_LIST.forEach(id=>{
-      const m = machines[id] || getDefaultMachine();
-      const op = m.op || {};
-      const mat = m.materialDetails || {};
+
+      const m =
+        machines[id]
+        ||
+        getDefaultMachine();
+
+      const op =
+        m.op
+        ||
+        {};
+
+      const mat =
+        m.materialDetails
+        ||
+        {};
+
       let deptName="-";
 
+
       if(m.status==="BREAKDOWN"){
+
         deptName="Maintenance";
-      }else if(m.status==="CMM NOT OK" || m.status==="SIGN PENDING"){
+
+      }else if(
+        m.status==="CMM NOT OK"
+        ||
+        m.status==="SIGN PENDING"
+      ){
+
         deptName="Quality";
-      }else if(m.status==="FIXTURE NOT OK" || m.status==="FIXTURE OK"){
+
+      }else if(
+        m.status==="FIXTURE NOT OK"
+        ||
+        m.status==="FIXTURE OK"
+      ){
+
         deptName="Tool Room";
-      }else if(m.status==="LOT READY"){
+
+      }else if(
+        m.status==="LOT READY"
+      ){
+
         deptName="Loading";
-      }else if(m.status==="MATERIAL REQUIREMENT" || m.status==="MATERIAL SHORTAGE"){
+
+      }else if(
+        m.status==="MATERIAL REQUIREMENT"
+        ||
+        m.status==="MATERIAL SHORTAGE"
+      ){
+
         deptName="Store Department";
-      }else if(m.status==="LOT HOLD"){
+
+      }else if(
+        m.status==="LOT HOLD"
+      ){
+
         deptName="Supervisor";
+
       }else{
+
         deptName="Running";
+
       }
 
+
       rows.push({
+
         "Machine No":id,
-        "Status":m.status || "RUNNING",
-        "Operator Name":op.name || "-",
-        "Operator ID":op.id || "-",
-        "Shift":op.shift || "-",
-        "Login Time":op.time || "-",
-        "Material Part No":mat.partNo || "-",
-        "Material Part Name":mat.partName || "-",
-        "Quantity":mat.qty || "-",
-        "Department Responsible":deptName
+
+        "Status":
+          m.status
+          ||
+          "RUNNING",
+
+        "Operator Name":
+          op.name
+          ||
+          "-",
+
+        "Operator ID":
+          op.id
+          ||
+          "-",
+
+        "Shift":
+          op.shift
+          ||
+          "-",
+
+        "Login Time":
+          op.time
+          ||
+          "-",
+
+        "Material Part No":
+          mat.partNo
+          ||
+          "-",
+
+        "Material Part Name":
+          mat.partName
+          ||
+          "-",
+
+        "Quantity":
+          mat.qty
+          ||
+          "-",
+
+        "Department Responsible":
+          deptName
+
       });
+
     });
 
-    if(typeof XLSX !== "undefined"){
-      const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    if(
+      typeof XLSX !== "undefined"
+    ){
+
+      const worksheet =
+        XLSX.utils.json_to_sheet(
+          rows
+        );
+
+
       worksheet["!cols"]=[
-        {wch:14},{wch:24},{wch:22},{wch:16},{wch:10},
-        {wch:16},{wch:20},{wch:30},{wch:12},{wch:24}
+
+        {wch:14},
+        {wch:24},
+        {wch:22},
+        {wch:16},
+        {wch:10},
+        {wch:16},
+        {wch:20},
+        {wch:30},
+        {wch:12},
+        {wch:24}
+
       ];
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");
-      const date = new Date().toISOString().slice(0,10);
-      XLSX.writeFile(workbook, "Brembo_Shift_Report_"+date+".xlsx");
+
+
+      const workbook =
+        XLSX.utils.book_new();
+
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Shift Report"
+      );
+
+
+      const date =
+        new Date()
+          .toISOString()
+          .slice(0,10);
+
+
+      XLSX.writeFile(
+        workbook,
+        "Brembo_Shift_Report_"+
+        date+
+        ".xlsx"
+      );
+
+
       return;
+
     }
 
+
     const header=[
-      "Machine No","Status","Operator Name","Operator ID","Shift",
-      "Login Time","Material Part No","Material Part Name","Quantity","Department Responsible"
+
+      "Machine No",
+      "Status",
+      "Operator Name",
+      "Operator ID",
+      "Shift",
+      "Login Time",
+      "Material Part No",
+      "Material Part Name",
+      "Quantity",
+      "Department Responsible"
+
     ];
-    const csv=[header.join(",")];
+
+
+    const csv=[
+      header.join(",")
+    ];
+
+
     rows.forEach(row=>{
-      csv.push(header.map(h=>csvEscape(row[h])).join(","));
+
+      csv.push(
+        header
+          .map(
+            h=>csvEscape(row[h])
+          )
+          .join(",")
+      );
+
     });
 
-    const blob = new Blob([csv.join("\n")], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+
+    const blob =
+      new Blob(
+        [csv.join("\n")],
+        {
+          type:
+            "text/csv;charset=utf-8;"
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const link =
+      document.createElement("a");
+
+
     link.href=url;
-    link.download="Brembo_Shift_Report_"+new Date().toISOString().slice(0,10)+".csv";
+
+
+    link.download =
+      "Brembo_Shift_Report_"+
+      new Date()
+        .toISOString()
+        .slice(0,10)+
+      ".csv";
+
+
     document.body.appendChild(link);
+
     link.click();
+
     document.body.removeChild(link);
+
     URL.revokeObjectURL(url);
 
+
   }catch(err){
-    console.error("Excel Error:", err);
-    alert("Excel download failed. Please try again.");
+
+    console.error(
+      "Excel Error:",
+      err
+    );
+
+    alert(
+      "Excel download failed. Please try again."
+    );
+
   }
 
 }
 
 
 function csvEscape(value){
-  const v = String(value ?? "");
-  return '"'+v.replace(/"/g,'""')+'"';
+
+  const v =
+    String(value ?? "");
+
+  return '"'+
+    v.replace(/"/g,'""')+
+    '"';
+
 }
 
 
@@ -2887,39 +3951,93 @@ function csvEscape(value){
 
 function departmentLogin(){
 
-  const dep = document.getElementById("departmentSelect").value;
-  const pin = document.getElementById("departmentPin").value;
+  const dep =
+    document.getElementById(
+      "departmentSelect"
+    ).value;
+
+  const pin =
+    document.getElementById(
+      "departmentPin"
+    ).value;
+
 
   if(!dep || !pin){
-    alert("Please select department and enter PIN.");
+
+    alert(
+      "Please select department and enter PIN."
+    );
+
     return;
+
   }
 
-  const config = DEPARTMENT_CONFIG[dep];
+
+  const config =
+    DEPARTMENT_CONFIG[dep];
+
+
   if(!config){
-    alert("Invalid department.");
+
+    alert(
+      "Invalid department."
+    );
+
     return;
+
   }
+
 
   if(pin!==config.pin){
-    alert("Wrong Department PIN! Access Denied!");
+
+    alert(
+      "Wrong Department PIN! Access Denied!"
+    );
+
     return;
+
   }
 
+
   department=dep;
+
   operator=null;
+
   materialRequirementMode=false;
 
-  localStorage.setItem("brembo_department", dep);
-  localStorage.removeItem("brembo_v7");
-  localStorage.removeItem("brembo_shift");
+  departmentStatusFilter="TOTAL";
 
-  document.getElementById("login").style.display="none";
-  document.getElementById("operatorDashboard").style.display="none";
-  document.getElementById("departmentDashboard").style.display="block";
+  deptSelectedMachine=null;
 
-  deptSeriesFilter="ALL";
-  deptStatusFilter="ISSUE";
+
+  localStorage.setItem(
+    "brembo_department",
+    dep
+  );
+
+  localStorage.removeItem(
+    "brembo_v7"
+  );
+
+  localStorage.removeItem(
+    "brembo_shift"
+  );
+
+
+  document.getElementById(
+    "login"
+  ).style.display="none";
+
+
+  document.getElementById(
+    "operatorDashboard"
+  ).style.display="none";
+
+
+  document.getElementById(
+    "departmentDashboard"
+  ).style.display="block";
+
 
   renderDepartmentDashboard();
 
@@ -2931,32 +4049,22 @@ function departmentLogin(){
 ========================================================= */
 
 function departmentLogout(){
-  if(!confirm("Logout from department dashboard?")) return;
-  localStorage.removeItem("brembo_department");
+
+  if(
+    !confirm(
+      "Logout from department dashboard?"
+    )
+  ) return;
+
+
+  localStorage.removeItem(
+    "brembo_department"
+  );
+
   department=null;
+
   location.reload();
-}
 
-
-/* =========================================================
-   DEPARTMENT SERIES
-========================================================= */
-
-function setDeptSeries(series){
-  deptSeriesFilter=series;
-
-  ["ALL","EN","MK","M","L","PN","BR"].forEach(x=>{
-    const el = document.getElementById("deptBtn"+x);
-    if(el){
-      if(x===series){
-        el.classList.add("active");
-      }else{
-        el.classList.remove("active");
-      }
-    }
-  });
-
-  renderDepartmentDashboard();
 }
 
 
@@ -2964,141 +4072,386 @@ function setDeptSeries(series){
    DEPARTMENT STATUS FILTER
 ========================================================= */
 
-function setDeptStatusFilter(st){
-  deptStatusFilter=st;
-  materialRequirementMode = (st==="MATERIAL REQUIREMENT");
+function setDepartmentStatusFilter(status){
 
-  ["ALL","ISSUE"].forEach(x=>{
-    const el = document.getElementById("deptCard"+x);
-    if(el){
-      if(x===st){
-        el.classList.add("active");
-      }else{
-        el.classList.remove("active");
-      }
-    }
-  });
+  departmentStatusFilter=status;
+
+  if(
+    status!=="MATERIAL REQUIREMENT"
+  ){
+
+    materialRequirementMode=false;
+
+  }else{
+
+    materialRequirementMode=true;
+
+  }
+
+
+  deptSelectedMachine=null;
 
   renderDepartmentDashboard();
+
 }
 
 
 /* =========================================================
-   STORE MATERIAL REQUIREMENT TOGGLE
+   STORE MATERIAL TOGGLE
 ========================================================= */
 
 function toggleMaterialRequirements(){
+
   if(department!=="store") return;
 
+
   if(materialRequirementMode){
+
     materialRequirementMode=false;
-    deptStatusFilter="ISSUE";
+
+    departmentStatusFilter="TOTAL";
+
   }else{
+
     materialRequirementMode=true;
-    deptStatusFilter="MATERIAL REQUIREMENT";
+
+    departmentStatusFilter=
+      "MATERIAL REQUIREMENT";
+
   }
 
+
+  deptSelectedMachine=null;
+
   renderDepartmentDashboard();
+
 }
 
 
 /* =========================================================
-   DEPARTMENT DASHBOARD (Only machines with issues)
+   DEPARTMENT STATUS CARDS
+========================================================= */
+
+function renderDepartmentStatusCards(){
+
+  renderStatusCards(
+
+    "departmentStatusCards",
+
+    departmentStatusFilter,
+
+    "setDepartmentStatusFilter"
+
+  );
+
+}
+
+
+/* =========================================================
+   DEPARTMENT MACHINE FILTER
+========================================================= */
+
+function getDepartmentFilteredMachines(){
+
+  if(!department){
+
+    return [];
+
+  }
+
+
+  const config =
+    DEPARTMENT_CONFIG[department];
+
+
+  /*
+    TOTAL = all machines
+    Other status = exact status
+  */
+
+  if(
+    departmentStatusFilter==="TOTAL"
+  ){
+
+    return ALL_MACHINES_LIST.slice();
+
+  }
+
+
+  return ALL_MACHINES_LIST.filter(id=>{
+
+    const m =
+      machines[id]
+      ||
+      getDefaultMachine();
+
+    return (
+      m.status ===
+      departmentStatusFilter
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   DEPARTMENT DASHBOARD
 ========================================================= */
 
 function renderDepartmentDashboard(){
 
   if(!department) return;
 
-  const config = DEPARTMENT_CONFIG[department];
+
+  const config =
+    DEPARTMENT_CONFIG[department];
+
+
   if(!config) return;
 
-  document.getElementById("deptTitle").innerText = config.name + " DASHBOARD";
-  document.getElementById("deptBadge").innerText = config.name;
 
-  // Calculate issue count specifically relevant to this department
-  let issueMachines = ALL_MACHINES_LIST.filter(id=>{
-    const m = machines[id] || getDefaultMachine();
-    if(m.status === "RUNNING") return false;
+  document.getElementById(
+    "deptTitle"
+  ).innerText =
+    config.name+
+    " DASHBOARD";
 
-    if(config.issueStatus){
-      return m.status === config.issueStatus;
-    }
-    return true; // For supervisor / generic fallback
-  });
 
-  document.getElementById("deptIssue").innerText = issueMachines.length;
+  document.getElementById(
+    "deptBadge"
+  ).innerText =
+    config.name;
 
-  // Store special button
-  const matBtn = document.getElementById("materialRequirementBtn");
-  const matCount = Object.values(machines).filter(m=>m.status==="MATERIAL REQUIREMENT").length;
+
+  renderDepartmentStatusCards();
+
+
+  /* STORE MATERIAL BUTTON */
+
+  const matBtn =
+    document.getElementById(
+      "materialRequirementBtn"
+    );
+
+
+  const matCount =
+    ALL_MACHINES_LIST.filter(id=>{
+
+      const m =
+        machines[id]
+        ||
+        getDefaultMachine();
+
+      return (
+        m.status ===
+        "MATERIAL REQUIREMENT"
+      );
+
+    }).length;
+
 
   if(department==="store"){
+
     matBtn.style.display="block";
-    document.getElementById("materialReqCount").innerText = matCount;
+
+    document.getElementById(
+      "materialReqCount"
+    ).innerText =
+      matCount;
+
+
     if(materialRequirementMode){
-      matBtn.classList.add("active");
+
+      matBtn.classList.add(
+        "active"
+      );
+
     }else{
-      matBtn.classList.remove("active");
+
+      matBtn.classList.remove(
+        "active"
+      );
+
     }
+
   }else{
+
     matBtn.style.display="none";
+
   }
 
-  // Filter machines for grid: Only show machines having issues related to this department
-  const filtered = ALL_MACHINES_LIST.filter(id=>{
-    const m = machines[id] || getDefaultMachine();
-    
-    // Running machines are ignored on department screen unless requested via view all
-    if(m.status === "RUNNING" && deptStatusFilter !== "ALL") {
-      return false;
-    }
 
-    const seriesMatch = (deptSeriesFilter==="ALL" || id.startsWith(deptSeriesFilter));
-    
-    let statusMatch = true;
-    if(deptStatusFilter === "ISSUE"){
-      if(config.issueStatus){
-        statusMatch = (m.status === config.issueStatus);
-      }else{
-        statusMatch = (m.status !== "RUNNING");
-      }
-    }else if(deptStatusFilter === "MATERIAL REQUIREMENT"){
-      statusMatch = (m.status === "MATERIAL REQUIREMENT");
-    }
+  renderDepartmentMachineGrid();
 
-    return seriesMatch && statusMatch;
-  });
+}
 
-  document.getElementById("deptGridTitle").innerText = "MACHINES REQUIRING ATTENTION ("+filtered.length+")";
 
-  const grid = document.getElementById("deptMachineGrid");
-  
-  if(filtered.length === 0){
-    grid.innerHTML = `<div style="grid-column: span 5; text-align:center; padding: 20px; color: #777;">No machines currently have issues for your department.</div>`;
-    deptSelectedMachine = null;
-    renderDepartmentSelected();
-    return;
+/* =========================================================
+   DEPARTMENT MACHINE GRID
+========================================================= */
+
+function renderDepartmentMachineGrid(){
+
+  const grid =
+    document.getElementById(
+      "deptMachineGrid"
+    );
+
+
+  if(!grid) return;
+
+
+  const filtered =
+    getDepartmentFilteredMachines();
+
+
+  const title =
+    document.getElementById(
+      "deptGridTitle"
+    );
+
+
+  const count =
+    document.getElementById(
+      "deptGridCount"
+    );
+
+
+  if(
+    departmentStatusFilter==="TOTAL"
+  ){
+
+    title.innerText =
+      "⚙️ ALL MACHINES";
+
+  }else{
+
+    title.innerText =
+      "⚙️ "+
+      getStatusDisplayName(
+        departmentStatusFilter
+      )+
+      " MACHINES";
+
   }
 
-  grid.innerHTML = filtered.map(id=>{
-    const m = machines[id] || getDefaultMachine();
-    const selected = (deptSelectedMachine===id) ? "selected" : "";
-    let color="#ef4444";
-    if(m.status==="MATERIAL REQUIREMENT") color="#eab308";
-    if(m.status==="MATERIAL SHORTAGE") color="#b91c1c";
 
-    return `
-      <div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">
-        ${id}
-        <span class="deptMachineStatus" style="color:${color}">${m.status}</span>
+  count.innerText =
+    filtered.length+
+    " MACHINES";
+
+
+  if(filtered.length===0){
+
+    grid.innerHTML=`
+
+      <div style="
+        grid-column:1/-1;
+        text-align:center;
+        padding:25px;
+        color:#777;
+        font-size:12px;
+        font-weight:700">
+
+        NO MACHINES IN THIS STATUS
+
       </div>
-    `;
-  }).join("");
 
-  if(!filtered.includes(deptSelectedMachine)){
-    deptSelectedMachine = filtered[0];
+    `;
+
+    deptSelectedMachine=null;
+
+    renderDepartmentSelected();
+
+    return;
+
   }
+
+
+  if(
+    !filtered.includes(
+      deptSelectedMachine
+    )
+  ){
+
+    deptSelectedMachine =
+      filtered[0];
+
+  }
+
+
+  grid.innerHTML =
+    filtered.map(id=>{
+
+      const m =
+        machines[id]
+        ||
+        getDefaultMachine();
+
+
+      const selected =
+        deptSelectedMachine===id
+        ? "selected"
+        : "";
+
+
+      let color="#ef4444";
+
+
+      if(m.status==="RUNNING"){
+        color="#22c55e";
+      }
+
+      if(m.status==="MATERIAL REQUIREMENT"){
+        color="#eab308";
+      }
+
+      if(m.status==="MATERIAL SHORTAGE"){
+        color="#b91c1c";
+      }
+
+      if(m.status==="CMM NOT OK"){
+        color="#0099ff";
+      }
+
+      if(m.status==="FIXTURE NOT OK"){
+        color="#c83cff";
+      }
+
+      if(m.status==="LOT READY"){
+        color="#ff9800";
+      }
+
+      if(m.status==="LOT HOLD"){
+        color="#ffd000";
+      }
+
+
+      return `
+
+        <div
+          class="deptMachine ${selected}"
+          onclick="selectDepartmentMachine('${id}')">
+
+          ${id}
+
+          <span
+            class="deptMachineStatus"
+            style="color:${color}">
+
+            ${getStatusDisplayName(
+              m.status
+            )}
+
+          </span>
+
+        </div>
+
+      `;
+
+    }).join("");
+
 
   renderDepartmentSelected();
 
@@ -3110,9 +4463,29 @@ function renderDepartmentDashboard(){
 ========================================================= */
 
 function selectDepartmentMachine(id){
+
   if(!machines[id]) return;
+
+
   deptSelectedMachine=id;
-  renderDepartmentDashboard();
+
+
+  renderDepartmentMachineGrid();
+
+
+  setTimeout(()=>{
+
+    document
+      .getElementById(
+        "deptSelected"
+      )
+      ?.scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
+
+  },100);
+
 }
 
 
@@ -3122,86 +4495,356 @@ function selectDepartmentMachine(id){
 
 function renderDepartmentSelected(){
 
-  const box = document.getElementById("deptSelected");
+  const box =
+    document.getElementById(
+      "deptSelected"
+    );
+
+
+  if(!box) return;
+
 
   if(!deptSelectedMachine){
-    box.innerHTML=`<div style="text-align:center;color:#777;padding:20px">No machine selected or available.</div>`;
+
+    box.innerHTML=`
+
+      <div style="
+        text-align:center;
+        color:#777;
+        padding:20px">
+
+        Select a status and machine.
+
+      </div>
+
+    `;
+
     return;
+
   }
 
-  const m = machines[deptSelectedMachine];
+
+  const m =
+    machines[
+      deptSelectedMachine
+    ];
+
+
   if(!m){
-    box.innerHTML="Please select machine.";
+
+    box.innerHTML =
+      "Please select machine.";
+
     return;
+
   }
 
-  const op = m.op;
-  const config = DEPARTMENT_CONFIG[department];
+
+  const op =
+    m.op;
+
+
+  const config =
+    DEPARTMENT_CONFIG[
+      department
+    ];
+
 
   let statusColor="#ef4444";
-  if(m.status==="RUNNING") statusColor="#22c55e";
-  if(m.status==="MATERIAL REQUIREMENT") statusColor="#eab308";
-  if(m.status==="MATERIAL SHORTAGE") statusColor="#b91c1c";
+
+
+  if(m.status==="RUNNING"){
+    statusColor="#22c55e";
+  }
+
+  if(m.status==="MATERIAL REQUIREMENT"){
+    statusColor="#eab308";
+  }
+
+  if(m.status==="MATERIAL SHORTAGE"){
+    statusColor="#b91c1c";
+  }
+
+  if(m.status==="CMM NOT OK"){
+    statusColor="#0099ff";
+  }
+
+  if(m.status==="FIXTURE NOT OK"){
+    statusColor="#c83cff";
+  }
+
+  if(m.status==="LOT READY"){
+    statusColor="#ff9800";
+  }
+
+  if(m.status==="LOT HOLD"){
+    statusColor="#ffd000";
+  }
+
 
   let html=`
-    <h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>
-    <div style="margin:8px 0;font-size:13px">
-      Current Status: <b style="color:${statusColor}">${m.status}</b>
+
+    <h2 style="
+      font-size:28px;
+      font-weight:900">
+
+      ${deptSelectedMachine}
+
+    </h2>
+
+    <div style="
+      margin:8px 0;
+      font-size:13px">
+
+      Current Status:
+
+      <b style="
+        color:${statusColor}">
+
+        ${m.status}
+
+      </b>
+
     </div>
+
   `;
 
+
   if(m.materialDetails){
+
     html+=`
-      <div style="background:#2a2508;border:1px dashed #eab308;padding:14px;border-radius:10px;font-size:13px;line-height:1.8;margin-bottom:12px">
-        <div style="color:#eab308;font-size:14px;font-weight:900;margin-bottom:6px">📦 MATERIAL REQUIREMENT</div>
-        <b>Machine:</b> ${deptSelectedMachine}<br>
-        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>
-        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>
-        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}
+
+      <div style="
+        background:#2a2508;
+        border:1px dashed #eab308;
+        padding:14px;
+        border-radius:10px;
+        font-size:13px;
+        line-height:1.8;
+        margin-bottom:12px">
+
+        <div style="
+          color:#eab308;
+          font-size:14px;
+          font-weight:900;
+          margin-bottom:6px">
+
+          📦 MATERIAL REQUIREMENT
+
+        </div>
+
+        <b>Machine:</b>
+        ${deptSelectedMachine}
+
+        <br>
+
+        <b>Part No:</b>
+        ${escapeHtml(
+          m.materialDetails.partNo
+        )}
+
+        <br>
+
+        <b>Part Name:</b>
+        ${escapeHtml(
+          m.materialDetails.partName
+        )}
+
+        <br>
+
+        <b>Quantity:</b>
+        ${escapeHtml(
+          String(
+            m.materialDetails.qty
+          )
+        )}
+
       </div>
+
     `;
+
   }
+
 
   if(op){
+
     html+=`
+
       <div class="viewBox">
-        <b style="color:#22c55e">OPERATOR INFORMATION</b><br>
-        ID: ${escapeHtml(op.id)}<br>
-        Name: ${escapeHtml(op.name)}<br>
-        Machine: ${escapeHtml(op.machine || deptSelectedMachine)}<br>
-        Shift: ${escapeHtml(op.shift || "-")}<br>
-        Time: ${escapeHtml(op.time || "-")}
+
+        <b style="color:#22c55e">
+          OPERATOR INFORMATION
+        </b>
+
+        <br>
+
+        ID:
+        ${escapeHtml(op.id)}
+
+        <br>
+
+        Name:
+        ${escapeHtml(op.name)}
+
+        <br>
+
+        Machine:
+        ${escapeHtml(
+          op.machine ||
+          deptSelectedMachine
+        )}
+
+        <br>
+
+        Shift:
+        ${escapeHtml(
+          op.shift ||
+          "-"
+        )}
+
+        <br>
+
+        Time:
+        ${escapeHtml(
+          op.time ||
+          "-"
+        )}
+
       </div>
+
     `;
+
   }else{
-    html+=`<div class="viewBox"><b style="color:#777">NO OPERATOR ASSIGNED</b></div>`;
-  }
 
-  if(department==="supervisor"){
     html+=`
-      <div class="viewOnly">
-        <div style="font-size:18px;font-weight:900;color:#a855f7">VIEW ONLY</div>
-        <div style="font-size:11px;color:#777;margin-top:6px">Supervisor can view machine details. No actions required.</div>
+
+      <div class="viewBox">
+
+        <b style="color:#777">
+          NO OPERATOR ASSIGNED
+        </b>
+
       </div>
+
     `;
-    box.innerHTML=html;
-    return;
+
   }
 
-  html+=`<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
+
+  /*
+    Supervisor = View Only
+  */
+
+  if(
+    department==="supervisor"
+  ){
+
+    html+=`
+
+      <div class="viewOnly">
+
+        <div style="
+          font-size:18px;
+          font-weight:900;
+          color:#a855f7">
+
+          VIEW ONLY
+
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:#777;
+          margin-top:6px">
+
+          Supervisor can view machine details.
+          No actions required.
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    box.innerHTML=html;
+
+    return;
+
+  }
+
+
+  /*
+    Department actions
+  */
+
+  html+=`
+
+    <div style="
+      margin-top:14px;
+      font-weight:900">
+
+      ${config.name}
+      ACTIONS
+
+    </div>
+
+  `;
+
 
   config.actions.forEach(action=>{
-    const isRed = (action.status==="MATERIAL SHORTAGE");
-    const bg = isRed ? "linear-gradient(180deg,#991b1b,#7f1d1d)" : "#103817";
-    const border = isRed ? "#ef4444" : "#22c55e";
-    const color = isRed ? "#fca5a5" : "#35ff48";
+
+    const isRed =
+      action.status ===
+      "MATERIAL SHORTAGE";
+
+
+    const bg =
+      isRed
+      ?
+      "linear-gradient(180deg,#991b1b,#7f1d1d)"
+      :
+      "#103817";
+
+
+    const border =
+      isRed
+      ?
+      "#ef4444"
+      :
+      "#22c55e";
+
+
+    const color =
+      isRed
+      ?
+      "#fca5a5"
+      :
+      "#35ff48";
+
 
     html+=`
-      <button onclick="departmentUpdateStatus('${action.status}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid ${border};border-radius:10px;background:${bg};color:${color};font-weight:900">
+
+      <button
+        onclick="departmentUpdateStatus('${action.status}')"
+        style="
+          width:100%;
+          margin-top:10px;
+          padding:15px;
+          border:1px solid ${border};
+          border-radius:10px;
+          background:${bg};
+          color:${color};
+          font-weight:900">
+
         ${action.label}
+
       </button>
+
     `;
+
   });
+
 
   box.innerHTML=html;
 
@@ -3215,66 +4858,237 @@ function renderDepartmentSelected(){
 function departmentUpdateStatus(status){
 
   if(!department){
-    alert("Department login required.");
+
+    alert(
+      "Department login required."
+    );
+
     return;
+
   }
 
-  const config = DEPARTMENT_CONFIG[department];
-  const allowed = config.actions.some(a=>a.status===status);
+
+  const config =
+    DEPARTMENT_CONFIG[
+      department
+    ];
+
+
+  const allowed =
+    config.actions.some(
+      a=>a.status===status
+    );
+
 
   if(!allowed){
-    alert("Access denied.");
+
+    alert(
+      "Access denied."
+    );
+
     return;
+
   }
+
 
   if(!deptSelectedMachine){
-    alert("Please select a machine first.");
+
+    alert(
+      "Please select a machine first."
+    );
+
     return;
+
   }
 
-  const id = deptSelectedMachine;
 
-  if(!confirm("Mark "+id+" as "+status+"?")){
+  const id =
+    deptSelectedMachine;
+
+
+  if(!confirm(
+    "Mark "+
+    id+
+    " as "+
+    status+
+    "?"
+  )){
+
     return;
+
   }
+
 
   if(!machines[id]){
-    machines[id]=getDefaultMachine();
+
+    machines[id]=
+      getDefaultMachine();
+
   }
 
-  machines[id].status=status;
+
+  machines[id].status =
+    status;
+
 
   if(status==="RUNNING"){
-    machines[id].materialDetails=null;
+
+    machines[id]
+      .materialDetails=null;
+
   }
 
+
   saveMachine(id)
+
     .then(()=>{
-      const route = ROUTE_MAP[status] || ROUTE_MAP.RUNNING;
-      loudPopup(id, status, config.name, route);
 
-      if(status!=="RUNNING"){
-        const msg = "*🚨 BREMBO ALERT*"+
-                    "%0A%0AMachine: "+encodeURIComponent(id)+
-                    "%0AStatus: *"+encodeURIComponent(status)+"*"+
-                    "%0ADepartment: "+encodeURIComponent(config.name)+
-                    "%0ATime: "+encodeURIComponent(new Date().toLocaleString("en-IN"))+
-                    "%0A%0AAction Required By: "+encodeURIComponent(route.name);
+      const route =
+        ROUTE_MAP[status]
+        ||
+        ROUTE_MAP.RUNNING;
 
-        lastWa = "https://wa.me/"+route.no+"?text="+msg;
+
+      loudPopup(
+        id,
+        status,
+        config.name,
+        route
+      );
+
+
+      if(
+        status!=="RUNNING"
+      ){
+
+        const msg =
+          "*🚨 BREMBO ALERT*"+
+          "%0A%0AMachine: "+
+          encodeURIComponent(id)+
+          "%0AStatus: *"+
+          encodeURIComponent(status)+
+          "*"+
+          "%0ADepartment: "+
+          encodeURIComponent(
+            config.name
+          )+
+          "%0ATime: "+
+          encodeURIComponent(
+            new Date()
+              .toLocaleString("en-IN")
+          )+
+          "%0A%0AAction Required By: "+
+          encodeURIComponent(
+            route.name
+          );
+
+
+        lastWa =
+          "https://wa.me/"+
+          route.no+
+          "?text="+
+          msg;
+
 
         setTimeout(()=>{
-          window.open(lastWa, "_blank");
+
+          window.open(
+            lastWa,
+            "_blank"
+          );
+
         },700);
+
       }
+
 
       renderDepartmentDashboard();
 
     })
+
     .catch(err=>{
+
       console.error(err);
-      alert("Firebase update failed. Please check Internet.");
+
+      alert(
+        "Firebase update failed. Please check Internet."
+      );
+
     });
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAllDashboards(){
+
+  if(operator){
+
+    document.getElementById(
+      "operatorDashboard"
+    ).style.display="block";
+
+    document.getElementById(
+      "departmentDashboard"
+    ).style.display="none";
+
+
+    renderOperatorStatusCards();
+
+    renderOperatorMachineList();
+
+
+    /*
+      Default detail = assigned machine.
+      If user has already selected another
+      machine, keep that selected machine.
+    */
+
+    if(
+      !curMachine ||
+      !machines[curMachine]
+    ){
+
+      curMachine =
+        operator.machine;
+
+    }
+
+
+    if(
+      machines[curMachine]
+    ){
+
+      sel(curMachine);
+
+    }
+
+
+    return;
+
+  }
+
+
+  if(department){
+
+    document.getElementById(
+      "operatorDashboard"
+    ).style.display="none";
+
+    document.getElementById(
+      "departmentDashboard"
+    ).style.display="block";
+
+
+    renderDepartmentDashboard();
+
+    return;
+
+  }
+
 
 }
 
@@ -3284,39 +5098,99 @@ function departmentUpdateStatus(status){
 ========================================================= */
 
 fillMachineDropdown();
+
 load();
-setInterval(checkShiftAutoReset, 10000);
+
+setInterval(
+  checkShiftAutoReset,
+  10000
+);
 
 
 /* =========================================================
    RESTORE LOGIN
 ========================================================= */
 
-const savedOperator = localStorage.getItem("brembo_v7");
-const savedDepartment = localStorage.getItem("brembo_department");
+const savedOperator =
+  localStorage.getItem(
+    "brembo_v7"
+  );
 
-if(savedDepartment && DEPARTMENT_CONFIG[savedDepartment]){
-  department = savedDepartment;
+
+const savedDepartment =
+  localStorage.getItem(
+    "brembo_department"
+  );
+
+
+if(
+  savedDepartment &&
+  DEPARTMENT_CONFIG[
+    savedDepartment
+  ]
+){
+
+  department =
+    savedDepartment;
+
   operator=null;
-  document.getElementById("login").style.display="none";
-  document.getElementById("departmentDashboard").style.display="block";
-  deptSeriesFilter="ALL";
+
+  document.getElementById(
+    "login"
+  ).style.display="none";
+
+  document.getElementById(
+    "departmentDashboard"
+  ).style.display="block";
+
+  departmentStatusFilter="TOTAL";
+
   renderDepartmentDashboard();
+
 }
+
 else if(savedOperator){
+
   try{
-    operator = JSON.parse(savedOperator);
+
+    operator =
+      JSON.parse(
+        savedOperator
+      );
+
+
     if(!operator.machine){
-      localStorage.removeItem("brembo_v7");
-    }else if(!checkShiftAutoReset()){
-      document.getElementById("login").style.display="none";
-      document.getElementById("operatorDashboard").style.display="block";
+
+      localStorage.removeItem(
+        "brembo_v7"
+      );
+
+    }else if(
+      !checkShiftAutoReset()
+    ){
+
+      document.getElementById(
+        "login"
+      ).style.display="none";
+
+      document.getElementById(
+        "operatorDashboard"
+      ).style.display="block";
+
       applyOperator();
+
     }
+
   }catch(e){
+
     console.error(e);
-    localStorage.removeItem("brembo_v7");
+
+    localStorage.removeItem(
+      "brembo_v7"
+    );
+
   }
+
 }
 
 
@@ -3324,11 +5198,17 @@ else if(savedOperator){
    SERVICE WORKER
 ========================================================= */
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
+if(
+  "serviceWorker" in navigator
+){
+
+  navigator.serviceWorker
+    .register("sw.js")
+    .catch(()=>{});
+
 }
 
 </script>
 
 </body>
-</html>
+  </html>
