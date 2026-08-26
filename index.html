@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0d1322">
+<meta name="theme-color" content="#05070a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +26,8 @@ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 body{
-background:#090d16;
+background:#05070a;
+background-image: radial-gradient(circle at center, #111827 0%, #05070a 100%);
 color:#f1f5f9;
 }
 
@@ -38,7 +39,7 @@ transition: all 0.2s ease;
 #login{
 position:fixed;
 inset:0;
-background: radial-gradient(circle at center, #141c30 0%, #090d16 100%);
+background: radial-gradient(circle at center, #111827 0%, #05070a 100%);
 z-index:9999;
 display:flex;
 align-items:center;
@@ -47,40 +48,53 @@ padding:20px;
 overflow:auto;
 }
 
+/* Glowing Neon Brembo Box */
 .loginBox{
-background: rgba(18, 26, 45, 0.85);
-backdrop-filter: blur(12px);
-padding:28px 24px;
-border-radius:20px;
-width:400px;
+background: linear-gradient(145deg, #0d121c 0%, #080b12 100%);
+padding:40px 30px;
+border-radius:28px;
+width:450px;
 max-width:100%;
 text-align:center;
-border:1px solid rgba(255, 255, 255, 0.08);
-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+border:1.5px solid rgba(255, 26, 26, 0.4);
+box-shadow: 0 0 35px rgba(255, 0, 0, 0.25), inset 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
 .brandLogo {
-height: 42px;
-margin: 0 auto 12px auto;
+width: 280px;
+height: auto;
+margin: 0 auto 10px auto;
 display: block;
-object-fit: contain;
+filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.5));
 }
 
 .topBarLogo {
-height: 24px;
+width: 140px;
+height: auto;
 display: inline-block;
 vertical-align: middle;
+filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.4));
 }
 
 .loginSub{
 font-size:11px;
 color:#94a3b8;
-margin-bottom:18px;
-letter-spacing:0.5px;
-font-weight:600;
+margin-bottom:15px;
+letter-spacing:3px;
+font-weight:700;
+text-transform: uppercase;
 }
 
-/* PROFESSIONAL UNIFORM FORM INPUTS & SELECT BOXES */
+/* Red Glowing Divider Line */
+.glow-divider {
+height: 2px;
+background: linear-gradient(90deg, transparent, #ff1a1a, transparent);
+margin: 0 auto 25px auto;
+width: 85%;
+box-shadow: 0 0 10px #ff1a1a, 0 0 15px #ff1a1a;
+}
+
+/* FORM INPUTS & SELECT BOXES */
 .loginInput,
 .loginSelect{
 width:100%;
@@ -102,8 +116,8 @@ border:1px solid #2a364f;
 }
 
 .loginInput:focus{
-border-color:#ff2a2a;
-box-shadow: 0 0 0 3px rgba(255, 42, 42, 0.2);
+border-color:#ff1a1a;
+box-shadow: 0 0 10px rgba(255, 26, 26, 0.4);
 }
 
 .loginSelect{
@@ -120,8 +134,8 @@ background-position-y: 50%;
 }
 
 .loginSelect:focus{
-border-color:#ff2a2a;
-box-shadow: 0 0 0 3px rgba(255, 42, 42, 0.2);
+border-color:#ff1a1a;
+box-shadow: 0 0 10px rgba(255, 26, 26, 0.4);
 }
 
 .loginSelect option{
@@ -133,19 +147,24 @@ padding:10px;
 .loginBtn{
 width:100%;
 height:52px;
-background: linear-gradient(135deg, #ff2a2a 0%, #dc2626 100%);
+background: linear-gradient(180deg, #ff2a2a 0%, #cc0000 100%);
 color:#fff;
-border:none;
-border-radius:12px;
+border:1px solid rgba(255, 255, 255, 0.2);
+border-radius:14px;
 font-weight:800;
 font-size:15px;
-margin-top:14px;
-box-shadow: 0 4px 14px rgba(255, 42, 42, 0.35);
-letter-spacing:0.5px;
+margin-top:18px;
+box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+letter-spacing:1px;
+}
+
+.loginBtn:hover{
+transform: translateY(-2px);
+box-shadow: 0 8px 25px rgba(255, 0, 0, 0.7);
 }
 
 .loginBtn:active{
-transform: scale(0.98);
+transform: translateY(1px);
 }
 
 .modeBar{
@@ -171,9 +190,9 @@ letter-spacing:0.5px;
 }
 
 .modeBtn.active{
-background:#ff2a2a;
+background:#ff1a1a;
 color:#ffffff;
-box-shadow: 0 2px 8px rgba(255, 42, 42, 0.3);
+box-shadow: 0 0 10px rgba(255, 26, 26, 0.5);
 }
 
 .departmentLogin{
@@ -224,7 +243,7 @@ box-shadow:0 0 30px rgba(236,72,153,0.2);
 
 .topBar{
 padding:14px 16px;
-background:#0e1628;
+background:#080b12;
 display:flex;
 justify-content:space-between;
 position:sticky;
@@ -232,7 +251,7 @@ top:0;
 z-index:50;
 align-items:center;
 gap:10px;
-border-bottom:1px solid #1e293b;
+border-bottom:1px solid rgba(255, 26, 26, 0.3);
 }
 
 .seriesBar{
@@ -255,9 +274,10 @@ white-space:nowrap
 }
 
 .sBtn.active{
-background:#ff2a2a;
+background:#ff1a1a;
 color:#fff;
-border-color:#ff2a2a;
+border-color:#ff1a1a;
+box-shadow: 0 0 8px rgba(255, 26, 26, 0.5);
 }
 
 .cards{
@@ -277,7 +297,7 @@ cursor:pointer
 }
 
 .card:hover{
-border-color:#334155;
+border-color:#ff1a1a;
 }
 
 .mainBox{
@@ -307,8 +327,9 @@ border:1px solid transparent;
 }
 
 .mItem.active{
-border-color:#ff2a2a;
+border-color:#ff1a1a;
 background:#222f4d;
+box-shadow: 0 0 10px rgba(255, 26, 26, 0.3);
 }
 
 .btn{
@@ -337,8 +358,8 @@ display:none
 
 .deptHeader{
 padding:16px;
-background:#0e1628;
-border-bottom:1px solid #1e293b;
+background:#080b12;
+border-bottom:1px solid rgba(255, 26, 26, 0.3);
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -358,8 +379,9 @@ padding:6px 12px;
 border-radius:20px;
 font-size:11px;
 font-weight:800;
-background:#ff2a2a;
-color:#fff
+background:#ff1a1a;
+color:#fff;
+box-shadow:0 0 8px rgba(255, 26, 26, 0.5);
 }
 
 .deptContent{
@@ -385,7 +407,7 @@ cursor:pointer;
 }
 
 .deptStat.active{
-border-color:#ff2a2a;
+border-color:#ff1a1a;
 background:#1a243b
 }
 
@@ -430,7 +452,7 @@ cursor:pointer
 }
 
 .deptMachine.selected{
-border-color:#ff2a2a;
+border-color:#ff1a1a;
 background:#222f4d
 }
 
@@ -526,8 +548,16 @@ line-height:1.5
 <!-- LOGIN -->
 <div id="login">
 <div class="loginBox">
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Brembo_logo.svg" alt="Brembo Logo" class="brandLogo">
-<p class="loginSub">69 MACHINES • LIVE MANAGEMENT SYSTEM</p>
+<!-- Brembo High Quality SVG Logo -->
+<svg class="brandLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 45">
+  <g fill="#FF1A1A">
+    <path d="M32.5 7.5 C 24.5 7.5 18 14 18 22 C 18 30 24.5 36.5 32.5 36.5 C 40.5 36.5 47 30 47 22 C 47 14 40.5 7.5 32.5 7.5 Z M 32.5 29 C 28.6 29 25.5 25.9 25.5 22 C 25.5 18.1 28.6 15 32.5 15 C 36.4 15 39.5 18.1 39.5 22 C 39.5 25.9 36.4 29 32.5 29 Z"/>
+    <path d="M12.5 7.5 C 5.6 7.5 0 13.1 0 20 L 0 36.5 L 7.5 36.5 L 7.5 20 C 7.5 17.2 9.7 15 12.5 15 C 15.3 15 17.5 17.2 17.5 20 L 17.5 36.5 L 25 36.5 L 25 20 C 25 13.1 19.4 7.5 12.5 7.5 Z"/>
+  </g>
+  <text x="55" y="32" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="900" fill="#FF1A1A" letter-spacing="-1">brembo</text>
+</svg>
+<p class="loginSub">OFFICIAL HIGH PERFORMANCE</p>
+<div class="glow-divider"></div>
 <div class="modeBar">
 <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>
 <button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>
@@ -545,7 +575,7 @@ line-height:1.5
 <option value="C">Shift C (12:00 AM - 7:45 AM)</option>
 </select>
 <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>
-<button onclick="doLogin()" class="loginBtn">LOGIN & START SHIFT</button>
+<button onclick="doLogin()" class="loginBtn">DASHBOARD</button>
 </div>
 
 <!-- DEPARTMENT LOGIN -->
@@ -571,15 +601,22 @@ line-height:1.5
 <div id="operatorDashboard">
 <div class="topBar">
 <div>
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Brembo_logo.svg" alt="Brembo Logo" class="topBarLogo"><br>
+<!-- Brembo Topbar SVG Logo -->
+<svg class="topBarLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 45">
+  <g fill="#FF1A1A">
+    <path d="M32.5 7.5 C 24.5 7.5 18 14 18 22 C 18 30 24.5 36.5 32.5 36.5 C 40.5 36.5 47 30 47 22 C 47 14 40.5 7.5 32.5 7.5 Z M 32.5 29 C 28.6 29 25.5 25.9 25.5 22 C 25.5 18.1 28.6 15 32.5 15 C 36.4 15 39.5 18.1 39.5 22 C 39.5 25.9 36.4 29 32.5 29 Z"/>
+    <path d="M12.5 7.5 C 5.6 7.5 0 13.1 0 20 L 0 36.5 L 7.5 36.5 L 7.5 20 C 7.5 17.2 9.7 15 12.5 15 C 15.3 15 17.5 17.2 17.5 20 L 17.5 36.5 L 25 36.5 L 25 20 C 25 13.1 19.4 7.5 12.5 7.5 Z"/>
+  </g>
+  <text x="55" y="32" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="900" fill="#FF1A1A" letter-spacing="-1">brembo</text>
+</svg><br>
 <span id="wel" style="font-size:11px;color:#22c55e"></span>
-<span id="welMc" style="font-size:11px;background:#1a243b;padding:2px 8px;border-radius:10px;border:1px solid #ff2a2a"></span>
+<span id="welMc" style="font-size:11px;background:#1a243b;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span>
 <span id="welShift" style="font-size:11px;background:#eab308;color:#000;padding:2px 8px;border-radius:10px;font-weight:800"></span>
 </div>
 <div style="display:flex;gap:6px;align-items:center">
 <span id="liveShiftBadge" style="font-size:10px;background:#eab308;color:#000;padding:5px 10px;border-radius:12px;font-weight:800">SHIFT: -</span>
 <span style="font-size:10px;background:#22c55e;color:#000;padding:5px 10px;border-radius:12px;font-weight:800">LIVE</span>
-<button onclick="resetAll()" style="font-size:10px;background:#ff2a2a;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:800">RESET ALL</button>
+<button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:800">RESET ALL</button>
 <button onclick="doLogout()" style="font-size:10px;background:#1e293b;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:700">LOGOUT</button>
 </div>
 </div>
@@ -1264,7 +1301,7 @@ Part No: ${m.materialDetails.partNo} | Part Name: ${m.materialDetails.partName} 
 
 document.getElementById("machineDetail").innerHTML=`
 <div style="font-size:28px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div>
-<div style="font-size:12px;color:#94a3b8">Status: <b style="color:#ff2a2a">${m.status}</b> | Shift: ${operator.shift}</div>
+<div style="font-size:12px;color:#94a3b8">Status: <b style="color:#ff1a1a">${m.status}</b> | Shift: ${operator.shift}</div>
 ${matHtml}
 <button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>
 `;
