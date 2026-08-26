@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<title>Brembo V8 - 69 Machines</title>
+<title>Brembo - 69 Machines</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -59,12 +59,17 @@ border:1px solid rgba(255, 255, 255, 0.08);
 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
-.loginTitle{
-color:#ff2a2a;
-font-weight:900;
-font-size:28px;
-letter-spacing:1px;
-margin-bottom:2px;
+.brandLogo {
+height: 42px;
+margin: 0 auto 12px auto;
+display: block;
+object-fit: contain;
+}
+
+.topBarLogo {
+height: 24px;
+display: inline-block;
+vertical-align: middle;
 }
 
 .loginSub{
@@ -521,7 +526,7 @@ line-height:1.5
 <!-- LOGIN -->
 <div id="login">
 <div class="loginBox">
-<h1 class="loginTitle">BREMBO V8</h1>
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Brembo_logo.svg" alt="Brembo Logo" class="brandLogo">
 <p class="loginSub">69 MACHINES • LIVE MANAGEMENT SYSTEM</p>
 <div class="modeBar">
 <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>
@@ -566,7 +571,7 @@ line-height:1.5
 <div id="operatorDashboard">
 <div class="topBar">
 <div>
-<b style="color:#ff2a2a;font-size:16px">BREMBO V8</b><br>
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Brembo_logo.svg" alt="Brembo Logo" class="topBarLogo"><br>
 <span id="wel" style="font-size:11px;color:#22c55e"></span>
 <span id="welMc" style="font-size:11px;background:#1a243b;padding:2px 8px;border-radius:10px;border:1px solid #ff2a2a"></span>
 <span id="welShift" style="font-size:11px;background:#eab308;color:#000;padding:2px 8px;border-radius:10px;font-weight:800"></span>
@@ -611,7 +616,7 @@ line-height:1.5
 <div class="deptHeader">
 <div>
 <div class="deptTitle" id="deptTitle">DEPARTMENT</div>
-<div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO V8 • LIVE</div>
+<div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>
 </div>
 <div style="display:flex;gap:6px;align-items:center">
 <span class="deptBadge" id="deptBadge"></span>
@@ -1165,7 +1170,7 @@ let who=department.toUpperCase()+" DEPARTMENT";
 loudPopup(id,status,who,route);
 
 if(status!=="RUNNING"){
-let msg=`*🚨 BREMBO V8 ALERT*%0A%0AMachine: ${id}%0AStatus: *${status}*%0ADepartment: ${config.name}%0ATime: ${new Date().toLocaleString("en-IN")}%0A%0AAction Required By: ${route.name}`;
+let msg=`*🚨 BREMBO ALERT*%0A%0AMachine: ${id}%0AStatus: *${status}*%0ADepartment: ${config.name}%0ATime: ${new Date().toLocaleString("en-IN")}%0A%0AAction Required By: ${route.name}`;
 lastWa=`https://wa.me/${route.no}?text=${msg}`;
 setTimeout(()=>{ window.open(lastWa,"_blank"); },700);
 }
@@ -1402,7 +1407,7 @@ let mDet = machines[curMachine].materialDetails;
 matInfo = `%0A%0A*📦 MATERIAL DETAILS:*%0APart No: ${mDet.partNo}%0APart Name: ${mDet.partName}%0AQty: ${mDet.qty}`;
 }
 
-let msg=`*🚨 BREMBO ALERT V8*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*${matInfo}%0AOperator: ${operator.name}%0AID: ${operator.id}%0AShift: ${operator.shift} (${getShiftRange(operator.shift)})%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
+let msg=`*🚨 BREMBO ALERT*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*${matInfo}%0AOperator: ${operator.name}%0AID: ${operator.id}%0AShift: ${operator.shift} (${getShiftRange(operator.shift)})%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
 lastWa=`https://wa.me/${route.no}?text=${msg}`;
 
 document.getElementById("routeInfo").style.display="block";
