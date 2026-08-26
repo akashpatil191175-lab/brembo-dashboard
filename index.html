@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/png" href="icon-192.png">
+
+<link rel="icon" type="image/png" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#05070a">
+
+<meta name="theme-color" content="#050505">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <title>Brembo - 69 Machines</title>
 
@@ -19,514 +20,871 @@
 
 <style>
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',Roboto,Arial,sans-serif
 }
 
 body{
-background:#05070a;
-background-image: radial-gradient(circle at center, #111827 0%, #05070a 100%);
-color:#f1f5f9;
+  background:#050505;
+  color:#f4f4f5;
+  min-height:100vh
 }
 
 button{
-cursor:pointer;
-transition: all 0.2s ease;
+  cursor:pointer;
+  transition:.18s ease
 }
+
+button:active{
+  transform:scale(.98)
+}
+
+::-webkit-scrollbar{
+  width:7px;
+  height:7px
+}
+
+::-webkit-scrollbar-track{
+  background:#090909
+}
+
+::-webkit-scrollbar-thumb{
+  background:#333;
+  border-radius:10px
+}
+
+/* ================= LOGIN ================= */
 
 #login{
-position:fixed;
-inset:0;
-background: radial-gradient(circle at center, #0c1017 0%, #030406 100%);
-z-index:9999;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
-overflow:auto;
+  position:fixed;
+  inset:0;
+  background:#050505;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px
 }
 
-/* हुबेहूब इमेज प्रमाणे Neon Red Glow Card Box */
 .loginBox{
-background: linear-gradient(145deg, #0d121c 0%, #06090f 100%);
-padding:45px 35px;
-border-radius:32px;
-width:460px;
-max-width:100%;
-text-align:center;
-border:1.5px solid rgba(255, 0, 0, 0.6);
-box-shadow: 0 0 50px rgba(255, 0, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.9);
+  width:460px;
+  max-width:100%;
+  padding:40px 34px;
+  background:linear-gradient(145deg,#111,#060606);
+  border:1px solid #3a3a3a;
+  border-radius:26px;
+  box-shadow:0 0 50px rgba(229,9,20,.2)
 }
 
-.brandLogo {
-width: 260px;
-height: auto;
-margin: 0 auto 8px auto;
-display: block;
-filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.6));
-}
-
-.topBarLogo {
-width: 130px;
-height: auto;
-display: inline-block;
-vertical-align: middle;
-filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.4));
+.brandLogo{
+  width:250px;
+  max-width:85%;
+  display:block;
+  margin:0 auto 12px
 }
 
 .loginSub{
-font-size:11px;
-color:#94a3b8;
-margin-bottom:18px;
-letter-spacing:3.5px;
-font-weight:700;
-text-transform: uppercase;
+  text-align:center;
+  color:#888;
+  font-size:10px;
+  letter-spacing:3px;
+  font-weight:800;
+  margin-bottom:20px
 }
 
-/* इमेजमधील ग्लोइंग रेड डिवाईडर लाईन */
-.glow-divider {
-height: 2px;
-background: linear-gradient(90deg, transparent, #ff0000, transparent);
-margin: 0 auto 25px auto;
-width: 90%;
-box-shadow: 0 0 12px #ff0000, 0 0 20px #ff0000;
-}
-
-/* FORM INPUTS & SELECT BOXES */
-.loginInput,
-.loginSelect{
-width:100%;
-height:52px;
-padding:0 16px;
-margin:8px 0;
-border-radius:12px;
-font-size:14px;
-font-weight:600;
-outline:none;
-box-sizing:border-box;
-transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.loginInput{
-background:#090d16;
-color:#ffffff;
-border:1px solid #1e293b;
-}
-
-.loginInput:focus{
-border-color:#ff1a1a;
-box-shadow: 0 0 12px rgba(255, 26, 26, 0.5);
-}
-
-.loginSelect{
-background:#090d16;
-color:#ffffff;
-border:1px solid #1e293b;
-appearance:none;
--webkit-appearance:none;
--moz-appearance:none;
-background-image: url("data:image/svg+xml;utf8,<svg fill='%2394a3b8' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-background-repeat: no-repeat;
-background-position-x: 95%;
-background-position-y: 50%;
-}
-
-.loginSelect:focus{
-border-color:#ff1a1a;
-box-shadow: 0 0 12px rgba(255, 26, 26, 0.5);
-}
-
-.loginSelect option{
-background:#0d1424;
-color:#fff;
-padding:10px;
-}
-
-/* ऑपरेटर लॉगिन बटन */
-.loginBtn{
-width:100%;
-height:54px;
-background: linear-gradient(180deg, #ff1a1a 0%, #b30000 100%);
-color:#fff;
-border:1px solid rgba(255, 255, 255, 0.25);
-border-radius:16px;
-font-weight:900;
-font-size:16px;
-margin-top:18px;
-box-shadow: 0 6px 22px rgba(255, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.4);
-letter-spacing:1.5px;
-text-transform: uppercase;
-}
-
-.loginBtn:hover{
-transform: translateY(-2px);
-box-shadow: 0 8px 28px rgba(255, 0, 0, 0.8);
-}
-
-.loginBtn:active{
-transform: translateY(1px);
+.redLine{
+  width:90%;
+  height:2px;
+  margin:0 auto 24px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #e50914,
+    transparent
+  );
+  box-shadow:0 0 15px #e50914
 }
 
 .modeBar{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-bottom:18px;
-background:#05070a;
-padding:4px;
-border-radius:12px;
-border:1px solid #1e293b;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding:4px;
+  background:#090909;
+  border:1px solid #292929;
+  border-radius:11px;
+  margin-bottom:16px
 }
 
 .modeBtn{
-padding:10px;
-border-radius:9px;
-border:none;
-background:transparent;
-color:#94a3b8;
-font-weight:800;
-font-size:12px;
-letter-spacing:0.5px;
+  border:0;
+  background:transparent;
+  color:#888;
+  padding:11px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:900
 }
 
 .modeBtn.active{
-background:#ff1a1a;
-color:#ffffff;
-box-shadow: 0 0 10px rgba(255, 26, 26, 0.6);
+  background:#e50914;
+  color:#fff;
+  box-shadow:0 0 15px rgba(229,9,20,.4)
 }
 
-.departmentLogin{
-display:none
+.loginInput,
+.loginSelect{
+  width:100%;
+  height:50px;
+  margin:7px 0;
+  padding:0 15px;
+  border-radius:10px;
+  background:#0b0b0b;
+  color:#fff;
+  border:1px solid #292929;
+  outline:none;
+  font-size:14px;
+  font-weight:600
 }
 
-#notifBig{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#ff1a1a;
-color:#fff;
-padding:30px;
-border-radius:20px;
-font-weight:900;
-font-size:20px;
-display:none;
-z-index:99999;
-text-align:center;
-box-shadow:0 0 50px rgba(255, 26, 26, 0.8);
-border:3px solid #fff;
-max-width:90%
+.loginInput:focus,
+.loginSelect:focus{
+  border-color:#e50914;
+  box-shadow:0 0 12px rgba(229,9,20,.3)
 }
 
-/* CUSTOM MATERIAL SHORTAGE MODAL */
-#materialModal{
-position:fixed;
-inset:0;
-background:rgba(5, 7, 10, 0.9);
-backdrop-filter: blur(8px);
-z-index:999999;
-display:none;
-align-items:center;
-justify-content:center;
-padding:20px;
+.loginSelect option{
+  background:#111;
+  color:#fff
 }
 
-.modalContent{
-background:#0d121c;
-padding:26px;
-border-radius:24px;
-width:400px;
-max-width:100%;
-border:1px solid #ec4899;
-box-shadow:0 0 35px rgba(236,72,153,0.3);
-}
-
-.topBar{
-padding:14px 16px;
-background:#080b12;
-display:flex;
-justify-content:space-between;
-position:sticky;
-top:0;
-z-index:50;
-align-items:center;
-gap:10px;
-border-bottom:1px solid rgba(255, 26, 26, 0.3);
-}
-
-.seriesBar{
-padding:10px;
-background:#121a2d;
-display:flex;
-gap:8px;
-overflow:auto
-}
-
-.sBtn{
-padding:8px 16px;
-border-radius:20px;
-border:1px solid #2a364f;
-background:#090d16;
-color:#94a3b8;
-font-size:12px;
-font-weight:700;
-white-space:nowrap
-}
-
-.sBtn.active{
-background:#ff1a1a;
-color:#fff;
-border-color:#ff1a1a;
-box-shadow: 0 0 8px rgba(255, 26, 26, 0.5);
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px;
-padding:12px
-}
-
-.card{
-background:#121a2d;
-border:1px solid #1e293b;
-border-radius:14px;
-padding:14px 10px;
-text-align:center;
-cursor:pointer
-}
-
-.card:hover{
-border-color:#ff1a1a;
-}
-
-.mainBox{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-padding:12px
-}
-
-.phone{
-background:#121a2d;
-border:1px solid #1e293b;
-border-radius:16px;
-padding:16px
-}
-
-.mItem{
-padding:12px;
-background:#1a243b;
-border-radius:10px;
-margin:6px 0;
-display:flex;
-justify-content:space-between;
-cursor:pointer;
-font-size:13px;
-border:1px solid transparent;
-}
-
-.mItem.active{
-border-color:#ff1a1a;
-background:#222f4d;
-box-shadow: 0 0 10px rgba(255, 26, 26, 0.3);
-}
-
-.btn{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-font-weight:800;
-margin-top:10px;
-cursor:pointer
-}
-
-.viewBox{
-background:#121a2d;
-border:1px solid #22c55e;
-padding:12px;
-border-radius:10px;
-margin:10px 0;
-line-height:1.8
-}
-
-/* DEPARTMENT DASHBOARD */
-#departmentDashboard{
-display:none
-}
-
-.deptHeader{
-padding:16px;
-background:#080b12;
-border-bottom:1px solid rgba(255, 26, 26, 0.3);
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:8px;
-position:sticky;
-top:0;
-z-index:100
-}
-
-.deptTitle{
-font-size:20px;
-font-weight:900
-}
-
-.deptBadge{
-padding:6px 12px;
-border-radius:20px;
-font-size:11px;
-font-weight:800;
-background:#ff1a1a;
-color:#fff;
-box-shadow:0 0 8px rgba(255, 26, 26, 0.5);
-}
-
-.deptContent{
-padding:12px;
-max-width:900px;
-margin:auto
-}
-
-.deptStats{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-margin-bottom:12px
-}
-
-.deptStat{
-background:#121a2d;
-border:1px solid #1e293b;
-border-radius:14px;
-padding:14px;
-text-align:center;
-cursor:pointer;
-}
-
-.deptStat.active{
-border-color:#ff1a1a;
-background:#1a243b
-}
-
-.deptStat small{
-display:block;
-font-size:10px;
-color:#94a3b8;
-margin-bottom:4px;
-font-weight:700;
-}
-
-.deptStat b{
-font-size:24px
-}
-
-.deptMachineBox{
-background:#121a2d;
-border:1px solid #1e293b;
-border-radius:16px;
-padding:16px;
-margin-bottom:12px
-}
-
-.deptMachineGrid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-max-height:420px;
-overflow:auto;
-margin-top:12px
-}
-
-.deptMachine{
-background:#1a243b;
-border:1px solid #2a364f;
-padding:12px 6px;
-border-radius:10px;
-text-align:center;
-font-weight:800;
-font-size:13px;
-cursor:pointer
-}
-
-.deptMachine.selected{
-border-color:#ff1a1a;
-background:#222f4d
-}
-
-.deptMachineStatus{
-display:block;
-font-size:9px;
-margin-top:4px;
-color:#22c55e
-}
-
-.deptSelected{
-background:#090d16;
-border:1px solid #2a364f;
-border-radius:12px;
-padding:16px;
-margin-top:12px
-}
-
-.deptSelected h2{
-font-size:26px;
-margin-bottom:6px
-}
-
-.actionGrid{
-display:grid;
-grid-template-columns:1fr;
-gap:10px;
-margin-top:14px
-}
-
-.actionBtn{
-padding:16px;
-border:none;
-border-radius:12px;
-font-weight:800;
-font-size:14px;
-cursor:pointer
-}
-
-.breakOff{ background:#22c55e; color:#000 }
-.lotTaken{ background:#22c55e; color:#000 }
-.cmmOk{ background:#22c55e; color:#000 }
-.fixtureOk{ background:#22c55e; color:#000 }
-.materialSupplied{ background:#22c55e; color:#000 }
-
-.viewOnly{
-background:#1a243b;
-border:1px solid #64748b;
-padding:20px;
-border-radius:12px;
-text-align:center;
-margin-top:12px
+.loginBtn{
+  width:100%;
+  height:52px;
+  margin-top:15px;
+  border:1px solid #ff5252;
+  border-radius:10px;
+  background:linear-gradient(
+    180deg,
+    #ed1b24,
+    #a80000
+  );
+  color:#fff;
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:1px;
+  box-shadow:0 7px 22px rgba(229,9,20,.25)
 }
 
 .smallNote{
-font-size:11px;
-color:#94a3b8;
-margin-top:10px;
-line-height:1.5
+  font-size:11px;
+  color:#777;
+  margin-top:10px;
+  line-height:1.5
+}
+
+/* ================= TOP BAR ================= */
+
+.topBar{
+  min-height:96px;
+  padding:16px 28px;
+  background:#050505;
+  border-bottom:1px solid #202020;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  position:sticky;
+  top:0;
+  z-index:100
+}
+
+.topLeft{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  min-width:0
+}
+
+.topLogo{
+  width:235px;
+  height:62px;
+  object-fit:contain;
+  object-position:left center
+}
+
+.topDivider{
+  width:1px;
+  height:42px;
+  background:#333
+}
+
+.userName{
+  font-size:17px;
+  font-weight:800;
+  white-space:nowrap
+}
+
+.machineBadge{
+  font-size:20px;
+  font-weight:900;
+  padding:12px 16px;
+  border:1px solid #292929;
+  background:#101010;
+  border-radius:12px
+}
+
+.shiftInfo{
+  line-height:1.2
+}
+
+.shiftMain{
+  font-size:18px;
+  font-weight:900;
+  color:#ffd000
+}
+
+.shiftRange{
+  font-size:11px;
+  color:#ffd000;
+  font-weight:700;
+  margin-top:4px
+}
+
+.topActions{
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+
+.pill{
+  padding:10px 14px;
+  border-radius:11px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid #292929;
+  background:#0b0b0b
+}
+
+.livePill{
+  color:#5cff64
+}
+
+.liveDot{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  background:#25d366;
+  border-radius:50%;
+  margin-right:7px;
+  box-shadow:0 0 10px #25d366
+}
+
+.resetBtn{
+  color:#ff3340;
+  border-color:#5a1116
+}
+
+.logoutBtn{
+  color:#fff
+}
+
+/* ================= SERIES ================= */
+
+.seriesBar{
+  padding:12px 26px;
+  background:#050505;
+  border-bottom:1px solid #171717;
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px
+}
+
+.sBtn{
+  height:50px;
+  border:1px solid #292929;
+  background:linear-gradient(
+    180deg,
+    #171717,
+    #0d0d0d
+  );
+  color:#eee;
+  border-radius:9px;
+  font-size:15px;
+  font-weight:800
+}
+
+.sBtn.active{
+  background:linear-gradient(
+    180deg,
+    #ed1b24,
+    #b40000
+  );
+  border-color:#ff3434;
+  box-shadow:0 0 18px rgba(229,9,20,.35)
+}
+
+/* ================= STATUS CARDS ================= */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:10px;
+  padding:14px 26px
+}
+
+.card{
+  min-height:120px;
+  background:linear-gradient(
+    180deg,
+    #111,
+    #080808
+  );
+  border:1px solid #282828;
+  border-radius:10px;
+  padding:13px 12px;
+  cursor:pointer;
+  position:relative
+}
+
+.cardTitle{
+  font-size:13px;
+  font-weight:800;
+  color:#ddd
+}
+
+.cardCount{
+  font-size:38px;
+  font-weight:900;
+  margin-top:16px;
+  color:var(--accent)
+}
+
+.card:after{
+  content:"";
+  position:absolute;
+  left:25%;
+  right:25%;
+  bottom:9px;
+  height:3px;
+  background:var(--accent);
+  border-radius:5px;
+  box-shadow:0 0 9px var(--accent)
+}
+
+/* ================= MAIN ================= */
+
+.mainBox{
+  display:grid;
+  grid-template-columns:33% 67%;
+  gap:18px;
+  padding:6px 26px 24px
+}
+
+.panel{
+  background:linear-gradient(
+    180deg,
+    #0e0e0e,
+    #070707
+  );
+  border:1px solid #292929;
+  border-radius:14px;
+  overflow:hidden
+}
+
+.panelHeader{
+  padding:17px 20px;
+  border-bottom:1px solid #292929;
+  font-size:18px;
+  font-weight:900
+}
+
+.panelHeader span{
+  color:#e50914
+}
+
+.machineList{
+  padding:10px;
+  max-height:650px;
+  overflow:auto
+}
+
+.mItem{
+  min-height:54px;
+  padding:10px 14px;
+  margin:6px 2px;
+  background:#101010;
+  border:1px solid #292929;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  cursor:pointer
+}
+
+.mItem:hover{
+  border-color:#555
+}
+
+.mItem.active{
+  background:linear-gradient(
+    90deg,
+    #4d090c,
+    #170707
+  );
+  border-color:#e50914;
+  box-shadow:inset 0 0 18px rgba(229,9,20,.12)
+}
+
+.mName{
+  font-size:16px;
+  font-weight:800
+}
+
+.statusTag{
+  padding:7px 11px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap
+}
+
+/* ================= DETAIL ================= */
+
+.detailPanel{
+  padding:18px
+}
+
+.detailTop{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:15px;
+  padding-bottom:16px;
+  border-bottom:1px solid #333
+}
+
+.machineTitle{
+  font-size:38px;
+  font-weight:900
+}
+
+.yours{
+  color:#e50914;
+  font-size:14px;
+  font-weight:900;
+  margin-left:12px
+}
+
+.statusLine{
+  font-size:14px;
+  margin-top:12px
+}
+
+.routeTop{
+  border-left:1px solid #3a3a3a;
+  padding-left:24px
+}
+
+.routeTitle{
+  color:#e50914;
+  font-size:15px;
+  font-weight:900;
+  margin-bottom:10px
+}
+
+.routeLine{
+  font-size:13px;
+  margin:8px 0
+}
+
+.infoBox{
+  margin-top:16px;
+  background:#080808;
+  border:1px solid #303030;
+  border-radius:12px;
+  padding:16px
+}
+
+.infoTitle{
+  color:#35ff48;
+  font-weight:900;
+  font-size:14px;
+  margin-bottom:10px
+}
+
+.infoGrid{
+  display:grid;
+  grid-template-columns:110px 1fr 1fr;
+  gap:8px;
+  font-size:14px
+}
+
+.label{
+  color:#aaa
+}
+
+.value{
+  font-weight:700
+}
+
+.assignBtn{
+  height:55px;
+  border:1px solid #28ff45;
+  background:linear-gradient(
+    180deg,
+    #123e18,
+    #09240e
+  );
+  color:#39ff52;
+  border-radius:9px;
+  font-weight:900;
+  width:100%
+}
+
+.statusHeading{
+  margin:15px 0 10px;
+  color:#e50914;
+  font-size:14px;
+  font-weight:900
+}
+
+.statusGrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px
+}
+
+.statusBtn{
+  min-height:56px;
+  background:#0c0c0c;
+  border:1px solid #292929;
+  border-radius:9px;
+  color:#eee;
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-weight:800;
+  font-size:13px;
+  text-align:left
+}
+
+.statusBtn:hover{
+  border-color:#666;
+  background:#151515
+}
+
+.routeInfo{
+  margin-top:16px;
+  padding:13px;
+  border:1px dashed #b58a00;
+  background:#141000;
+  border-radius:9px;
+  font-size:13px;
+  line-height:1.7
+}
+
+.waBtn{
+  width:100%;
+  height:54px;
+  border:1px solid #25d366;
+  border-radius:9px;
+  background:linear-gradient(
+    180deg,
+    #168b3c,
+    #0d5f29
+  );
+  color:#fff;
+  font-size:15px;
+  font-weight:900;
+  margin-top:10px
+}
+
+.viewBox{
+  background:#0d0d0d;
+  border:1px solid #303030;
+  border-radius:10px;
+  padding:15px;
+  margin-top:12px;
+  line-height:1.7
+}
+
+/* ================= POPUP ================= */
+
+#notifBig{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#c9000b;
+  color:#fff;
+  padding:28px;
+  border-radius:16px;
+  font-weight:900;
+  font-size:20px;
+  display:none;
+  z-index:99999;
+  text-align:center;
+  box-shadow:0 0 60px rgba(229,9,20,.65);
+  border:2px solid #fff;
+  max-width:90%
+}
+
+/* ================= MATERIAL ================= */
+
+#materialModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(8px);
+  z-index:999999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px
+}
+
+.modalContent{
+  background:#111;
+  border:1px solid #ec4899;
+  border-radius:18px;
+  padding:24px;
+  width:400px;
+  max-width:100%
+}
+
+/* ================= DEPARTMENT ================= */
+
+#departmentDashboard{
+  display:none
+}
+
+.deptHeader{
+  padding:18px 26px;
+  background:#050505;
+  border-bottom:1px solid #252525;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:100
+}
+
+.deptTitle{
+  font-size:23px;
+  font-weight:900
+}
+
+.deptBadge{
+  padding:7px 13px;
+  border-radius:20px;
+  background:#e50914;
+  color:#fff;
+  font-size:11px;
+  font-weight:900
+}
+
+.deptContent{
+  padding:16px 26px;
+  max-width:1250px;
+  margin:auto
+}
+
+.deptStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:14px
+}
+
+.deptStat{
+  background:#0d0d0d;
+  border:1px solid #292929;
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+  cursor:pointer
+}
+
+.deptStat.active{
+  border-color:#e50914;
+  box-shadow:0 0 15px rgba(229,9,20,.12)
+}
+
+.deptStat small{
+  display:block;
+  color:#888;
+  font-size:10px;
+  font-weight:800
+}
+
+.deptStat b{
+  font-size:30px
+}
+
+.deptMachineBox{
+  background:#0d0d0d;
+  border:1px solid #292929;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:14px
+}
+
+.deptMachineGrid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:9px;
+  max-height:430px;
+  overflow:auto;
+  margin-top:12px
+}
+
+.deptMachine{
+  background:#141414;
+  border:1px solid #292929;
+  padding:13px 7px;
+  border-radius:9px;
+  text-align:center;
+  font-weight:900;
+  cursor:pointer
+}
+
+.deptMachine.selected{
+  border-color:#e50914;
+  background:#30090b
+}
+
+.deptMachineStatus{
+  display:block;
+  font-size:9px;
+  margin-top:5px
+}
+
+.deptSelected{
+  background:#090909;
+  border:1px solid #303030;
+  border-radius:12px;
+  padding:16px;
+  margin-top:12px
+}
+
+.viewOnly{
+  margin-top:14px;
+  background:#121212;
+  border:1px solid #555;
+  border-radius:10px;
+  padding:18px;
+  text-align:center
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+
+  .cards{
+    grid-template-columns:repeat(4,1fr)
+  }
+
+  .topBar{
+    flex-wrap:wrap
+  }
+
+  .mainBox{
+    grid-template-columns:1fr
+  }
+
 }
 
 @media(max-width:700px){
-.topBar{ align-items:flex-start }
-.cards{ grid-template-columns:repeat(4,1fr) }
-.mainBox{ grid-template-columns:1fr }
-.deptMachineGrid{ grid-template-columns:repeat(3,1fr) }
+
+  .topBar{
+    padding:12px;
+  }
+
+  .topLogo{
+    width:160px;
+    height:48px
+  }
+
+  .topLeft{
+    flex-wrap:wrap;
+    gap:8px
+  }
+
+  .topActions{
+    width:100%;
+    justify-content:flex-end;
+    flex-wrap:wrap
+  }
+
+  .seriesBar{
+    grid-template-columns:repeat(2,1fr);
+    padding:10px
+  }
+
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+    padding:10px
+  }
+
+  .mainBox{
+    padding:6px 10px 20px
+  }
+
+  .detailTop{
+    grid-template-columns:1fr
+  }
+
+  .routeTop{
+    border-left:0;
+    border-top:1px solid #333;
+    padding:12px 0 0
+  }
+
+  .statusGrid{
+    grid-template-columns:1fr
+  }
+
+  .deptContent{
+    padding:10px
+  }
+
+  .deptMachineGrid{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .deptStats{
+    grid-template-columns:repeat(3,1fr)
+  }
+
 }
 
 @media(max-width:450px){
-.deptMachineGrid{ grid-template-columns:repeat(3,1fr) }
-.actionGrid{ grid-template-columns:1fr }
-.deptStats{ grid-template-columns:repeat(3,1fr) }
+
+  .userName{
+    font-size:13px
+  }
+
+  .machineBadge{
+    font-size:16px
+  }
+
+  .shiftMain{
+    font-size:14px
+  }
+
+  .cards{
+    grid-template-columns:repeat(2,1fr)
+  }
+
+  .deptMachineGrid{
+    grid-template-columns:repeat(3,1fr)
+  }
+
 }
 </style>
 </head>
@@ -535,987 +893,3269 @@ line-height:1.5
 
 <div id="notifBig"></div>
 
-<!-- MATERIAL SHORTAGE MODAL -->
+<!-- ================= MATERIAL MODAL ================= -->
+
 <div id="materialModal">
-<div class="modalContent">
-<h2 style="color:#ec4899;font-weight:900;font-size:18px;margin-bottom:14px;text-align:center">MATERIAL SHORTAGE DETAILS</h2>
-<input id="matPartNo" class="loginInput" placeholder="PART NO">
-<input id="matPartName" class="loginInput" placeholder="PART NAME">
-<input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">
-<button onclick="submitMaterialShortage()" class="loginBtn" style="background:linear-gradient(135deg, #ec4899 0%, #db2777 100%);box-shadow:0 4px 14px rgba(236, 72, 153, 0.35)">SUBMIT & SEND ALERT</button>
-<button onclick="closeMaterialModal()" class="loginBtn" style="background:#1e293b;color:#fff;margin-top:8px;box-shadow:none">CANCEL</button>
-</div>
+
+  <div class="modalContent">
+
+    <h2 style="
+      color:#ec4899;
+      font-weight:900;
+      font-size:18px;
+      margin-bottom:15px;
+      text-align:center
+    ">
+      MATERIAL SHORTAGE DETAILS
+    </h2>
+
+    <input
+      id="matPartNo"
+      class="loginInput"
+      placeholder="PART NO"
+    >
+
+    <input
+      id="matPartName"
+      class="loginInput"
+      placeholder="PART NAME"
+    >
+
+    <input
+      id="matQty"
+      type="number"
+      class="loginInput"
+      placeholder="QUANTITY"
+    >
+
+    <button
+      onclick="submitMaterialShortage()"
+      class="loginBtn"
+      style="
+        background:linear-gradient(135deg,#ec4899,#db2777);
+        box-shadow:none
+      "
+    >
+      SUBMIT & SEND ALERT
+    </button>
+
+    <button
+      onclick="closeMaterialModal()"
+      class="loginBtn"
+      style="
+        background:#222;
+        border-color:#444;
+        box-shadow:none
+      "
+    >
+      CANCEL
+    </button>
+
+  </div>
+
 </div>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
+
 <div id="login">
-<div class="loginBox">
-<!-- Brembo High Quality SVG Logo -->
-<svg class="brandLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 45">
-  <g fill="#FF1A1A">
-    <path d="M32.5 7.5 C 24.5 7.5 18 14 18 22 C 18 30 24.5 36.5 32.5 36.5 C 40.5 36.5 47 30 47 22 C 47 14 40.5 7.5 32.5 7.5 Z M 32.5 29 C 28.6 29 25.5 25.9 25.5 22 C 25.5 18.1 28.6 15 32.5 15 C 36.4 15 39.5 18.1 39.5 22 C 39.5 25.9 36.4 29 32.5 29 Z"/>
-    <path d="M12.5 7.5 C 5.6 7.5 0 13.1 0 20 L 0 36.5 L 7.5 36.5 L 7.5 20 C 7.5 17.2 9.7 15 12.5 15 C 15.3 15 17.5 17.2 17.5 20 L 17.5 36.5 L 25 36.5 L 25 20 C 25 13.1 19.4 7.5 12.5 7.5 Z"/>
-  </g>
-  <text x="55" y="32" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="900" fill="#FF1A1A" letter-spacing="-1">brembo</text>
-</svg>
-<p class="loginSub">OFFICIAL HIGH PERFORMANCE</p>
-<div class="glow-divider"></div>
 
-<div class="modeBar">
-<button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>
-<button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>
+  <div class="loginBox">
+
+    <img
+      src="icon-512.png"
+      class="brandLogo"
+      alt="Brembo"
+    >
+
+    <div class="loginSub">
+      OFFICIAL HIGH PERFORMANCE
+    </div>
+
+    <div class="redLine"></div>
+
+    <div class="modeBar">
+
+      <button
+        id="operatorModeBtn"
+        class="modeBtn active"
+        onclick="showLoginMode('operator')"
+      >
+        OPERATOR
+      </button>
+
+      <button
+        id="departmentModeBtn"
+        class="modeBtn"
+        onclick="showLoginMode('department')"
+      >
+        DEPARTMENT
+      </button>
+
+    </div>
+
+    <!-- OPERATOR -->
+
+    <div id="operatorLogin">
+
+      <input
+        id="opId"
+        class="loginInput"
+        placeholder="EMPLOYEE ID"
+      >
+
+      <input
+        id="opName"
+        class="loginInput"
+        placeholder="EMPLOYEE NAME"
+      >
+
+      <input
+        id="opPin"
+        type="password"
+        class="loginInput"
+        placeholder="OPERATOR PIN"
+      >
+
+      <select
+        id="opMachine"
+        class="loginSelect"
+      ></select>
+
+      <select
+        id="opShift"
+        class="loginSelect"
+      >
+        <option value="A">
+          Shift A (7:45 AM - 4:15 PM)
+        </option>
+
+        <option value="B">
+          Shift B (4:15 PM - 12:00 AM)
+        </option>
+
+        <option value="C">
+          Shift C (12:00 AM - 7:45 AM)
+        </option>
+      </select>
+
+      <p
+        id="autoShiftTxt"
+        style="
+          font-size:11px;
+          color:#22c55e;
+          margin-top:8px;
+          font-weight:700
+        "
+      ></p>
+
+      <button
+        onclick="doLogin()"
+        class="loginBtn"
+      >
+        OPERATOR LOGIN
+      </button>
+
+    </div>
+
+    <!-- DEPARTMENT -->
+
+    <div
+      id="departmentLogin"
+      style="display:none"
+    >
+
+      <select
+        id="departmentSelect"
+        class="loginSelect"
+      >
+
+        <option value="">
+          -- SELECT DEPARTMENT --
+        </option>
+
+        <option value="maintenance">
+          Maintenance
+        </option>
+
+        <option value="loading">
+          Loading
+        </option>
+
+        <option value="quality">
+          Quality
+        </option>
+
+        <option value="toolroom">
+          Tool Room
+        </option>
+
+        <option value="store">
+          Store Department
+        </option>
+
+        <option value="supervisor">
+          Supervisor
+        </option>
+
+      </select>
+
+      <input
+        id="departmentPin"
+        type="password"
+        class="loginInput"
+        placeholder="DEPARTMENT PIN"
+      >
+
+      <button
+        onclick="departmentLogin()"
+        class="loginBtn"
+      >
+        DEPARTMENT LOGIN
+      </button>
+
+      <div class="smallNote">
+        Authorized department access only.
+      </div>
+
+    </div>
+
+    <p
+      id="fbStat"
+      style="
+        font-size:11px;
+        color:#eab308;
+        margin-top:14px;
+        font-weight:600
+      "
+    >
+      Connecting LIVE...
+    </p>
+
+  </div>
+
 </div>
 
-<!-- OPERATOR LOGIN -->
-<div id="operatorLogin">
-<input id="opId" class="loginInput" placeholder="EMPLOYEE ID">
-<input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">
-<input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">
-<select id="opMachine" class="loginSelect"></select>
-<select id="opShift" class="loginSelect" style="border-color:#eab308">
-<option value="A">Shift A (7:45 AM - 4:15 PM)</option>
-<option value="B">Shift B (4:15 PM - 12:00 AM)</option>
-<option value="C">Shift C (12:00 AM - 7:45 AM)</option>
-</select>
-<p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>
-<button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>
+<!-- ================= OPERATOR DASHBOARD ================= -->
+
+<div id="operatorDashboard" style="display:none">
+
+  <div class="topBar">
+
+    <div class="topLeft">
+
+      <img
+        src="icon-512.png"
+        class="topLogo"
+        alt="Brembo"
+      >
+
+      <div class="topDivider"></div>
+
+      <div
+        id="wel"
+        class="userName"
+      ></div>
+
+      <div
+        id="welMc"
+        class="machineBadge"
+      ></div>
+
+      <div class="shiftInfo">
+
+        <div
+          id="welShift"
+          class="shiftMain"
+        >
+          Shift A
+        </div>
+
+        <div
+          id="shiftRangeTop"
+          class="shiftRange"
+        >
+          7:45 AM - 4:15 PM
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="topActions">
+
+      <span
+        id="liveShiftBadge"
+        class="pill"
+        style="color:#ffd000"
+      >
+        SHIFT: -
+      </span>
+
+      <span class="pill livePill">
+        <span class="liveDot"></span>
+        LIVE
+      </span>
+
+      <button
+        onclick="resetAll()"
+        class="pill resetBtn"
+      >
+        ⟳ RESET ALL
+      </button>
+
+      <button
+        onclick="doLogout()"
+        class="pill logoutBtn"
+      >
+        ⇥ LOGOUT
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SERIES -->
+
+  <div class="seriesBar">
+
+    <button
+      class="sBtn active"
+      id="btnALL"
+      onclick="setSeries('ALL')"
+    >
+      ALL (69)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnEN"
+      onclick="setSeries('EN')"
+    >
+      EN (35)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnMK"
+      onclick="setSeries('MK')"
+    >
+      MK (8)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnM"
+      onclick="setSeries('M')"
+    >
+      M (15)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnL"
+      onclick="setSeries('L')"
+    >
+      L (4)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnPN"
+      onclick="setSeries('PN')"
+    >
+      PN (4)
+    </button>
+
+    <button
+      class="sBtn"
+      id="btnBR"
+      onclick="setSeries('BR')"
+    >
+      BR (3)
+    </button>
+
+  </div>
+
+  <!-- STATUS CARDS -->
+
+  <div
+    class="cards"
+    id="cards"
+  ></div>
+
+  <!-- MAIN -->
+
+  <div class="mainBox">
+
+    <!-- MACHINE LIST -->
+
+    <div class="panel">
+
+      <div class="panelHeader">
+
+        MACHINES
+        <span id="listTitleCount">
+          (ALL - 69)
+        </span>
+
+      </div>
+
+      <div
+        id="machineList"
+        class="machineList"
+      ></div>
+
+    </div>
+
+    <!-- DETAIL -->
+
+    <div class="panel detailPanel">
+
+      <div id="machineDetail"></div>
+
+      <div id="operatorBox"></div>
+
+      <div id="statusList"></div>
+
+      <div
+        id="lockMsg"
+        style="
+          font-size:11px;
+          color:#777;
+          margin-top:8px
+        "
+      ></div>
+
+      <div
+        id="routeInfo"
+        class="routeInfo"
+        style="display:none"
+      ></div>
+
+      <button
+        id="waBtn"
+        class="waBtn"
+        onclick="openWA()"
+        style="display:none"
+      >
+        SEND WHATSAPP
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
 
-<!-- DEPARTMENT LOGIN -->
-<div id="departmentLogin">
-<select id="departmentSelect" class="loginSelect">
-<option value="">-- SELECT DEPARTMENT --</option>
-<option value="maintenance">Maintenance</option>
-<option value="loading">Loading</option>
-<option value="quality">Quality</option>
-<option value="toolroom">Tool Room</option>
-<option value="store">Store Department</option>
-<option value="supervisor">Supervisor</option>
-</select>
-<input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">
-<button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>
-<div class="smallNote">Authorized department access only.</div>
-</div>
-<p id="fbStat" style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">Connecting LIVE...</p>
-</div>
-</div>
+<!-- ================= DEPARTMENT DASHBOARD ================= -->
 
-<!-- OPERATOR DASHBOARD -->
-<div id="operatorDashboard">
-<div class="topBar">
-<div>
-<!-- Brembo Topbar SVG Logo -->
-<svg class="topBarLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 45">
-  <g fill="#FF1A1A">
-    <path d="M32.5 7.5 C 24.5 7.5 18 14 18 22 C 18 30 24.5 36.5 32.5 36.5 C 40.5 36.5 47 30 47 22 C 47 14 40.5 7.5 32.5 7.5 Z M 32.5 29 C 28.6 29 25.5 25.9 25.5 22 C 25.5 18.1 28.6 15 32.5 15 C 36.4 15 39.5 18.1 39.5 22 C 39.5 25.9 36.4 29 32.5 29 Z"/>
-    <path d="M12.5 7.5 C 5.6 7.5 0 13.1 0 20 L 0 36.5 L 7.5 36.5 L 7.5 20 C 7.5 17.2 9.7 15 12.5 15 C 15.3 15 17.5 17.2 17.5 20 L 17.5 36.5 L 25 36.5 L 25 20 C 25 13.1 19.4 7.5 12.5 7.5 Z"/>
-  </g>
-  <text x="55" y="32" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="900" fill="#FF1A1A" letter-spacing="-1">brembo</text>
-</svg><br>
-<span id="wel" style="font-size:11px;color:#22c55e"></span>
-<span id="welMc" style="font-size:11px;background:#1a243b;padding:2px 8px;border-radius:10px;border:1px solid #ff1a1a"></span>
-<span id="welShift" style="font-size:11px;background:#eab308;color:#000;padding:2px 8px;border-radius:10px;font-weight:800"></span>
-</div>
-<div style="display:flex;gap:6px;align-items:center">
-<span id="liveShiftBadge" style="font-size:10px;background:#eab308;color:#000;padding:5px 10px;border-radius:12px;font-weight:800">SHIFT: -</span>
-<span style="font-size:10px;background:#22c55e;color:#000;padding:5px 10px;border-radius:12px;font-weight:800">LIVE</span>
-<button onclick="resetAll()" style="font-size:10px;background:#ff1a1a;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:800">RESET ALL</button>
-<button onclick="doLogout()" style="font-size:10px;background:#1e293b;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:700">LOGOUT</button>
-</div>
-</div>
+<div
+  id="departmentDashboard"
+  style="display:none"
+>
 
-<div class="seriesBar">
-<button class="sBtn active" onclick="setSeries('ALL')" id="btnALL">ALL (69)</button>
-<button class="sBtn" onclick="setSeries('EN')" id="btnEN">EN (35)</button>
-<button class="sBtn" onclick="setSeries('MK')" id="btnMK">MK (8)</button>
-<button class="sBtn" onclick="setSeries('M')" id="btnM">M (15)</button>
-<button class="sBtn" onclick="setSeries('L')" id="btnL">L (4)</button>
-<button class="sBtn" onclick="setSeries('PN')" id="btnPN">PN (4)</button>
-<button class="sBtn" onclick="setSeries('BR')" id="btnBR">BR (3)</button>
-</div>
+  <div class="deptHeader">
 
-<div class="cards" id="cards"></div>
-<div class="mainBox">
-<div class="phone">
-<div id="listTitle" style="font-weight:800;margin-bottom:10px;color:#94a3b8">MACHINES</div>
-<div id="machineList"></div>
-</div>
-<div class="phone">
-<div id="machineDetail"></div>
-<div id="operatorBox" style="margin:10px 0;font-size:12px;color:#94a3b8"></div>
-<div id="statusList"></div>
-<div id="lockMsg" style="margin-top:8px;font-size:11px;color:#f87171"></div>
-<div id="routeInfo" style="margin-top:12px;padding:12px;background:#1e1402;border:1px dashed #eab308;border-radius:10px;display:none;font-size:12px;line-height:1.6"></div>
-<button id="waBtn" onclick="openWA()" style="width:100%;padding:14px;background:#25D366;color:#000;font-weight:900;border:none;border-radius:12px;margin-top:12px;display:none">SEND WHATSAPP</button>
-</div>
-</div>
-</div>
+    <div>
 
-<!-- DEPARTMENT DASHBOARD -->
-<div id="departmentDashboard">
-<div class="deptHeader">
-<div>
-<div class="deptTitle" id="deptTitle">DEPARTMENT</div>
-<div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>
-</div>
-<div style="display:flex;gap:6px;align-items:center">
-<span class="deptBadge" id="deptBadge"></span>
-<button onclick="departmentLogout()" style="background:#1e293b;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800">LOGOUT</button>
-</div>
-</div>
+      <div
+        class="deptTitle"
+        id="deptTitle"
+      >
+        DEPARTMENT
+      </div>
 
-<div class="deptContent">
-<div class="deptStats">
-<div class="deptStat active" id="deptCardALL" onclick="setDeptStatusFilter('ALL')">
-<small>TOTAL MACHINES</small>
-<b id="deptTotal">69</b>
-</div>
-<div class="deptStat" id="deptCardRUNNING" onclick="setDeptStatusFilter('RUNNING')">
-<small>RUNNING</small>
-<b id="deptRunning" style="color:#22c55e">0</b>
-</div>
-<div class="deptStat" id="deptCardISSUE" onclick="setDeptStatusFilter('ISSUE')">
-<small>ACTIVE ISSUE</small>
-<b id="deptIssue" style="color:#ef4444">0</b>
-</div>
-</div>
+      <div
+        style="
+          font-size:10px;
+          color:#22c55e;
+          margin-top:2px;
+          font-weight:700
+        "
+      >
+        BREMBO • LIVE
+      </div>
 
-<div class="seriesBar" style="margin-bottom:12px;border-radius:12px;">
-<button class="sBtn active" onclick="setDeptSeries('ALL')" id="deptBtnALL">ALL (69)</button>
-<button class="sBtn" onclick="setDeptSeries('EN')" id="deptBtnEN">EN (35)</button>
-<button class="sBtn" onclick="setDeptSeries('MK')" id="deptBtnMK">MK (8)</button>
-<button class="sBtn" onclick="setDeptSeries('M')" id="deptBtnM">M (15)</button>
-<button class="sBtn" onclick="setDeptSeries('L')" id="deptBtnL">L (4)</button>
-<button class="sBtn" onclick="setDeptSeries('PN')" id="deptBtnPN">PN (4)</button>
-<button class="sBtn" onclick="setDeptSeries('BR')" id="deptBtnBR">BR (3)</button>
-</div>
+    </div>
 
-<div class="deptMachineBox">
-<div style="font-size:14px;font-weight:800" id="deptGridTitle">SELECT MACHINE</div>
-<div style="font-size:11px;color:#94a3b8;margin-top:2px">Select a machine to perform your department action.</div>
-<div id="deptMachineGrid" class="deptMachineGrid"></div>
-</div>
+    <div
+      style="
+        display:flex;
+        gap:7px;
+        align-items:center
+      "
+    >
 
-<div class="deptMachineBox">
-<div style="font-size:14px;font-weight:800">SELECTED MACHINE</div>
-<div id="deptSelected" class="deptSelected"></div>
-</div>
-</div>
+      <span
+        class="deptBadge"
+        id="deptBadge"
+      ></span>
+
+      <button
+        onclick="departmentLogout()"
+        class="pill logoutBtn"
+      >
+        LOGOUT
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="deptContent">
+
+    <div class="deptStats">
+
+      <div
+        class="deptStat active"
+        id="deptCardALL"
+        onclick="setDeptStatusFilter('ALL')"
+      >
+
+        <small>TOTAL MACHINES</small>
+
+        <b id="deptTotal">69</b>
+
+      </div>
+
+      <div
+        class="deptStat"
+        id="deptCardRUNNING"
+        onclick="setDeptStatusFilter('RUNNING')"
+      >
+
+        <small>RUNNING</small>
+
+        <b
+          id="deptRunning"
+          style="color:#22c55e"
+        >
+          0
+        </b>
+
+      </div>
+
+      <div
+        class="deptStat"
+        id="deptCardISSUE"
+        onclick="setDeptStatusFilter('ISSUE')"
+      >
+
+        <small>ACTIVE ISSUE</small>
+
+        <b
+          id="deptIssue"
+          style="color:#ef4444"
+        >
+          0
+        </b>
+
+      </div>
+
+    </div>
+
+    <div class="seriesBar">
+
+      <button
+        class="sBtn active"
+        id="deptBtnALL"
+        onclick="setDeptSeries('ALL')"
+      >
+        ALL (69)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnEN"
+        onclick="setDeptSeries('EN')"
+      >
+        EN (35)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnMK"
+        onclick="setDeptSeries('MK')"
+      >
+        MK (8)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnM"
+        onclick="setDeptSeries('M')"
+      >
+        M (15)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnL"
+        onclick="setDeptSeries('L')"
+      >
+        L (4)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnPN"
+        onclick="setDeptSeries('PN')"
+      >
+        PN (4)
+      </button>
+
+      <button
+        class="sBtn"
+        id="deptBtnBR"
+        onclick="setDeptSeries('BR')"
+      >
+        BR (3)
+      </button>
+
+    </div>
+
+    <div class="deptMachineBox">
+
+      <b id="deptGridTitle">
+        SELECT MACHINE
+      </b>
+
+      <div
+        style="
+          font-size:11px;
+          color:#777;
+          margin-top:4px
+        "
+      >
+        Select a machine to perform your department action.
+      </div>
+
+      <div
+        id="deptMachineGrid"
+        class="deptMachineGrid"
+      ></div>
+
+    </div>
+
+    <div class="deptMachineBox">
+
+      <b>SELECTED MACHINE</b>
+
+      <div
+        id="deptSelected"
+        class="deptSelected"
+      >
+        Please select machine.
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
 <script>
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
 const firebaseConfig = {
-apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",
-authDomain:"brembo-dashboard.firebaseapp.com",
-databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",
-projectId:"brembo-dashboard",
-storageBucket:"brembo-dashboard.firebasestorage.app",
-messagingSenderId:"935783960863",
-appId:"1:935783960863:web:115a5380ab005c50da602a"
+  apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",
+  authDomain:"brembo-dashboard.firebaseapp.com",
+  databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",
+  projectId:"brembo-dashboard",
+  storageBucket:"brembo-dashboard.firebasestorage.app",
+  messagingSenderId:"935783960863",
+  appId:"1:935783960863:web:115a5380ab005c50da602a"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
 
-const ADMIN_PIN="191197";
-const OPERATOR_PIN="1234";
+const db = firebase.database();
 
-const DEPARTMENT_CONFIG={
-maintenance:{
-name:"MAINTENANCE",
-pin:"2026",
-color:"#ef4444",
-issueStatus:"BREAKDOWN",
-actions:[
-{ label:"BREAKDOWN OFF", status:"RUNNING", className:"breakOff" }
-]
-},
-loading:{
-name:"LOADING",
-pin:"2024",
-color:"#f59e0b",
-issueStatus:"LOT READY",
-actions:[
-{ label:"LOT TAKEN", status:"RUNNING", className:"lotTaken" }
-]
-},
-quality:{
-name:"QUALITY",
-pin:"2025",
-color:"#3b82f6",
-issueStatus:"CMM NOT OK",
-actions:[
-{ label:"OK", status:"RUNNING", className:"cmmOk" }
-]
-},
-toolroom:{
-name:"TOOL ROOM",
-pin:"2027",
-color:"#06b6d4",
-issueStatus:"FIXTURE NOT OK",
-actions:[
-{ label:"FIXTURE OK", status:"RUNNING", className:"fixtureOk" }
-]
-},
-store:{
-name:"STORE DEPARTMENT",
-pin:"2028",
-color:"#ec4899",
-issueStatus:"MATERIAL SHORTAGE",
-actions:[
-{ label:"MATERIAL SUPPLIED", status:"RUNNING", className:"materialSupplied" }
-]
-},
-supervisor:{
-name:"SUPERVISOR",
-pin:"Ampa123",
-color:"#a855f7",
-actions:[]
-}
+
+/* =========================================================
+   PINS
+========================================================= */
+
+const ADMIN_PIN = "191197";
+const OPERATOR_PIN = "1234";
+
+
+/* =========================================================
+   DEPARTMENTS
+========================================================= */
+
+const DEPARTMENT_CONFIG = {
+
+  maintenance:{
+    name:"MAINTENANCE",
+    pin:"2026",
+    issueStatus:"BREAKDOWN",
+    actions:[
+      {
+        label:"BREAKDOWN OFF",
+        status:"RUNNING"
+      }
+    ]
+  },
+
+  loading:{
+    name:"LOADING",
+    pin:"2024",
+    issueStatus:"LOT READY",
+    actions:[
+      {
+        label:"LOT TAKEN",
+        status:"RUNNING"
+      }
+    ]
+  },
+
+  quality:{
+    name:"QUALITY",
+    pin:"2025",
+    issueStatus:"CMM NOT OK",
+    actions:[
+      {
+        label:"OK",
+        status:"RUNNING"
+      }
+    ]
+  },
+
+  toolroom:{
+    name:"TOOL ROOM",
+    pin:"2027",
+    issueStatus:"FIXTURE NOT OK",
+    actions:[
+      {
+        label:"FIXTURE OK",
+        status:"RUNNING"
+      }
+    ]
+  },
+
+  store:{
+    name:"STORE DEPARTMENT",
+    pin:"2028",
+    issueStatus:"MATERIAL SHORTAGE",
+    actions:[
+      {
+        label:"MATERIAL SUPPLIED",
+        status:"RUNNING"
+      }
+    ]
+  },
+
+  supervisor:{
+    name:"SUPERVISOR",
+    pin:"Ampa123",
+    actions:[]
+  }
+
 };
 
-const ROUTE_MAP={
-"BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776" },
-"FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },
-"FIXTURE OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },
-"CMM NOT OK":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },
-"LOT HOLD":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" },
-"LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },
-"LOT READY FOR SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },
-"SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },
-"MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173" },
-"RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }
+
+/* =========================================================
+   WHATSAPP ROUTING
+========================================================= */
+
+const ROUTE_MAP = {
+
+  "BREAKDOWN":{
+    name:"Pravin Kolhe Bbi (Maintenance)",
+    no:"919822431776"
+  },
+
+  "FIXTURE NOT OK":{
+    name:"Prashant Tarate (Tool Room)",
+    no:"917350090376"
+  },
+
+  "FIXTURE OK":{
+    name:"Prashant Tarate (Tool Room)",
+    no:"917350090376"
+  },
+
+  "CMM NOT OK":{
+    name:"Santosh Shipurkar (Quality)",
+    no:"919921862590"
+  },
+
+  "LOT HOLD":{
+    name:"Mahesh Andhale (Supervisor)",
+    no:"919881097236"
+  },
+
+  "LOT READY":{
+    name:"Sonpal Ram (Loading)",
+    no:"919012683322"
+  },
+
+  "SIGN PENDING":{
+    name:"Santosh Shipurkar (Quality)",
+    no:"919921862590"
+  },
+
+  "MATERIAL SHORTAGE":{
+    name:"Sameer Sir (Store)",
+    no:"918605802173"
+  },
+
+  "RUNNING":{
+    name:"Mahesh Andhale (Supervisor)",
+    no:"919881097236"
+  }
+
 };
 
-function getCurrentShift(){
-const t=new Date().getHours()*60+new Date().getMinutes();
-if(t>=465 && t<975) return "A";
-if(t>=975 && t<1440) return "B";
-return "C";
-}
 
-function getShiftRange(s){
-if(s=="A") return "7:45 AM - 4:15 PM";
-if(s=="B") return "4:15 PM - 12:00 AM";
-return "12:00 AM - 7:45 AM";
-}
+/* =========================================================
+   MACHINE LIST
+========================================================= */
 
-function checkShiftAutoReset(){
-let saved=localStorage.getItem("brembo_shift");
-let live=getCurrentShift();
-const badge=document.getElementById("liveShiftBadge");
-if(badge) badge.innerText="SHIFT: "+live;
+const ALL_MACHINES_LIST = (()=>{
 
-const at=document.getElementById("autoShiftTxt");
-if(at) at.innerText="Current Running Shift: "+live+" ("+getShiftRange(live)+") Auto";
+  let a=[];
 
-if(saved && saved!==live){
-alert("Shift "+saved+" Ended! Shift "+live+" Started. Auto Resetting System & Logging Out.");
-let resetData={};
-ALL_MACHINES_LIST.forEach(id=>{
-resetData[id]={status:"RUNNING",op:null};
-});
-db.ref("machines").set(resetData).then(()=>{
-localStorage.clear();
-location.reload();
-});
-return true;
-}
-return false;
-}
+  for(let i=1;i<=35;i++){
+    a.push("EN"+i);
+  }
 
-setInterval(checkShiftAutoReset,10000);
+  [
+    "MK3",
+    "MK8",
+    "MK11",
+    "MK13",
+    "MK15",
+    "MK25",
+    "MK27",
+    "MK28"
+  ].forEach(x=>a.push(x));
 
-const ALL_MACHINES_LIST=(()=>{
-let a=[];
-for(let i=1;i<=35;i++) a.push("EN"+i);
-["MK3","MK8","MK11","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x));
-for(let i=1;i<=15;i++) a.push("M"+i);
-for(let i=1;i<=4;i++) a.push("L"+i);
-for(let i=1;i<=4;i++) a.push("PN"+i);
-for(let i=1;i<=3;i++) a.push("BR"+i);
-return a;
+  for(let i=1;i<=15;i++){
+    a.push("M"+i);
+  }
+
+  for(let i=1;i<=4;i++){
+    a.push("L"+i);
+  }
+
+  for(let i=1;i<=4;i++){
+    a.push("PN"+i);
+  }
+
+  for(let i=1;i<=3;i++){
+    a.push("BR"+i);
+  }
+
+  return a;
+
 })();
 
-let curSeries="ALL";
-let curMachine=null;
-let curFilter="ALL";
-let operator=null;
-let department=null;
-let machines={};
-let lastWa="";
-let prev={};
-let deptSelectedMachine=null;
-let deptSeriesFilter="ALL";
-let deptStatusFilter="ALL";
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let machines = {};
+let operator = null;
+let department = null;
+
+let curMachine = null;
+let curSeries = "ALL";
+let curFilter = "ALL";
+
+let deptSelectedMachine = null;
+let deptSeriesFilter = "ALL";
+let deptStatusFilter = "ALL";
+
+let prev = {};
+let lastWa = "";
+
+
+/* =========================================================
+   SHIFT
+========================================================= */
+
+function getCurrentShift(){
+
+  const t =
+    new Date().getHours()*60 +
+    new Date().getMinutes();
+
+  if(t>=465 && t<975) return "A";
+
+  if(t>=975 && t<1440) return "B";
+
+  return "C";
+}
+
+
+function getShiftRange(s){
+
+  if(s==="A")
+    return "7:45 AM - 4:15 PM";
+
+  if(s==="B")
+    return "4:15 PM - 12:00 AM";
+
+  return "12:00 AM - 7:45 AM";
+
+}
+
+
+function checkShiftAutoReset(){
+
+  const saved =
+    localStorage.getItem("brembo_shift");
+
+  const live =
+    getCurrentShift();
+
+  const badge =
+    document.getElementById("liveShiftBadge");
+
+  if(badge)
+    badge.innerText = "SHIFT: "+live;
+
+  const txt =
+    document.getElementById("autoShiftTxt");
+
+  if(txt)
+    txt.innerText =
+      "Current Running Shift: "+
+      live+
+      " ("+
+      getShiftRange(live)+
+      ")";
+
+  if(saved && saved!==live){
+
+    alert(
+      "Shift "+
+      saved+
+      " Ended! Shift "+
+      live+
+      " Started. Auto Resetting System."
+    );
+
+    let resetData={};
+
+    ALL_MACHINES_LIST.forEach(id=>{
+      resetData[id]={
+        status:"RUNNING",
+        op:null
+      };
+    });
+
+    db.ref("machines")
+      .set(resetData)
+      .then(()=>{
+
+        localStorage.clear();
+
+        location.reload();
+
+      });
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+/* =========================================================
+   MACHINE DATA
+========================================================= */
 
 function getAllMachines(){
-let m={};
-ALL_MACHINES_LIST.forEach((id)=>{
-m[id]={status:"RUNNING",op:null};
-});
-return m;
+
+  let m={};
+
+  ALL_MACHINES_LIST.forEach(id=>{
+
+    m[id]={
+      status:"RUNNING",
+      op:null
+    };
+
+  });
+
+  return m;
+
 }
 
-function save(){ db.ref("machines").set(machines); }
 
-function resetAll(){
-let pin=prompt("ENTER ADMIN PIN:");
-if(pin===null) return;
-if(pin!==ADMIN_PIN){ alert("Wrong PIN! Access Denied!"); return; }
-if(!confirm("Reset all 69 machines to RUNNING?")) return;
-for(let k in machines){ machines[k]={status:"RUNNING",op:null,materialDetails:null}; }
-save();
-alert("All 69 machines are RUNNING!");
-location.reload();
+function save(){
+
+  db.ref("machines").set(machines);
+
 }
 
-function loudPopup(mid,st,who,routeTo){
-const b=document.getElementById("notifBig");
-b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900;background:#fff;color:#ff1a1a">CLOSE</button>`;
-b.style.display="block";
-if(navigator.vibrate) navigator.vibrate([600,200,600,200,600]);
-try{
-let a=new Audio("https://cdn.pixabay.com/audio/2024/08/02/audio_8d832d1e7b.mp3");
-a.volume=1;
-a.play();
-}catch(e){}
-setTimeout(()=>{b.style.display="none"},9000);
-}
+
+/* =========================================================
+   LOAD FIREBASE
+========================================================= */
 
 function load(){
-db.ref("machines").on("value",s=>{
-let d=s.val();
-let all=getAllMachines();
-if(d){
-let needSave=false;
-for(let k in all){ if(!d[k]){ d[k]=all[k]; needSave=true; } }
-for(let k in d){ if(k.includes("-")){ delete d[k]; needSave=true; } }
-machines=d;
-if(needSave) save();
-for(let id in d){
-if(prev[id] && prev[id].status!=d[id].status){
-let who=d[id].op?d[id].op.name:"Someone";
-let route=ROUTE_MAP[d[id].status]||ROUTE_MAP["RUNNING"];
-loudPopup(id,d[id].status,who,route);
+
+  db.ref("machines").on("value",snap=>{
+
+    let d=snap.val();
+
+    let all=getAllMachines();
+
+    if(!d){
+
+      machines=all;
+
+      save();
+
+      return;
+
+    }
+
+    let changed=false;
+
+    ALL_MACHINES_LIST.forEach(id=>{
+
+      if(!d[id]){
+
+        d[id]=all[id];
+
+        changed=true;
+
+      }
+
+    });
+
+    machines=d;
+
+    if(changed)
+      save();
+
+    for(let id in machines){
+
+      if(
+        prev[id] &&
+        prev[id].status !== machines[id].status
+      ){
+
+        const who =
+          machines[id].op
+          ? machines[id].op.name
+          : "Someone";
+
+        const route =
+          ROUTE_MAP[machines[id].status]
+          || ROUTE_MAP.RUNNING;
+
+        loudPopup(
+          id,
+          machines[id].status,
+          who,
+          route
+        );
+
+      }
+
+    }
+
+    prev=
+      JSON.parse(
+        JSON.stringify(machines)
+      );
+
+    const fb =
+      document.getElementById("fbStat");
+
+    if(fb){
+
+      fb.innerText =
+        "LIVE - "+
+        Object.keys(machines).length+
+        " M/C";
+
+      fb.style.color="#22c55e";
+
+    }
+
+    render();
+
+    renderDepartmentDashboard();
+
+  });
+
 }
-}
-prev=JSON.parse(JSON.stringify(d));
-const fb=document.getElementById("fbStat");
-if(fb) fb.innerText="LIVE - "+Object.keys(machines).length+" M/C";
-render();
-renderDepartmentDashboard();
-}else{
-machines=getAllMachines();
-save();
-}
-});
-}
+
+
+/* =========================================================
+   LOGIN MODE
+========================================================= */
 
 function showLoginMode(mode){
-const op=document.getElementById("operatorLogin");
-const dept=document.getElementById("departmentLogin");
-const opBtn=document.getElementById("operatorModeBtn");
-const deptBtn=document.getElementById("departmentModeBtn");
-if(mode==="operator"){
-op.style.display="block";
-dept.style.display="none";
-opBtn.classList.add("active");
-deptBtn.classList.remove("active");
-}else{
-op.style.display="none";
-dept.style.display="block";
-opBtn.classList.remove("active");
-deptBtn.classList.add("active");
+
+  const op =
+    document.getElementById("operatorLogin");
+
+  const dep =
+    document.getElementById("departmentLogin");
+
+  const opBtn =
+    document.getElementById("operatorModeBtn");
+
+  const depBtn =
+    document.getElementById("departmentModeBtn");
+
+  if(mode==="operator"){
+
+    op.style.display="block";
+    dep.style.display="none";
+
+    opBtn.classList.add("active");
+    depBtn.classList.remove("active");
+
+  }else{
+
+    op.style.display="none";
+    dep.style.display="block";
+
+    opBtn.classList.remove("active");
+    depBtn.classList.add("active");
+
+  }
+
 }
-}
+
+
+/* =========================================================
+   MACHINE DROPDOWN
+========================================================= */
 
 function fillMachineDropdown(){
-const sel=document.getElementById("opMachine");
-sel.innerHTML='<option value="">-- SELECT MACHINE --</option>'+ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");
-document.getElementById("opShift").value=getCurrentShift();
-checkShiftAutoReset();
+
+  const sel =
+    document.getElementById("opMachine");
+
+  sel.innerHTML =
+    '<option value="">-- SELECT MACHINE --</option>'+
+    ALL_MACHINES_LIST
+      .map(m=>`<option value="${m}">${m}</option>`)
+      .join("");
+
+  document.getElementById("opShift").value =
+    getCurrentShift();
+
+  checkShiftAutoReset();
+
 }
+
+
+/* =========================================================
+   OPERATOR LOGIN
+========================================================= */
 
 function doLogin(){
-let id=document.getElementById("opId").value.trim();
-let nm=document.getElementById("opName").value.trim();
-let pin=document.getElementById("opPin").value.trim();
-let mc=document.getElementById("opMachine").value;
-let sh=document.getElementById("opShift").value;
 
-if(!id||!nm||!pin||!mc||!sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }
+  const id =
+    document.getElementById("opId")
+      .value.trim();
 
-if(pin !== OPERATOR_PIN){
-alert("Wrong Operator PIN! Access Denied.");
-return;
+  const nm =
+    document.getElementById("opName")
+      .value.trim();
+
+  const pin =
+    document.getElementById("opPin")
+      .value.trim();
+
+  const mc =
+    document.getElementById("opMachine")
+      .value;
+
+  const sh =
+    document.getElementById("opShift")
+      .value;
+
+  if(!id || !nm || !pin || !mc || !sh){
+
+    alert(
+      "Please fill ID, Name, PIN, Machine and Shift!"
+    );
+
+    return;
+
+  }
+
+  if(pin!==OPERATOR_PIN){
+
+    alert(
+      "Wrong Operator PIN! Access Denied."
+    );
+
+    return;
+
+  }
+
+  operator={
+    id:id,
+    name:nm,
+    machine:mc,
+    shift:sh,
+    time:new Date().toLocaleTimeString("en-IN")
+  };
+
+  department=null;
+
+  localStorage.setItem(
+    "brembo_v7",
+    JSON.stringify(operator)
+  );
+
+  localStorage.setItem(
+    "brembo_shift",
+    sh
+  );
+
+  document.getElementById("login")
+    .style.display="none";
+
+  document.getElementById("operatorDashboard")
+    .style.display="block";
+
+  applyOperator();
+
 }
 
-operator={id:id,name:nm,machine:mc,shift:sh,time:new Date().toLocaleString()};
-department=null;
-localStorage.setItem("brembo_v7",JSON.stringify(operator));
-localStorage.setItem("brembo_shift",sh);
-localStorage.setItem("brembo_login_time",Date.now());
-document.getElementById("login").style.display="none";
-document.getElementById("operatorDashboard").style.display="block";
-document.getElementById("departmentDashboard").style.display="none";
-applyOperator();
-}
+
+/* =========================================================
+   APPLY OPERATOR
+========================================================= */
 
 function applyOperator(){
-if(!operator) return;
-document.getElementById("wel").innerText=operator.name+" ("+operator.id+")";
-document.getElementById("welMc").innerText=operator.machine;
-document.getElementById("welShift").innerText="Shift "+operator.shift;
-curMachine=operator.machine;
-document.getElementById("lockMsg").innerText=`You can only send notification for ${operator.machine}.`;
-if(machines[operator.machine]){
-machines[operator.machine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine,shift:operator.shift};
-save();
+
+  if(!operator)
+    return;
+
+  document.getElementById("wel")
+    .innerText =
+      operator.name+
+      " ("+
+      operator.id+
+      ")";
+
+  document.getElementById("welMc")
+    .innerText =
+      operator.machine;
+
+  document.getElementById("welShift")
+    .innerText =
+      "Shift "+
+      operator.shift;
+
+  document.getElementById("shiftRangeTop")
+    .innerText =
+      getShiftRange(operator.shift);
+
+  curMachine =
+    operator.machine;
+
+  if(machines[operator.machine]){
+
+    machines[operator.machine].op={
+
+      name:operator.name,
+      id:operator.id,
+      time:new Date().toLocaleTimeString("en-IN"),
+      machine:operator.machine,
+      shift:operator.shift
+
+    };
+
+    save();
+
+  }
+
+  render();
+
 }
-render();
-}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 function doLogout(){
-if(confirm("Logout? Next operator can login after this.")){
-localStorage.removeItem("brembo_v7");
-localStorage.removeItem("brembo_shift");
-localStorage.removeItem("brembo_login_time");
-operator=null;
-location.reload();
-}
-}
 
-function departmentLogin(){
-const dep=document.getElementById("departmentSelect").value;
-const pin=document.getElementById("departmentPin").value;
-if(!dep||!pin){ alert("Please select department and enter PIN."); return; }
-const config=DEPARTMENT_CONFIG[dep];
-if(!config){ alert("Invalid department."); return; }
-if(pin!==config.pin){ alert("Wrong Department PIN! Access Denied!"); return; }
-department=dep;
-operator=null;
-localStorage.setItem("brembo_department",dep);
-localStorage.removeItem("brembo_v7");
-localStorage.removeItem("brembo_shift");
-localStorage.removeItem("brembo_login_time");
-document.getElementById("login").style.display="none";
-document.getElementById("operatorDashboard").style.display="none";
-document.getElementById("departmentDashboard").style.display="block";
-deptSelectedMachine=ALL_MACHINES_LIST[0];
-renderDepartmentDashboard();
+  if(!confirm("Logout?"))
+    return;
+
+  localStorage.removeItem("brembo_v7");
+  localStorage.removeItem("brembo_shift");
+
+  operator=null;
+
+  location.reload();
+
 }
 
-function departmentLogout(){
-if(confirm("Logout from department dashboard?")){
-localStorage.removeItem("brembo_department");
-department=null;
-location.reload();
-}
-}
 
-function setDeptSeries(series){
-deptSeriesFilter = series;
-const btns = ['ALL', 'EN', 'MK', 'M', 'L', 'PN', 'BR'];
-btns.forEach(b => {
-const el = document.getElementById("deptBtn" + b);
-if(el){
-if(b === series) el.classList.add("active");
-else el.classList.remove("active");
-}
-});
-renderDepartmentDashboard();
-}
+/* =========================================================
+   RESET
+========================================================= */
 
-function setDeptStatusFilter(st){
-deptStatusFilter = st;
-const cards = ['ALL', 'RUNNING', 'ISSUE'];
-cards.forEach(c => {
-const el = document.getElementById("deptCard" + c);
-if(el){
-if(c === st) el.classList.add("active");
-else el.classList.remove("active");
-}
-});
-renderDepartmentDashboard();
-}
+function resetAll(){
 
-function renderDepartmentDashboard(){
-if(!department) return;
-const config=DEPARTMENT_CONFIG[department];
-if(!config) return;
+  const pin =
+    prompt("ENTER ADMIN PIN:");
 
-document.getElementById("deptTitle").innerText=config.name+" DASHBOARD";
-document.getElementById("deptBadge").innerText=config.name;
+  if(pin===null)
+    return;
 
-document.getElementById("deptTotal").innerText=Object.keys(machines).length;
+  if(pin!==ADMIN_PIN){
 
-let running=Object.values(machines).filter(m=>m.status==="RUNNING").length;
-document.getElementById("deptRunning").innerText=running;
+    alert("Wrong PIN! Access Denied!");
 
-let issue=Object.values(machines).filter(m => config.issueStatus ? m.status === config.issueStatus : m.status !== "RUNNING").length;
-document.getElementById("deptIssue").innerText=issue;
+    return;
 
-let filteredList = ALL_MACHINES_LIST.filter(id => {
-const m = machines[id] || { status: "RUNNING" };
-let matchSeries = (deptSeriesFilter === "ALL") || id.startsWith(deptSeriesFilter);
-let matchStatus = true;
-if(deptStatusFilter === "RUNNING") {
-matchStatus = (m.status === "RUNNING");
-} else if(deptStatusFilter === "ISSUE") {
-matchStatus = config.issueStatus ? (m.status === config.issueStatus) : (m.status !== "RUNNING");
-}
-return matchSeries && matchStatus;
-});
+  }
 
-document.getElementById("deptGridTitle").innerText = `SELECT MACHINE (${filteredList.length})`;
+  if(!confirm(
+    "Reset all 69 machines to RUNNING?"
+  ))
+    return;
 
-const grid=document.getElementById("deptMachineGrid");
-if(filteredList.length === 0){
-grid.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">No Machines Found</div>`;
-} else {
-grid.innerHTML=filteredList.map(id=>{
-const m=machines[id] || {status:"RUNNING",op:null};
-const selected=deptSelectedMachine===id ? "selected" : "";
-const statusColor=m.status==="RUNNING" ? "#22c55e" : "#ef4444";
-return `
-<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">
-${id}
-<span class="deptMachineStatus" style="color:${statusColor}">${m.status}</span>
-</div>
-`;
-}).join("");
+  ALL_MACHINES_LIST.forEach(id=>{
+
+    machines[id]={
+      status:"RUNNING",
+      op:null,
+      materialDetails:null
+    };
+
+  });
+
+  save();
+
+  alert(
+    "All 69 machines are RUNNING!"
+  );
+
 }
 
-renderDepartmentSelected();
+
+/* =========================================================
+   POPUP
+========================================================= */
+
+function loudPopup(mid,st,who,routeTo){
+
+  const b =
+    document.getElementById("notifBig");
+
+  b.innerHTML=`
+
+    🚨 ${mid}
+
+    <br><br>
+
+    ${st}
+
+    <br><br>
+
+    <span style="
+      font-size:13px;
+      color:#ffeb3b
+    ">
+      To: ${routeTo.name}
+    </span>
+
+    <br>
+
+    <span style="font-size:11px">
+      By: ${who}
+    </span>
+
+    <br><br>
+
+    <button
+      onclick="this.parentElement.style.display='none'"
+      style="
+        padding:8px 20px;
+        border-radius:20px;
+        border:none;
+        font-weight:900
+      "
+    >
+      CLOSE
+    </button>
+
+  `;
+
+  b.style.display="block";
+
+  if(navigator.vibrate){
+
+    navigator.vibrate([
+      600,200,600,200,600
+    ]);
+
+  }
+
+  setTimeout(()=>{
+
+    b.style.display="none";
+
+  },9000);
+
 }
 
-function selectDepartmentMachine(id){
-if(!machines[id]) return;
-deptSelectedMachine=id;
-renderDepartmentDashboard();
-}
 
-function renderDepartmentSelected(){
-const box=document.getElementById("deptSelected");
-if(!deptSelectedMachine){
-box.innerHTML="Please select a machine.";
-return;
-}
-const m=machines[deptSelectedMachine];
-const op=m.op;
-
-let html=`
-<h2>${deptSelectedMachine}</h2>
-<div style="font-size:13px;margin-bottom:8px">
-Current Status: <b style="color:${m.status==="RUNNING"?"#22c55e":"#ef4444"}">${m.status}</b>
-</div>
-`;
-
-if(m.materialDetails){
-html+=`
-<div style="background:#2a081d;border:1px dashed #ec4899;padding:12px;border-radius:10px;font-size:12px;margin-bottom:10px;line-height:1.6">
-<b style="color:#ec4899">📦 MATERIAL SHORTAGE DETAILS:</b><br>
-Part No: <b>${m.materialDetails.partNo}</b><br>
-Part Name: <b>${m.materialDetails.partName}</b><br>
-Qty: <b>${m.materialDetails.qty}</b>
-</div>
-`;
-}
-
-if(op){
-html+=`
-<div style="background:#1a243b;padding:12px;border-radius:10px;font-size:12px;line-height:1.7">
-<b style="color:#22c55e">OPERATOR INFORMATION</b><br>
-ID: ${op.id}<br>
-Name: ${op.name}<br>
-Machine: ${op.machine || deptSelectedMachine}<br>
-Shift: ${op.shift || "-"}<br>
-Time: ${op.time || "-"}
-</div>
-`;
-}else{
-html+=`
-<div style="background:#1a243b;padding:12px;border-radius:10px;font-size:12px">
-<b style="color:#94a3b8">NO OPERATOR ASSIGNED</b>
-</div>
-`;
-}
-
-if(department==="supervisor"){
-html+=`
-<div class="viewOnly">
-<div style="font-size:18px;font-weight:900;color:#a855f7">VIEW ONLY</div>
-<div style="font-size:11px;color:#94a3b8;margin-top:6px">Supervisor can view machine, operator, shift and status.<br>No status changes are allowed.</div>
-</div>
-`;
-box.innerHTML=html;
-return;
-}
-
-const config = DEPARTMENT_CONFIG[department];
-
-if(config.issueStatus && m.status !== config.issueStatus){
-html+=`
-<div class="viewOnly" style="border-color:#22c55e">
-<div style="font-size:16px;font-weight:800;color:#22c55e">NO ACTIVE ISSUE</div>
-<div style="font-size:11px;color:#94a3b8;margin-top:6px">No active issue (${config.issueStatus}) for ${config.name} on this machine.</div>
-</div>
-`;
-box.innerHTML=html;
-return;
-}
-
-html+=`
-<div style="margin-top:14px;font-size:13px;font-weight:800">${config.name} ACTIONS</div>
-<div class="actionGrid">
-`;
-
-config.actions.forEach(action=>{
-html+=`
-<button class="actionBtn ${action.className}" onclick="departmentUpdateStatus('${action.status}')">${action.label}</button>
-`;
-});
-
-html+=`
-</div>
-<div class="smallNote">Perform action for ${config.name}.</div>
-`;
-
-box.innerHTML=html;
-}
-
-function departmentUpdateStatus(status){
-if(!department){ alert("Department login required."); return; }
-const config=DEPARTMENT_CONFIG[department];
-
-const allowed=config.actions.some(a=>a.status===status);
-if(!allowed){ alert("Access denied. This action is not allowed for your department."); return; }
-
-if(!deptSelectedMachine){ alert("Please select a machine first."); return; }
-const id=deptSelectedMachine;
-
-if(!confirm(`Mark ${id} as ${status}?`)) return;
-
-machines[id].status=status;
-
-if(status === "RUNNING"){
-machines[id].materialDetails = null;
-}
-
-save();
-
-let route=ROUTE_MAP[status] || ROUTE_MAP["RUNNING"];
-let who=department.toUpperCase()+" DEPARTMENT";
-loudPopup(id,status,who,route);
-
-if(status!=="RUNNING"){
-let msg=`*🚨 BREMBO ALERT*%0A%0AMachine: ${id}%0AStatus: *${status}*%0ADepartment: ${config.name}%0ATime: ${new Date().toLocaleString("en-IN")}%0A%0AAction Required By: ${route.name}`;
-lastWa=`https://wa.me/${route.no}?text=${msg}`;
-setTimeout(()=>{ window.open(lastWa,"_blank"); },700);
-}
-
-renderDepartmentDashboard();
-}
+/* =========================================================
+   SERIES
+========================================================= */
 
 function setSeries(series){
-curSeries=series;
-document.querySelectorAll(".sBtn").forEach(b=>b.classList.remove("active"));
-let btn=document.getElementById("btn"+series);
-if(btn) btn.classList.add("active");
-curFilter="ALL";
-renderList();
+
+  curSeries=series;
+
+  document
+    .querySelectorAll(".seriesBar .sBtn")
+    .forEach(b=>{
+
+      if(
+        b.id.startsWith("btn")
+      )
+        b.classList.remove("active");
+
+    });
+
+  const btn =
+    document.getElementById(
+      "btn"+series
+    );
+
+  if(btn)
+    btn.classList.add("active");
+
+  curFilter="ALL";
+
+  renderList();
+
 }
+
+
+/* =========================================================
+   COUNTS
+========================================================= */
 
 function getCount(k){
-if(k==="ALL") return Object.keys(machines).length;
-return Object.values(machines).filter(m=>m.status===k).length;
+
+  if(k==="ALL")
+    return Object.keys(machines).length;
+
+  return Object.values(machines)
+    .filter(m=>m.status===k)
+    .length;
+
 }
+
+
+/* =========================================================
+   STATUS CARDS
+========================================================= */
 
 function renderCards(){
-let list=[
-{k:"ALL",t:"TOTAL"},
-{k:"RUNNING",t:"RUN"},
-{k:"BREAKDOWN",t:"BREAK"},
-{k:"CMM NOT OK",t:"CMM"},
-{k:"FIXTURE NOT OK",t:"FIX"},
-{k:"LOT READY",t:"READY"},
-{k:"LOT HOLD",t:"HOLD"},
-{k:"MATERIAL SHORTAGE",t:"MAT SHORT"}
-];
 
-document.getElementById("cards").innerHTML=list.map(x=>`
-<div class="card" onclick="setF('${x.k}')">
-<p style="font-size:9px;color:#94a3b8;font-weight:700">${x.t}</p>
-<h2 style="font-size:20px;font-weight:900;color:${x.k==="BREAKDOWN"||x.k==="MATERIAL SHORTAGE"?"#ef4444":"#22c55e"}">${getCount(x.k)}</h2>
-</div>
-`).join("");
+  const list=[
+
+    {
+      k:"ALL",
+      t:"TOTAL",
+      c:"#ffffff"
+    },
+
+    {
+      k:"RUNNING",
+      t:"RUNNING",
+      c:"#22e43a"
+    },
+
+    {
+      k:"BREAKDOWN",
+      t:"BREAKDOWN",
+      c:"#ff3340"
+    },
+
+    {
+      k:"CMM NOT OK",
+      t:"CMM NOT OK",
+      c:"#168cff"
+    },
+
+    {
+      k:"FIXTURE NOT OK",
+      t:"FIXTURE NOT OK",
+      c:"#b64cff"
+    },
+
+    {
+      k:"LOT READY",
+      t:"LOT READY",
+      c:"#ff9518"
+    },
+
+    {
+      k:"LOT HOLD",
+      t:"LOT HOLD",
+      c:"#ffd000"
+    },
+
+    {
+      k:"MATERIAL SHORTAGE",
+      t:"MAT SHORT",
+      c:"#f0449b"
+    }
+
+  ];
+
+  document.getElementById("cards")
+    .innerHTML =
+      list.map(x=>`
+
+        <div
+          class="card"
+          style="--accent:${x.c}"
+          onclick="setF('${x.k}')"
+        >
+
+          <div class="cardTitle">
+            ${x.t}
+          </div>
+
+          <div class="cardCount">
+            ${getCount(x.k)}
+          </div>
+
+        </div>
+
+      `).join("");
+
 }
 
-function setF(f){ curFilter=f; renderList(); }
+
+function setF(f){
+
+  curFilter=f;
+
+  renderList();
+
+}
+
+
+/* =========================================================
+   MACHINE LIST
+========================================================= */
 
 function renderList(){
-let ids=[];
-if(curSeries==="ALL"){
-ids=curFilter==="ALL"?Object.keys(machines).sort():Object.keys(machines).filter(k=>machines[k].status===curFilter).sort();
-}else{
-ids=Object.keys(machines).filter(k=>k.startsWith(curSeries)).sort((a,b)=>{
-let na=parseInt(a.replace(/[^0-9]/g,""))||0;
-let nb=parseInt(b.replace(/[^0-9]/g,""))||0;
-return na-nb;
-});
-if(curFilter!=="ALL"){ ids=ids.filter(k=>machines[k].status===curFilter); }
+
+  let ids=[];
+
+  if(curSeries==="ALL"){
+
+    if(curFilter==="ALL"){
+
+      ids=
+        Object.keys(machines)
+          .sort();
+
+    }else{
+
+      ids=
+        Object.keys(machines)
+          .filter(
+            k=>machines[k].status===curFilter
+          )
+          .sort();
+
+    }
+
+  }else{
+
+    ids=
+      Object.keys(machines)
+        .filter(
+          k=>k.startsWith(curSeries)
+        )
+        .sort((a,b)=>{
+
+          const na=
+            parseInt(
+              a.replace(/\D/g,"")
+            )||0;
+
+          const nb=
+            parseInt(
+              b.replace(/\D/g,"")
+            )||0;
+
+          return na-nb;
+
+        });
+
+    if(curFilter!=="ALL"){
+
+      ids=
+        ids.filter(
+          k=>machines[k].status===curFilter
+        );
+
+    }
+
+  }
+
+  document.getElementById("listTitleCount")
+    .innerText =
+      "("+curSeries+" - "+ids.length+")";
+
+  document.getElementById("machineList")
+    .innerHTML =
+      ids.map(id=>{
+
+        const isMine =
+          operator &&
+          operator.machine===id;
+
+        const cls =
+          curMachine===id
+          ? "mItem active"
+          : "mItem";
+
+        const star =
+          isMine ? "★ " : "";
+
+        let color="#22c55e";
+
+        if(machines[id].status!=="RUNNING")
+          color="#ef3340";
+
+        return `
+
+          <div
+            class="${cls}"
+            onclick="sel('${id}')"
+          >
+
+            <div class="mName">
+              ${star}${id}
+            </div>
+
+            <span
+              class="statusTag"
+              style="
+                background:${color}22;
+                color:${color};
+                border:1px solid ${color}55
+              "
+            >
+              ${machines[id].status}
+            </span>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+  if(ids.length && !curMachine)
+    sel(ids[0]);
+
+  else if(
+    curMachine &&
+    machines[curMachine]
+  )
+    sel(curMachine);
+
 }
 
-document.getElementById("listTitle").innerText=curSeries+" ("+ids.length+") - "+curFilter;
-document.getElementById("machineList").innerHTML=ids.map(id=>{
-let isMine=operator && operator.machine===id;
-let cls=curMachine===id?"mItem active":"mItem";
-let star=isMine?"⭐ ":"";
-return `
-<div class="${cls}" onclick="sel('${id}')">
-<b>${star}${id}</b>
-<span style="font-size:9px;background:${machines[id].status==="RUNNING"?"#22c55e":"#ef4444"};padding:3px 8px;border-radius:10px;color:#fff;font-weight:700">${machines[id].status}</span>
-</div>
-`;
-}).join("");
 
-if(ids.length && !curMachine) sel(ids[0]);
-else if(curMachine) sel(curMachine);
-}
+/* =========================================================
+   SELECT MACHINE
+========================================================= */
 
 function sel(id){
-if(!machines[id]) return;
-curMachine=id;
-let m=machines[id];
-let op=m.op;
-let isMyMachine=operator && operator.machine===id;
 
-if(isMyMachine){
-let matHtml = "";
-if(m.materialDetails){
-matHtml = `
-<div style="background:#2a081d;border:1px dashed #ec4899;padding:10px;border-radius:10px;font-size:12px;margin-top:8px;line-height:1.5">
-<b style="color:#ec4899">📦 MATERIAL SHORTAGE:</b><br>
-Part No: ${m.materialDetails.partNo} | Part Name: ${m.materialDetails.partName} | Qty: ${m.materialDetails.qty}
-</div>
-`;
+  if(!machines[id])
+    return;
+
+  curMachine=id;
+
+  const m=
+    machines[id];
+
+  const op=
+    m.op;
+
+  const isMyMachine=
+    operator &&
+    operator.machine===id;
+
+  let route =
+    ROUTE_MAP[m.status]
+    || ROUTE_MAP.RUNNING;
+
+  let matHtml="";
+
+  if(m.materialDetails){
+
+    matHtml=`
+
+      <div style="
+        background:#2a081d;
+        border:1px dashed #ec4899;
+        padding:10px;
+        border-radius:10px;
+        font-size:12px;
+        margin-top:8px;
+        line-height:1.5
+      ">
+
+        <b style="color:#ec4899">
+          📦 MATERIAL SHORTAGE
+        </b>
+
+        <br>
+
+        Part No:
+        ${m.materialDetails.partNo}
+
+        <br>
+
+        Part Name:
+        ${m.materialDetails.partName}
+
+        <br>
+
+        Qty:
+        ${m.materialDetails.qty}
+
+      </div>
+
+    `;
+
+  }
+
+  if(isMyMachine){
+
+    document.getElementById("machineDetail")
+      .innerHTML=`
+
+        <div class="detailTop">
+
+          <div>
+
+            <div>
+
+              <span class="machineTitle">
+                ${id}
+              </span>
+
+              <span class="yours">
+                ☆ YOUR MACHINE
+              </span>
+
+            </div>
+
+            <div class="statusLine">
+
+              Status:
+
+              <b style="
+                background:#a30b11;
+                color:#fff;
+                padding:7px 10px;
+                border-radius:7px
+              ">
+                ${m.status}
+              </b>
+
+              &nbsp; | &nbsp;
+
+              Shift:
+
+              <b style="color:#ffd000">
+                ${operator.shift}
+                (${getShiftRange(operator.shift)})
+              </b>
+
+            </div>
+
+          </div>
+
+          <div class="routeTop">
+
+            <div class="routeTitle">
+              WHATSAPP ROUTING
+            </div>
+
+            <div class="routeLine">
+              👤 ${route.name}
+            </div>
+
+            <div class="routeLine">
+              ☎ +${route.no}
+            </div>
+
+          </div>
+
+        </div>
+
+        ${matHtml}
+
+      `;
+
+
+    document.getElementById("operatorBox")
+      .innerHTML=`
+
+        <div class="infoBox">
+
+          <div class="infoTitle">
+            YOUR DETAILS
+          </div>
+
+          <div class="infoGrid">
+
+            <div class="label">ID</div>
+            <div class="value">
+              ${operator.id}
+            </div>
+
+            <button
+              class="assignBtn"
+              onclick="assign()"
+            >
+              👤 I AM HERE - ASSIGN ME (${id})
+            </button>
+
+            <div class="label">Name</div>
+            <div class="value">
+              ${operator.name}
+            </div>
+
+            <div></div>
+
+            <div class="label">Machine</div>
+            <div class="value">
+              ${id}
+            </div>
+
+            <div></div>
+
+            <div class="label">Shift</div>
+            <div
+              class="value"
+              style="color:#ffd000"
+            >
+              ${operator.shift}
+              (${getShiftRange(operator.shift)})
+            </div>
+
+            <div></div>
+
+            <div class="label">Login Time</div>
+            <div class="value">
+              ${op
+                ? op.time
+                : operator.time}
+            </div>
+
+            <div></div>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+    const statuses=[
+
+      "RUNNING",
+      "BREAKDOWN",
+      "CMM NOT OK",
+      "FIXTURE NOT OK",
+      "FIXTURE OK",
+      "LOT HOLD",
+      "LOT READY",
+      "SIGN PENDING",
+      "MATERIAL SHORTAGE"
+
+    ];
+
+    document.getElementById("statusList")
+      .innerHTML=`
+
+        <div class="statusHeading">
+          UPDATE MACHINE STATUS
+        </div>
+
+        <div class="statusGrid">
+
+          ${statuses.map(s=>`
+
+            <button
+              class="statusBtn"
+              onclick="upd('${s}')"
+            >
+
+              <span>${s}</span>
+
+              <span>›</span>
+
+            </button>
+
+          `).join("")}
+
+        </div>
+
+      `;
+
+    document.getElementById("lockMsg")
+      .innerText =
+        "You can change status only for "+id;
+
+  }else{
+
+    document.getElementById("machineDetail")
+      .innerHTML=`
+
+        <div class="detailTop">
+
+          <div>
+
+            <div
+              class="machineTitle"
+              style="color:#aaa"
+            >
+              ${id}
+            </div>
+
+            <div style="
+              font-size:11px;
+              color:#777;
+              font-weight:800;
+              margin-top:7px
+            ">
+              VIEW ONLY MODE
+            </div>
+
+            <div class="statusLine">
+              Status:
+              <b>${m.status}</b>
+            </div>
+
+          </div>
+
+          <div class="routeTop">
+
+            <div
+              class="routeTitle"
+              style="color:#777"
+            >
+              WHATSAPP ROUTING
+            </div>
+
+            <div class="routeLine">
+              ${route.name}
+            </div>
+
+          </div>
+
+        </div>
+
+        ${matHtml}
+
+      `;
+
+    if(op){
+
+      document.getElementById("operatorBox")
+        .innerHTML=`
+
+          <div class="viewBox">
+
+            <b style="color:#ffd000">
+              OPERATOR ON ${id}
+            </b>
+
+            <br>
+
+            ID: ${op.id}
+
+            <br>
+
+            Name: ${op.name}
+
+            <br>
+
+            Machine: ${op.machine||id}
+
+            <br>
+
+            Shift: ${op.shift||"-"}
+
+            <br>
+
+            Time: ${op.time}
+
+          </div>
+
+        `;
+
+    }else{
+
+      document.getElementById("operatorBox")
+        .innerHTML=`
+
+          <div class="viewBox">
+
+            <b style="color:#777">
+              No Operator on ${id}
+            </b>
+
+            <br>
+
+            ID: -
+
+            <br>
+
+            Name: -
+
+            <br>
+
+            Machine: ${id}
+
+          </div>
+
+        `;
+
+    }
+
+    document.getElementById("statusList")
+      .innerHTML=`
+
+        <div style="
+          font-size:11px;
+          color:#666;
+          padding:16px;
+          text-align:center
+        ">
+
+          You cannot change status of other machines.
+
+          <br>
+
+          Only view ID, Name and Machine.
+
+        </div>
+
+      `;
+
+    document.getElementById("lockMsg")
+      .innerText =
+        "View Only - You can edit "+
+        (operator
+          ? operator.machine
+          : "your assigned machine");
+
+    document.getElementById("routeInfo")
+      .style.display="none";
+
+    document.getElementById("waBtn")
+      .style.display="none";
+
+  }
+
 }
 
-document.getElementById("machineDetail").innerHTML=`
-<div style="font-size:28px;font-weight:900;color:#22c55e">${id} ⭐ YOURS</div>
-<div style="font-size:12px;color:#94a3b8">Status: <b style="color:#ff1a1a">${m.status}</b> | Shift: ${operator.shift}</div>
-${matHtml}
-<button class="btn" style="background:#22c55e;color:#000" onclick="assign()">I AM HERE - ASSIGN ME (${id})</button>
-`;
 
-document.getElementById("operatorBox").innerHTML=`
-<div class="viewBox">
-<b style="color:#22c55e">YOUR DETAILS:</b><br>
-ID: ${operator.id}<br>
-Name: ${operator.name}<br>
-Machine: ${id}<br>
-Shift: ${operator.shift}<br>
-Time: ${op?op.time:new Date().toLocaleTimeString()}
-</div>
-`;
-
-let statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING","MATERIAL SHORTAGE"];
-document.getElementById("statusList").innerHTML=statuses.map(s=>{
-let r=ROUTE_MAP[s];
-return `
-<div class="mItem" onclick="upd('${s}')">
-<span>${s}</span>
-<span style="font-size:10px;color:#eab308">${r?r.name.split("(")[0]:""} ${m.status===s?"✓":""}</span>
-</div>
-`;
-}).join("");
-
-document.getElementById("lockMsg").innerText=`You can change status for ${id}`;
-}else{
-let matHtml = "";
-if(m.materialDetails){
-matHtml = `
-<div style="background:#2a081d;border:1px dashed #ec4899;padding:10px;border-radius:10px;font-size:12px;margin-top:8px;line-height:1.5">
-<b style="color:#ec4899">📦 MATERIAL SHORTAGE:</b><br>
-Part No: ${m.materialDetails.partNo} | Part Name: ${m.materialDetails.partName} | Qty: ${m.materialDetails.qty}
-</div>
-`;
-}
-
-document.getElementById("machineDetail").innerHTML=`
-<div style="font-size:28px;font-weight:900;color:#64748b">${id}</div>
-<div style="font-size:11px;color:#64748b;font-weight:700">VIEW ONLY MODE</div>
-<div style="font-size:12px;margin-top:4px">Status: <b style="color:#94a3b8">${m.status}</b></div>
-${matHtml}
-`;
-
-if(op){
-document.getElementById("operatorBox").innerHTML=`
-<div class="viewBox">
-<b style="color:#eab308">OPERATOR ON ${id}:</b><br>
-<b>ID:</b> ${op.id}<br>
-<b>Name:</b> ${op.name}<br>
-<b>Machine:</b> ${op.machine || id}<br>
-<b>Shift:</b> ${op.shift || "-"}<br>
-<b>Time:</b> ${op.time}
-</div>
-`;
-}else{
-document.getElementById("operatorBox").innerHTML=`
-<div class="viewBox">
-<b style="color:#64748b">No Operator on ${id}</b><br>
-ID: -<br>Name: -<br>Machine: ${id}
-</div>
-`;
-}
-
-document.getElementById("statusList").innerHTML=`
-<div style="font-size:11px;color:#64748b;padding:12px;text-align:center">You cannot change status of other machines.<br>Only view ID, Name and Machine.</div>
-`;
-document.getElementById("lockMsg").innerText=`View Only - This machine belongs to ${op?op.name:"Nobody"}. You can only edit ${operator?operator.machine:""}`;
-document.getElementById("routeInfo").style.display="none";
-document.getElementById("waBtn").style.display="none";
-}
-}
+/* =========================================================
+   ASSIGN
+========================================================= */
 
 function assign(){
-if(!operator){ document.getElementById("login").style.display="flex"; return; }
-machines[curMachine].op={name:operator.name,id:operator.id,time:new Date().toLocaleTimeString(),machine:operator.machine,shift:operator.shift};
-save();
-sel(curMachine);
+
+  if(!operator){
+
+    document.getElementById("login")
+      .style.display="flex";
+
+    return;
+
+  }
+
+  machines[curMachine].op={
+
+    name:operator.name,
+    id:operator.id,
+    time:new Date()
+      .toLocaleTimeString("en-IN"),
+    machine:operator.machine,
+    shift:operator.shift
+
+  };
+
+  save();
+
+  sel(curMachine);
+
 }
 
-function openWA(){ if(lastWa) window.open(lastWa,"_blank"); }
+
+/* =========================================================
+   STATUS UPDATE
+========================================================= */
 
 function upd(s){
-if(!operator){ document.getElementById("login").style.display="flex"; return; }
-if(curMachine!==operator.machine){ alert(`You can only send for ${operator.machine}!`); return; }
 
-if(s === "MATERIAL SHORTAGE"){
-openMaterialModal();
-return;
+  if(!operator){
+
+    document.getElementById("login")
+      .style.display="flex";
+
+    return;
+
+  }
+
+  if(curMachine!==operator.machine){
+
+    alert(
+      "You can only send for "+
+      operator.machine+"!"
+    );
+
+    return;
+
+  }
+
+  if(s==="MATERIAL SHORTAGE"){
+
+    openMaterialModal();
+
+    return;
+
+  }
+
+  machines[curMachine]
+    .materialDetails=null;
+
+  executeStatusUpdate(s);
+
 }
 
-machines[curMachine].materialDetails = null;
 
-executeStatusUpdate(s);
-}
+/* =========================================================
+   MATERIAL MODAL
+========================================================= */
 
 function openMaterialModal(){
-document.getElementById("matPartNo").value = "";
-document.getElementById("matPartName").value = "";
-document.getElementById("matQty").value = "";
-document.getElementById("materialModal").style.display = "flex";
+
+  document.getElementById("matPartNo")
+    .value="";
+
+  document.getElementById("matPartName")
+    .value="";
+
+  document.getElementById("matQty")
+    .value="";
+
+  document.getElementById("materialModal")
+    .style.display="flex";
+
 }
+
 
 function closeMaterialModal(){
-document.getElementById("materialModal").style.display = "none";
+
+  document.getElementById("materialModal")
+    .style.display="none";
+
 }
+
 
 function submitMaterialShortage(){
-let partNo = document.getElementById("matPartNo").value.trim();
-let partName = document.getElementById("matPartName").value.trim();
-let qty = document.getElementById("matQty").value.trim();
 
-if(!partNo || !partName || !qty){
-alert("Please fill Part No, Part Name, and Quantity!");
-return;
+  const partNo =
+    document.getElementById("matPartNo")
+      .value.trim();
+
+  const partName =
+    document.getElementById("matPartName")
+      .value.trim();
+
+  const qty =
+    document.getElementById("matQty")
+      .value.trim();
+
+  if(!partNo || !partName || !qty){
+
+    alert(
+      "Please fill Part No, Part Name, and Quantity!"
+    );
+
+    return;
+
+  }
+
+  machines[curMachine]
+    .materialDetails={
+
+      partNo:partNo,
+      partName:partName,
+      qty:qty
+
+    };
+
+  closeMaterialModal();
+
+  executeStatusUpdate(
+    "MATERIAL SHORTAGE"
+  );
+
 }
 
-machines[curMachine].materialDetails = {
-partNo: partNo,
-partName: partName,
-qty: qty
-};
 
-closeMaterialModal();
-executeStatusUpdate("MATERIAL SHORTAGE");
-}
+/* =========================================================
+   EXECUTE STATUS
+========================================================= */
 
 function executeStatusUpdate(s){
-machines[curMachine].status=s;
-save();
 
-let route=ROUTE_MAP[s] || ROUTE_MAP["RUNNING"];
-loudPopup(curMachine,s,operator.name,route);
+  machines[curMachine]
+    .status=s;
 
-let date=new Date().toLocaleString("en-IN");
-let matInfo = "";
-if(s === "MATERIAL SHORTAGE" && machines[curMachine].materialDetails){
-let mDet = machines[curMachine].materialDetails;
-matInfo = `%0A%0A*📦 MATERIAL DETAILS:*%0APart No: ${mDet.partNo}%0APart Name: ${mDet.partName}%0AQty: ${mDet.qty}`;
+  save();
+
+  const route =
+    ROUTE_MAP[s]
+    || ROUTE_MAP.RUNNING;
+
+  loudPopup(
+    curMachine,
+    s,
+    operator.name,
+    route
+  );
+
+  let date =
+    new Date()
+      .toLocaleString("en-IN");
+
+  let matInfo="";
+
+  if(
+    s==="MATERIAL SHORTAGE" &&
+    machines[curMachine].materialDetails
+  ){
+
+    const d =
+      machines[curMachine]
+        .materialDetails;
+
+    matInfo=
+      "%0A%0A"+
+      "*📦 MATERIAL DETAILS:*"+
+      "%0A"+
+      "Part No: "+
+      encodeURIComponent(d.partNo)+
+      "%0A"+
+      "Part Name: "+
+      encodeURIComponent(d.partName)+
+      "%0A"+
+      "Qty: "+
+      encodeURIComponent(d.qty);
+
+  }
+
+  const msg=
+    "*🚨 BREMBO ALERT*"+
+    "%0A%0A"+
+    "Machine: "+
+    encodeURIComponent(curMachine)+
+    "%0A"+
+    "Status: *"+
+    encodeURIComponent(s)+
+    "*"+
+    matInfo+
+    "%0A"+
+    "Operator: "+
+    encodeURIComponent(operator.name)+
+    "%0A"+
+    "ID: "+
+    encodeURIComponent(operator.id)+
+    "%0A"+
+    "Shift: "+
+    operator.shift+
+    " ("+
+    encodeURIComponent(
+      getShiftRange(operator.shift)
+    )+
+    ")"+
+    "%0A"+
+    "Time: "+
+    encodeURIComponent(date)+
+    "%0A%0A"+
+    "Action Required By: "+
+    encodeURIComponent(route.name);
+
+  lastWa =
+    "https://wa.me/"+
+    route.no+
+    "?text="+
+    msg;
+
+  document.getElementById("routeInfo")
+    .style.display="block";
+
+  document.getElementById("routeInfo")
+    .innerHTML=`
+
+      <b style="color:#ffd000">
+        ROUTE INFO
+      </b>
+
+      <br>
+
+      Route To:
+      ${route.name}
+
+      <br>
+
+      ☎ +${route.no}
+
+    `;
+
+  document.getElementById("waBtn")
+    .style.display="block";
+
+  document.getElementById("waBtn")
+    .innerText=
+      "◉ SEND WHATSAPP";
+
+  setTimeout(()=>{
+
+    window.open(
+      lastWa,
+      "_blank"
+    );
+
+  },700);
+
+  renderCards();
+
+  renderList();
+
 }
 
-let msg=`*🚨 BREMBO ALERT*%0A%0AMachine: ${curMachine}%0AStatus: *${s}*${matInfo}%0AOperator: ${operator.name}%0AID: ${operator.id}%0AShift: ${operator.shift} (${getShiftRange(operator.shift)})%0ATime: ${date}%0A%0AAction Required By: ${route.name}`;
-lastWa=`https://wa.me/${route.no}?text=${msg}`;
 
-document.getElementById("routeInfo").style.display="block";
-document.getElementById("routeInfo").innerHTML=`<b>WhatsApp will go to:</b><br>👉 ${route.name}<br>📱 ${route.no}`;
-document.getElementById("waBtn").style.display="block";
-document.getElementById("waBtn").innerText=`SEND TO ${route.name.toUpperCase()}`;
+/* =========================================================
+   WHATSAPP
+========================================================= */
 
-setTimeout(()=>{ window.open(lastWa,"_blank"); },700);
+function openWA(){
 
-renderCards();
-renderList();
+  if(lastWa)
+    window.open(
+      lastWa,
+      "_blank"
+    );
+
 }
+
+
+/* =========================================================
+   DEPARTMENT LOGIN
+========================================================= */
+
+function departmentLogin(){
+
+  const dep =
+    document.getElementById(
+      "departmentSelect"
+    ).value;
+
+  const pin =
+    document.getElementById(
+      "departmentPin"
+    ).value;
+
+  if(!dep || !pin){
+
+    alert(
+      "Please select department and enter PIN."
+    );
+
+    return;
+
+  }
+
+  const config =
+    DEPARTMENT_CONFIG[dep];
+
+  if(!config){
+
+    alert("Invalid department.");
+
+    return;
+
+  }
+
+  if(pin!==config.pin){
+
+    alert(
+      "Wrong Department PIN! Access Denied!"
+    );
+
+    return;
+
+  }
+
+  department=dep;
+
+  operator=null;
+
+  localStorage.setItem(
+    "brembo_department",
+    dep
+  );
+
+  localStorage.removeItem("brembo_v7");
+  localStorage.removeItem("brembo_shift");
+
+  document.getElementById("login")
+    .style.display="none";
+
+  document.getElementById("operatorDashboard")
+    .style.display="none";
+
+  document.getElementById("departmentDashboard")
+    .style.display="block";
+
+  deptSelectedMachine =
+    ALL_MACHINES_LIST[0];
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT LOGOUT
+========================================================= */
+
+function departmentLogout(){
+
+  if(!confirm(
+    "Logout from department dashboard?"
+  ))
+    return;
+
+  localStorage.removeItem(
+    "brembo_department"
+  );
+
+  department=null;
+
+  location.reload();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT SERIES
+========================================================= */
+
+function setDeptSeries(series){
+
+  deptSeriesFilter=series;
+
+  [
+    "ALL",
+    "EN",
+    "MK",
+    "M",
+    "L",
+    "PN",
+    "BR"
+  ].forEach(x=>{
+
+    const el =
+      document.getElementById(
+        "deptBtn"+x
+      );
+
+    if(el){
+
+      if(x===series)
+        el.classList.add("active");
+
+      else
+        el.classList.remove("active");
+
+    }
+
+  });
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT FILTER
+========================================================= */
+
+function setDeptStatusFilter(st){
+
+  deptStatusFilter=st;
+
+  [
+    "ALL",
+    "RUNNING",
+    "ISSUE"
+  ].forEach(x=>{
+
+    const el =
+      document.getElementById(
+        "deptCard"+x
+      );
+
+    if(el){
+
+      if(x===st)
+        el.classList.add("active");
+
+      else
+        el.classList.remove("active");
+
+    }
+
+  });
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT DASHBOARD
+========================================================= */
+
+function renderDepartmentDashboard(){
+
+  if(!department)
+    return;
+
+  const config =
+    DEPARTMENT_CONFIG[department];
+
+  if(!config)
+    return;
+
+  document.getElementById("deptTitle")
+    .innerText=
+      config.name+
+      " DASHBOARD";
+
+  document.getElementById("deptBadge")
+    .innerText=
+      config.name;
+
+  document.getElementById("deptTotal")
+    .innerText=
+      Object.keys(machines).length;
+
+  const running =
+    Object.values(machines)
+      .filter(
+        m=>m.status==="RUNNING"
+      )
+      .length;
+
+  document.getElementById("deptRunning")
+    .innerText=running;
+
+  const issue =
+    Object.values(machines)
+      .filter(m=>{
+
+        if(config.issueStatus)
+          return m.status===
+            config.issueStatus;
+
+        return m.status!=="RUNNING";
+
+      }).length;
+
+  document.getElementById("deptIssue")
+    .innerText=issue;
+
+  const filtered =
+    ALL_MACHINES_LIST
+      .filter(id=>{
+
+        const m =
+          machines[id]
+          || {status:"RUNNING"};
+
+        const seriesMatch =
+          deptSeriesFilter==="ALL"
+          ||
+          id.startsWith(
+            deptSeriesFilter
+          );
+
+        let statusMatch=true;
+
+        if(
+          deptStatusFilter==="RUNNING"
+        ){
+
+          statusMatch =
+            m.status==="RUNNING";
+
+        }
+
+        if(
+          deptStatusFilter==="ISSUE"
+        ){
+
+          statusMatch =
+            config.issueStatus
+            ? m.status===
+              config.issueStatus
+            : m.status!=="RUNNING";
+
+        }
+
+        return seriesMatch &&
+          statusMatch;
+
+      });
+
+  document.getElementById("deptGridTitle")
+    .innerText=
+      "SELECT MACHINE ("+
+      filtered.length+
+      ")";
+
+  const grid =
+    document.getElementById(
+      "deptMachineGrid"
+    );
+
+  grid.innerHTML =
+    filtered.map(id=>{
+
+      const m =
+        machines[id]
+        || {
+          status:"RUNNING"
+        };
+
+      const selected =
+        deptSelectedMachine===id
+        ? "selected"
+        : "";
+
+      const color =
+        m.status==="RUNNING"
+        ? "#22c55e"
+        : "#ef4444";
+
+      return `
+
+        <div
+          class="deptMachine ${selected}"
+          onclick="selectDepartmentMachine('${id}')"
+        >
+
+          ${id}
+
+          <span
+            class="deptMachineStatus"
+            style="color:${color}"
+          >
+            ${m.status}
+          </span>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+  renderDepartmentSelected();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT MACHINE SELECT
+========================================================= */
+
+function selectDepartmentMachine(id){
+
+  if(!machines[id])
+    return;
+
+  deptSelectedMachine=id;
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT SELECTED
+========================================================= */
+
+function renderDepartmentSelected(){
+
+  const box =
+    document.getElementById(
+      "deptSelected"
+    );
+
+  if(!deptSelectedMachine){
+
+    box.innerHTML=
+      "Please select a machine.";
+
+    return;
+
+  }
+
+  const m =
+    machines[deptSelectedMachine];
+
+  const op =
+    m.op;
+
+  const config =
+    DEPARTMENT_CONFIG[department];
+
+  let html=`
+
+    <h2 style="
+      font-size:28px;
+      font-weight:900
+    ">
+      ${deptSelectedMachine}
+    </h2>
+
+    <div style="
+      margin:8px 0;
+      font-size:13px
+    ">
+
+      Current Status:
+
+      <b style="
+        color:
+        ${m.status==="RUNNING"
+          ? "#22c55e"
+          : "#ef4444"}
+      ">
+        ${m.status}
+      </b>
+
+    </div>
+
+  `;
+
+  if(m.materialDetails){
+
+    html+=`
+
+      <div style="
+        background:#2a081d;
+        border:1px dashed #ec4899;
+        padding:12px;
+        border-radius:10px;
+        font-size:12px;
+        line-height:1.6;
+        margin-bottom:10px
+      ">
+
+        <b style="color:#ec4899">
+          📦 MATERIAL SHORTAGE
+        </b>
+
+        <br>
+
+        Part No:
+        ${m.materialDetails.partNo}
+
+        <br>
+
+        Part Name:
+        ${m.materialDetails.partName}
+
+        <br>
+
+        Qty:
+        ${m.materialDetails.qty}
+
+      </div>
+
+    `;
+
+  }
+
+  if(op){
+
+    html+=`
+
+      <div class="viewBox">
+
+        <b style="color:#22c55e">
+          OPERATOR INFORMATION
+        </b>
+
+        <br>
+
+        ID: ${op.id}
+
+        <br>
+
+        Name: ${op.name}
+
+        <br>
+
+        Machine:
+        ${op.machine||deptSelectedMachine}
+
+        <br>
+
+        Shift:
+        ${op.shift||"-"}
+
+        <br>
+
+        Time:
+        ${op.time||"-"}
+
+      </div>
+
+    `;
+
+  }else{
+
+    html+=`
+
+      <div class="viewBox">
+
+        <b style="color:#777">
+          NO OPERATOR ASSIGNED
+        </b>
+
+      </div>
+
+    `;
+
+  }
+
+  if(department==="supervisor"){
+
+    html+=`
+
+      <div class="viewOnly">
+
+        <div style="
+          font-size:18px;
+          font-weight:900;
+          color:#a855f7
+        ">
+          VIEW ONLY
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:#777;
+          margin-top:6px
+        ">
+          Supervisor can view machine,
+          operator, shift and status.
+          <br>
+          No status changes are allowed.
+        </div>
+
+      </div>
+
+    `;
+
+    box.innerHTML=html;
+
+    return;
+
+  }
+
+  if(
+    config.issueStatus &&
+    m.status!==config.issueStatus
+  ){
+
+    html+=`
+
+      <div class="viewOnly"
+        style="border-color:#22c55e">
+
+        <div style="
+          color:#22c55e;
+          font-weight:900
+        ">
+          NO ACTIVE ISSUE
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:#777;
+          margin-top:5px
+        ">
+          No active issue
+          (${config.issueStatus})
+        </div>
+
+      </div>
+
+    `;
+
+    box.innerHTML=html;
+
+    return;
+
+  }
+
+  html+=`
+
+    <div style="
+      margin-top:14px;
+      font-weight:900
+    ">
+      ${config.name} ACTIONS
+    </div>
+
+  `;
+
+  config.actions.forEach(action=>{
+
+    html+=`
+
+      <button
+        onclick="departmentUpdateStatus('${action.status}')"
+        style="
+          width:100%;
+          margin-top:10px;
+          padding:15px;
+          border:1px solid #22c55e;
+          border-radius:10px;
+          background:#103817;
+          color:#35ff48;
+          font-weight:900
+        "
+      >
+        ${action.label}
+      </button>
+
+    `;
+
+  });
+
+  box.innerHTML=html;
+
+}
+
+
+/* =========================================================
+   DEPARTMENT UPDATE
+========================================================= */
+
+function departmentUpdateStatus(status){
+
+  if(!department){
+
+    alert(
+      "Department login required."
+    );
+
+    return;
+
+  }
+
+  const config =
+    DEPARTMENT_CONFIG[department];
+
+  const allowed =
+    config.actions.some(
+      a=>a.status===status
+    );
+
+  if(!allowed){
+
+    alert(
+      "Access denied."
+    );
+
+    return;
+
+  }
+
+  if(!deptSelectedMachine){
+
+    alert(
+      "Please select a machine first."
+    );
+
+    return;
+
+  }
+
+  const id =
+    deptSelectedMachine;
+
+  if(!confirm(
+    "Mark "+
+    id+
+    " as "+
+    status+
+    "?"
+  ))
+    return;
+
+  machines[id].status=status;
+
+  if(status==="RUNNING"){
+
+    machines[id]
+      .materialDetails=null;
+
+  }
+
+  save();
+
+  const route =
+    ROUTE_MAP[status]
+    || ROUTE_MAP.RUNNING;
+
+  loudPopup(
+    id,
+    status,
+    config.name,
+    route
+  );
+
+  if(status!=="RUNNING"){
+
+    const msg =
+      "*🚨 BREMBO ALERT*"+
+      "%0A%0A"+
+      "Machine: "+
+      encodeURIComponent(id)+
+      "%0A"+
+      "Status: *"+
+      encodeURIComponent(status)+
+      "*"+
+      "%0A"+
+      "Department: "+
+      encodeURIComponent(config.name)+
+      "%0A"+
+      "Time: "+
+      encodeURIComponent(
+        new Date()
+          .toLocaleString("en-IN")
+      )+
+      "%0A%0A"+
+      "Action Required By: "+
+      encodeURIComponent(route.name);
+
+    lastWa =
+      "https://wa.me/"+
+      route.no+
+      "?text="+
+      msg;
+
+    setTimeout(()=>{
+
+      window.open(
+        lastWa,
+        "_blank"
+      );
+
+    },700);
+
+  }
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
 
 function render(){
-if(!operator && !department) return;
 
-if(operator){
-document.getElementById("operatorDashboard").style.display="block";
-document.getElementById("departmentDashboard").style.display="none";
-renderCards();
-renderList();
-if(curMachine) sel(curMachine);
+  if(!operator && !department)
+    return;
+
+  if(operator){
+
+    document.getElementById(
+      "operatorDashboard"
+    ).style.display="block";
+
+    document.getElementById(
+      "departmentDashboard"
+    ).style.display="none";
+
+    renderCards();
+
+    renderList();
+
+  }
+
+  if(department){
+
+    document.getElementById(
+      "operatorDashboard"
+    ).style.display="none";
+
+    document.getElementById(
+      "departmentDashboard"
+    ).style.display="block";
+
+    renderDepartmentDashboard();
+
+  }
+
 }
 
-if(department){
-document.getElementById("operatorDashboard").style.display="none";
-document.getElementById("departmentDashboard").style.display="block";
-renderDepartmentDashboard();
-}
-}
+
+/* =========================================================
+   START
+========================================================= */
 
 fillMachineDropdown();
+
 load();
 
-let savedOperator=localStorage.getItem("brembo_v7");
-let savedDepartment=localStorage.getItem("brembo_department");
+setInterval(
+  checkShiftAutoReset,
+  10000
+);
 
-if(savedDepartment){
-if(DEPARTMENT_CONFIG[savedDepartment]){
-department=savedDepartment;
-operator=null;
-document.getElementById("login").style.display="none";
-document.getElementById("operatorDashboard").style.display="none";
-document.getElementById("departmentDashboard").style.display="block";
-deptSelectedMachine=ALL_MACHINES_LIST[0];
-renderDepartmentDashboard();
+
+/* =========================================================
+   RESTORE LOGIN
+========================================================= */
+
+const savedOperator =
+  localStorage.getItem("brembo_v7");
+
+const savedDepartment =
+  localStorage.getItem(
+    "brembo_department"
+  );
+
+
+if(
+  savedDepartment &&
+  DEPARTMENT_CONFIG[savedDepartment]
+){
+
+  department =
+    savedDepartment;
+
+  operator=null;
+
+  document.getElementById("login")
+    .style.display="none";
+
+  document.getElementById(
+    "departmentDashboard"
+  ).style.display="block";
+
+  deptSelectedMachine =
+    ALL_MACHINES_LIST[0];
+
+  renderDepartmentDashboard();
+
 }
-}else if(savedOperator){
-try{
-operator=JSON.parse(savedOperator);
-if(!operator.machine){
-document.getElementById("login").style.display="flex";
-localStorage.removeItem("brembo_v7");
-}else{
-if(!checkShiftAutoReset()){
-document.getElementById("login").style.display="none";
-document.getElementById("operatorDashboard").style.display="block";
-applyOperator();
+
+
+else if(savedOperator){
+
+  try{
+
+    operator =
+      JSON.parse(savedOperator);
+
+    if(!operator.machine){
+
+      localStorage.removeItem(
+        "brembo_v7"
+      );
+
+    }
+
+    else if(
+      !checkShiftAutoReset()
+    ){
+
+      document.getElementById("login")
+        .style.display="none";
+
+      document.getElementById(
+        "operatorDashboard"
+      ).style.display="block";
+
+      applyOperator();
+
+    }
+
+  }catch(e){
+
+    localStorage.removeItem(
+      "brembo_v7"
+    );
+
+  }
+
 }
-}
-}catch(e){
-localStorage.removeItem("brembo_v7");
-}
-}
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
 
 if("serviceWorker" in navigator){
-navigator.serviceWorker.register("sw.js");
+
+  navigator.serviceWorker
+    .register("sw.js")
+    .catch(()=>{});
+
 }
+
 </script>
+
 </body>
-</html>
+      </html>
