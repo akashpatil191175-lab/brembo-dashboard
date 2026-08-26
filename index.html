@@ -1210,78 +1210,9 @@ button:active{
 
   </div>
 
-  <!-- SERIES -->
-
-  <div class="seriesBar">
-
-    <button class="sBtn active"
-            id="btnALL"
-            onclick="setSeries('ALL')">
-      ALL (69)
-    </button>
-
-    <button class="sBtn"
-            id="btnEN"
-            onclick="setSeries('EN')">
-      EN (35)
-    </button>
-
-    <button class="sBtn"
-            id="btnMK"
-            onclick="setSeries('MK')">
-      MK (8)
-    </button>
-
-    <button class="sBtn"
-            id="btnM"
-            onclick="setSeries('M')">
-      M (15)
-    </button>
-
-    <button class="sBtn"
-            id="btnL"
-            onclick="setSeries('L')">
-      L (4)
-    </button>
-
-    <button class="sBtn"
-            id="btnPN"
-            onclick="setSeries('PN')">
-      PN (4)
-    </button>
-
-    <button class="sBtn"
-            id="btnBR"
-            onclick="setSeries('BR')">
-      BR (3)
-    </button>
-
-  </div>
-
-  <!-- STATUS CARDS -->
-
-  <div class="cards"
-       id="cards"></div>
-
   <!-- MAIN -->
 
-  <div class="mainBox">
-
-    <!-- MACHINE LIST -->
-
-    <div class="panel">
-
-      <div class="panelHeader">
-        MACHINES
-        <span id="listTitleCount">
-          (ALL - 69)
-        </span>
-      </div>
-
-      <div id="machineList"
-           class="machineList"></div>
-
-    </div>
+  <div class="mainBox" style="grid-template-columns: 1fr; padding-top: 20px;">
 
     <!-- DETAIL -->
 
@@ -1384,48 +1315,33 @@ button:active{
 
     <!-- DEPARTMENT STATS -->
 
-    <div class="deptStats">
+    <div class="deptStats" style="grid-template-columns: repeat(2, 1fr);">
 
       <div class="deptStat active"
-           id="deptCardALL"
-           onclick="setDeptStatusFilter('ALL')">
-
-        <small>
-          TOTAL MACHINES
-        </small>
-
-        <b id="deptTotal">
-          69
-        </b>
-
-      </div>
-
-      <div class="deptStat"
-           id="deptCardRUNNING"
-           onclick="setDeptStatusFilter('RUNNING')">
-
-        <small>
-          RUNNING
-        </small>
-
-        <b id="deptRunning"
-           style="color:#22c55e">
-          0
-        </b>
-
-      </div>
-
-      <div class="deptStat"
            id="deptCardISSUE"
            onclick="setDeptStatusFilter('ISSUE')">
 
         <small id="deptIssueTitle">
-          ACTIVE ISSUE
+          MACHINES WITH ISSUE
         </small>
 
         <b id="deptIssue"
            style="color:#ef4444">
           0
+        </b>
+
+      </div>
+
+      <div class="deptStat"
+           id="deptCardALL"
+           onclick="setDeptStatusFilter('ALL')">
+
+        <small>
+          ALL MACHINES IN ISSUE LIST
+        </small>
+
+        <b>
+          VIEW ALL
         </b>
 
       </div>
@@ -1485,11 +1401,11 @@ button:active{
     <div class="deptMachineBox">
 
       <b id="deptGridTitle">
-        SELECT MACHINE
+        SELECT MACHINE WITH ISSUE
       </b>
 
       <div style="font-size:11px;color:#777;margin-top:4px">
-        Select a machine to perform your department action.
+        Only machines requiring attention from your department are listed below.
       </div>
 
       <div id="deptMachineGrid"
@@ -1757,7 +1673,7 @@ let deptSelectedMachine = null;
 
 let deptSeriesFilter = "ALL";
 
-let deptStatusFilter = "ALL";
+let deptStatusFilter = "ISSUE";
 
 let prev = {};
 
@@ -1998,29 +1914,6 @@ function saveMachine(id){
 
 
 /* =========================================================
-   FIREBASE MULTI MACHINE UPDATE
-========================================================= */
-
-function saveMultipleMachines(ids){
-
-  const updates={};
-
-  ids.forEach(id=>{
-
-    if(machines[id]){
-
-      updates["machines/"+id]=machines[id];
-
-    }
-
-  });
-
-  return db.ref().update(updates);
-
-}
-
-
-/* =========================================================
    RESET ALL FIREBASE
 ========================================================= */
 
@@ -2096,8 +1989,6 @@ function load(){
     });
 
 
-    /* Add missing machines without overwriting existing */
-
     if(missing.length){
 
       const updates={};
@@ -2112,8 +2003,6 @@ function load(){
 
     }
 
-
-    /* Detect status changes */
 
     for(let id of ALL_MACHINES_LIST){
 
@@ -2578,871 +2467,138 @@ function loudPopup(
 
 
 /* =========================================================
-   SERIES
+   SELECT MACHINE (Only Operator's own machine)
 ========================================================= */
 
-function setSeries(series){
+function render(){
 
-  curSeries=series;
-
-  document
-    .querySelectorAll(".seriesBar .sBtn")
-    .forEach(b=>{
-
-      if(
-        b.id &&
-        b.id.startsWith("btn")
-      ){
-
-        b.classList.remove("active");
-
-      }
-
-    });
-
-
-  const btn =
-    document.getElementById(
-      "btn"+series
-    );
-
-
-  if(btn){
-
-    btn.classList.add("active");
-
+  if(!operator && !department){
+    return;
   }
 
-
-  curFilter="ALL";
-
-  renderCards();
-
-  renderList();
-
-}
-
-
-/* =========================================================
-   COUNT
-========================================================= */
-
-function getCount(k){
-
-  if(k==="ALL"){
-
-    return Object.keys(machines).length;
-
-  }
-
-
-  if(k==="MAT REQ"){
-
-    return Object.values(machines)
-      .filter(
-        m=>m.status==="MATERIAL REQUIREMENT"
-      ).length;
-
-  }
-
-
-  return Object.values(machines)
-    .filter(
-      m=>m.status===k
-    ).length;
-
-}
-
-
-/* =========================================================
-   OPERATOR STATUS CARDS
-========================================================= */
-
-function renderCards(){
-
-  const list=[
-
-    {
-      k:"ALL",
-      t:"TOTAL",
-      c:"#ffffff"
-    },
-
-    {
-      k:"RUNNING",
-      t:"RUNNING",
-      c:"#22e43a"
-    },
-
-    {
-      k:"BREAKDOWN",
-      t:"BREAKDOWN",
-      c:"#ff3340"
-    },
-
-    {
-      k:"CMM NOT OK",
-      t:"CMM NOT OK",
-      c:"#168cff"
-    },
-
-    {
-      k:"FIXTURE NOT OK",
-      t:"FIXTURE NOT OK",
-      c:"#b64cff"
-    },
-
-    {
-      k:"LOT READY",
-      t:"LOT READY",
-      c:"#ff9518"
-    },
-
-    {
-      k:"LOT HOLD",
-      t:"LOT HOLD",
-      c:"#ffd000"
-    },
-
-    {
-      k:"MAT REQ",
-      t:"MAT REQ",
-      c:"#facc15"
-    },
-
-    {
-      k:"MATERIAL SHORTAGE",
-      t:"SHORTAGE",
-      c:"#b91c1c"
-    }
-
-  ];
-
-
-  document.getElementById("cards")
-    .innerHTML =
-
-    list.map(x=>`
-
-      <div
-        class="card"
-        style="--accent:${x.c}"
-        onclick="setF('${x.k}')">
-
-        <div class="cardTitle">
-          ⚙️ ${x.t}
-        </div>
-
-        <div class="cardCount">
-          ${getCount(x.k)}
-        </div>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-/* =========================================================
-   FILTER
-========================================================= */
-
-function setF(f){
-
-  curFilter=f;
-
-  renderList();
-
-}
-
-
-/* =========================================================
-   MACHINE LIST
-========================================================= */
-
-function renderList(){
-
-  let ids=[];
-
-  let filterVal =
-    curFilter;
-
-
-  if(curFilter==="MAT REQ"){
-
-    filterVal =
-      "MATERIAL REQUIREMENT";
-
-  }
-
-
-  if(curSeries==="ALL"){
-
-    if(curFilter==="ALL"){
-
-      ids =
-        Object.keys(machines)
-          .sort();
-
-    }else{
-
-      ids =
-        Object.keys(machines)
-          .filter(
-            k=>
-              machines[k].status===
-              filterVal
-          )
-          .sort();
-
-    }
-
-  }else{
-
-    ids =
-      Object.keys(machines)
-        .filter(
-          k=>
-            k.startsWith(curSeries)
-        )
-        .sort((a,b)=>{
-
-          const na =
-            parseInt(
-              a.replace(/\D/g,"")
-            )||0;
-
-          const nb =
-            parseInt(
-              b.replace(/\D/g,"")
-            )||0;
-
-          return na-nb;
-
-        });
-
-
-    if(curFilter!=="ALL"){
-
-      ids =
-        ids.filter(
-          k=>
-            machines[k].status===
-            filterVal
-        );
-
-    }
-
-  }
-
-
-  document.getElementById(
-    "listTitleCount"
-  ).innerText =
-    "("+curSeries+" - "+ids.length+")";
-
-
-  document.getElementById(
-    "machineList"
-  ).innerHTML =
-
-    ids.map(id=>{
-
-      const isMine =
-        operator &&
-        operator.machine===id;
-
-
-      const cls =
-        curMachine===id
-        ? "mItem active"
-        : "mItem";
-
-
-      const star =
-        isMine ? "★ " : "☆ ";
-
-
-      const st =
-        machines[id].status;
-
-
-      let color="#22c55e";
-
-
-      if(
-        st==="MATERIAL REQUIREMENT"
-      ){
-
-        color="#eab308";
-
-      }
-
-      else if(
-        st==="MATERIAL SHORTAGE"
-      ){
-
-        color="#b91c1c";
-
-      }
-
-      else if(st!=="RUNNING"){
-
-        color="#ef3340";
-
-      }
-
-
-      return `
-
-        <div
-          class="${cls}"
-          onclick="sel('${id}')">
-
-          <div class="mName">
-            ${star}${id}
-          </div>
-
-          <span
-            class="statusTag"
-            style="
-              background:${color}22;
-              color:${color};
-              border:1px solid ${color}55
-            ">
-
-            ${st}
-
-          </span>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-
-  if(
-    ids.length &&
-    !curMachine
-  ){
-
-    sel(ids[0]);
-
-  }
-
-  else if(
-    curMachine &&
-    machines[curMachine]
-  ){
-
+  if(operator){
+    document.getElementById("operatorDashboard").style.display="block";
+    document.getElementById("departmentDashboard").style.display="none";
+    
+    // Always force operator to see only their assigned machine
+    curMachine = operator.machine;
     sel(curMachine);
+  }
 
+  if(department){
+    document.getElementById("operatorDashboard").style.display="none";
+    document.getElementById("departmentDashboard").style.display="block";
+    renderDepartmentDashboard();
   }
 
 }
 
-
-/* =========================================================
-   SELECT MACHINE
-========================================================= */
 
 function sel(id){
 
   if(!machines[id]) return;
 
-
   curMachine=id;
 
-
-  const m =
-    machines[id];
-
-
-  const op =
-    m.op;
-
-
-  const isMyMachine =
-    operator &&
-    operator.machine===id;
-
-
-  const route =
-    ROUTE_MAP[m.status]
-    ||
-    ROUTE_MAP.RUNNING;
-
+  const m = machines[id];
+  const op = m.op;
+  const route = ROUTE_MAP[m.status] || ROUTE_MAP.RUNNING;
 
   let matHtml="";
 
-
   if(m.materialDetails){
-
     matHtml=`
-
-      <div style="
-        background:#2a2508;
-        border:1px dashed #eab308;
-        padding:10px;
-        border-radius:10px;
-        font-size:12px;
-        margin-top:8px;
-        line-height:1.5">
-
-        <b style="color:#eab308">
-          📦 MATERIAL REQUIREMENT DETAILS
-        </b>
-
-        <br>
-
-        Part No:
-        ${escapeHtml(m.materialDetails.partNo)}
-
-        <br>
-
-        Part Name:
-        ${escapeHtml(m.materialDetails.partName)}
-
-        <br>
-
-        Qty:
-        ${escapeHtml(String(m.materialDetails.qty))}
-
+      <div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:10px;font-size:12px;margin-top:8px;line-height:1.5">
+        <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>
+        Part No: ${escapeHtml(m.materialDetails.partNo)}<br>
+        Part Name: ${escapeHtml(m.materialDetails.partName)}<br>
+        Qty: ${escapeHtml(String(m.materialDetails.qty))}
       </div>
-
     `;
-
   }
-
 
   let badgeBg="#a30b11";
-
-
-  if(
-    m.status==="MATERIAL REQUIREMENT"
-  ){
-
+  if(m.status==="MATERIAL REQUIREMENT"){
     badgeBg="#ca8a04";
-
-  }
-
-  else if(
-    m.status==="MATERIAL SHORTAGE"
-  ){
-
+  }else if(m.status==="MATERIAL SHORTAGE"){
     badgeBg="#b91c1c";
-
   }
 
-
-  if(isMyMachine){
-
-    document.getElementById(
-      "machineDetail"
-    ).innerHTML=`
-
-      <div class="detailTop">
-
+  document.getElementById("machineDetail").innerHTML=`
+    <div class="detailTop">
+      <div>
         <div>
-
-          <div>
-
-            <span class="machineTitle">
-              ${id}
-            </span>
-
-            <span class="yours">
-              ☆ YOUR MACHINE
-            </span>
-
-          </div>
-
-          <div class="statusLine">
-
-            Status:
-
-            <b style="
-              background:${badgeBg};
-              color:#fff;
-              padding:6px 10px;
-              border-radius:6px">
-
-              ${m.status}
-
-            </b>
-
-            &nbsp;|&nbsp;
-
-            Shift:
-
-            <b style="color:#ffd000">
-
-              ${operator.shift}
-
-              (${getShiftRange(operator.shift)})
-
-            </b>
-
-          </div>
-
+          <span class="machineTitle">${id}</span>
+          <span class="yours">☆ YOUR MACHINE</span>
         </div>
-
-        <div class="routeTop">
-
-          <div class="routeTitle">
-            WHATSAPP ROUTING
-          </div>
-
-          <div class="routeLine">
-            👤 ${route.name}
-          </div>
-
-          <div class="routeLine">
-            ☎ +${route.no}
-          </div>
-
-        </div>
-
-      </div>
-
-      ${matHtml}
-
-    `;
-
-
-    document.getElementById(
-      "operatorBox"
-    ).innerHTML=`
-
-      <div class="infoBox">
-
-        <div class="infoTitle">
-          YOUR DETAILS
-        </div>
-
-        <div class="infoGrid">
-
-          <div class="label">
-            ID
-          </div>
-
-          <div class="value">
-            ${escapeHtml(operator.id)}
-          </div>
-
-          <div></div>
-
-
-          <div class="label">
-            Name
-          </div>
-
-          <div class="value">
-            ${escapeHtml(operator.name)}
-          </div>
-
-          <button
-            class="assignBtn"
-            onclick="assign()">
-
-            👤 I AM HERE - ASSIGN ME (${id})
-
-          </button>
-
-
-          <div class="label">
-            Machine
-          </div>
-
-          <div class="value">
-            ${id}
-          </div>
-
-          <div></div>
-
-
-          <div class="label">
-            Shift
-          </div>
-
-          <div
-            class="value"
-            style="color:#ffd000">
-
-            ${operator.shift}
-            (${getShiftRange(operator.shift)})
-
-          </div>
-
-          <div></div>
-
-
-          <div class="label">
-            Login Time
-          </div>
-
-          <div class="value">
-            ${op ? op.time : operator.time}
-          </div>
-
-          <div></div>
-
-        </div>
-
-      </div>
-
-    `;
-
-
-    const statuses=[
-
-      "RUNNING",
-
-      "BREAKDOWN",
-
-      "CMM NOT OK",
-
-      "FIXTURE NOT OK",
-
-      "FIXTURE OK",
-
-      "LOT HOLD",
-
-      "LOT READY",
-
-      "SIGN PENDING",
-
-      "MATERIAL REQUIREMENT"
-
-    ];
-
-
-    document.getElementById(
-      "statusList"
-    ).innerHTML=`
-
-      <div class="statusHeading">
-        UPDATE MACHINE STATUS
-      </div>
-
-      <div class="statusGrid">
-
-        ${statuses.map(s=>`
-
-          <button
-            class="statusBtn"
-            onclick="upd('${s}')">
-
-            <span>
-
-              ${
-                s==="MATERIAL REQUIREMENT"
-                ? "📦 MATERIAL REQUIREMENT (मागणी)"
-                : s
-              }
-
-            </span>
-
-            <span>
-              ›
-            </span>
-
-          </button>
-
-        `).join("")}
-
-      </div>
-
-    `;
-
-
-    document.getElementById(
-      "lockMsg"
-    ).innerText =
-      "You can change status only for "+id;
-
-  }
-
-  else{
-
-    document.getElementById(
-      "machineDetail"
-    ).innerHTML=`
-
-      <div class="detailTop">
-
-        <div>
-
-          <div
-            class="machineTitle"
-            style="color:#aaa">
-
-            ${id}
-
-          </div>
-
-          <div style="
-            font-size:11px;
-            color:#777;
-            font-weight:800;
-            margin-top:7px">
-
-            VIEW ONLY MODE
-
-          </div>
-
-          <div class="statusLine">
-
-            Status:
-
-            <b>
-              ${m.status}
-            </b>
-
-          </div>
-
-        </div>
-
-        <div class="routeTop">
-
-          <div
-            class="routeTitle"
-            style="color:#777">
-
-            WHATSAPP ROUTING
-
-          </div>
-
-          <div class="routeLine">
-            ${route.name}
-          </div>
-
-        </div>
-
-      </div>
-
-      ${matHtml}
-
-    `;
-
-
-    if(op){
-
-      document.getElementById(
-        "operatorBox"
-      ).innerHTML=`
-
-        <div class="viewBox">
-
+        <div class="statusLine">
+          Status:
+          <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">
+            ${m.status}
+          </b>
+          &nbsp;|&nbsp; Shift:
           <b style="color:#ffd000">
-            OPERATOR ON ${id}
+            ${operator.shift} (${getShiftRange(operator.shift)})
           </b>
-
-          <br>
-
-          ID:
-          ${escapeHtml(op.id)}
-
-          <br>
-
-          Name:
-          ${escapeHtml(op.name)}
-
-          <br>
-
-          Machine:
-          ${escapeHtml(op.machine||id)}
-
-          <br>
-
-          Shift:
-          ${escapeHtml(op.shift||"-")}
-
-          <br>
-
-          Time:
-          ${escapeHtml(op.time||"-")}
-
         </div>
-
-      `;
-
-    }else{
-
-      document.getElementById(
-        "operatorBox"
-      ).innerHTML=`
-
-        <div class="viewBox">
-
-          <b style="color:#777">
-            No Operator on ${id}
-          </b>
-
-          <br>
-
-          ID: -
-
-          <br>
-
-          Name: -
-
-          <br>
-
-          Machine: ${id}
-
-        </div>
-
-      `;
-
-    }
-
-
-    document.getElementById(
-      "statusList"
-    ).innerHTML=`
-
-      <div style="
-        font-size:11px;
-        color:#666;
-        padding:16px;
-        text-align:center">
-
-        You cannot change status of other machines.
-
-        <br>
-
-        Only view ID, Name and Machine.
-
       </div>
+      <div class="routeTop">
+        <div class="routeTitle">WHATSAPP ROUTING</div>
+        <div class="routeLine">👤 ${route.name}</div>
+        <div class="routeLine">☎ +${route.no}</div>
+      </div>
+    </div>
+    ${matHtml}
+  `;
 
-    `;
+  document.getElementById("operatorBox").innerHTML=`
+    <div class="infoBox">
+      <div class="infoTitle">YOUR DETAILS</div>
+      <div class="infoGrid">
+        <div class="label">ID</div>
+        <div class="value">${escapeHtml(operator.id)}</div>
+        <div></div>
+        <div class="label">Name</div>
+        <div class="value">${escapeHtml(operator.name)}</div>
+        <button class="assignBtn" onclick="assign()">👤 ASSIGN ME (${id})</button>
+        <div class="label">Machine</div>
+        <div class="value">${id}</div>
+        <div></div>
+        <div class="label">Shift</div>
+        <div class="value" style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</div>
+        <div></div>
+        <div class="label">Login Time</div>
+        <div class="value">${op ? op.time : operator.time}</div>
+        <div></div>
+      </div>
+    </div>
+  `;
 
+  const statuses=[
+    "RUNNING",
+    "BREAKDOWN",
+    "CMM NOT OK",
+    "FIXTURE NOT OK",
+    "FIXTURE OK",
+    "LOT HOLD",
+    "LOT READY",
+    "SIGN PENDING",
+    "MATERIAL REQUIREMENT"
+  ];
 
-    document.getElementById(
-      "lockMsg"
-    ).innerText =
-      "View Only - You can edit "+
-      (
-        operator
-        ? operator.machine
-        : "your assigned machine"
-      );
+  document.getElementById("statusList").innerHTML=`
+    <div class="statusHeading">UPDATE MACHINE STATUS</div>
+    <div class="statusGrid">
+      ${statuses.map(s=>`
+        <button class="statusBtn" onclick="upd('${s}')">
+          <span>${s==="MATERIAL REQUIREMENT" ? "📦 MATERIAL REQUIREMENT (मागणी)" : s}</span>
+          <span>›</span>
+        </button>
+      `).join("")}
+    </div>
+  `;
 
-
-    document.getElementById(
-      "routeInfo"
-    ).style.display="none";
-
-
-    document.getElementById(
-      "waBtn"
-    ).style.display="none";
-
-  }
-
+  document.getElementById("lockMsg").innerText = "You are viewing and updating your assigned machine: " + id;
 }
 
 
@@ -3453,56 +2609,25 @@ function sel(id){
 function assign(){
 
   if(!operator){
-
-    document.getElementById(
-      "login"
-    ).style.display="flex";
-
+    document.getElementById("login").style.display="flex";
     return;
-
   }
-
 
   if(!machines[curMachine]){
-
-    machines[curMachine]=
-      getDefaultMachine();
-
+    machines[curMachine]=getDefaultMachine();
   }
 
-
   machines[curMachine].op={
-
     name:operator.name,
-
     id:operator.id,
-
-    time:
-      new Date()
-        .toLocaleTimeString("en-IN"),
-
+    time:new Date().toLocaleTimeString("en-IN"),
     machine:operator.machine,
-
     shift:operator.shift
-
   };
 
-
   saveMachine(curMachine)
-    .then(()=>{
-
-      sel(curMachine);
-
-    })
-    .catch(err=>{
-
-      console.error(err);
-
-      alert(
-        "Firebase save failed."
-      );
-
-    });
+    .then(()=>{ sel(curMachine); })
+    .catch(err=>{ console.error(err); alert("Firebase save failed."); });
 
 }
 
@@ -3514,41 +2639,16 @@ function assign(){
 function upd(s){
 
   if(!operator){
-
-    document.getElementById(
-      "login"
-    ).style.display="flex";
-
+    document.getElementById("login").style.display="flex";
     return;
-
   }
-
-
-  if(curMachine!==operator.machine){
-
-    alert(
-      "You can only send for "+
-      operator.machine+
-      "!"
-    );
-
-    return;
-
-  }
-
 
   if(s==="MATERIAL REQUIREMENT"){
-
     openMaterialModal();
-
     return;
-
   }
 
-
   machines[curMachine].materialDetails=null;
-
-
   executeStatusUpdate(s);
 
 }
@@ -3559,33 +2659,15 @@ function upd(s){
 ========================================================= */
 
 function openMaterialModal(){
-
-  document.getElementById(
-    "matPartNo"
-  ).value="";
-
-  document.getElementById(
-    "matPartName"
-  ).value="";
-
-  document.getElementById(
-    "matQty"
-  ).value="";
-
-
-  document.getElementById(
-    "materialModal"
-  ).style.display="flex";
-
+  document.getElementById("matPartNo").value="";
+  document.getElementById("matPartName").value="";
+  document.getElementById("matQty").value="";
+  document.getElementById("materialModal").style.display="flex";
 }
 
 
 function closeMaterialModal(){
-
-  document.getElementById(
-    "materialModal"
-  ).style.display="none";
-
+  document.getElementById("materialModal").style.display="none";
 }
 
 
@@ -3595,53 +2677,23 @@ function closeMaterialModal(){
 
 function submitMaterialRequirement(){
 
-  const partNo =
-    document.getElementById(
-      "matPartNo"
-    ).value.trim();
-
-
-  const partName =
-    document.getElementById(
-      "matPartName"
-    ).value.trim();
-
-
-  const qty =
-    document.getElementById(
-      "matQty"
-    ).value.trim();
-
+  const partNo = document.getElementById("matPartNo").value.trim();
+  const partName = document.getElementById("matPartName").value.trim();
+  const qty = document.getElementById("matQty").value.trim();
 
   if(!partNo || !partName || !qty){
-
-    alert(
-      "Please fill Part No, Part Name, and Quantity!"
-    );
-
+    alert("Please fill Part No, Part Name, and Quantity!");
     return;
-
   }
 
-
-  machines[curMachine]
-    .materialDetails={
-
-      partNo:partNo,
-
-      partName:partName,
-
-      qty:qty
-
-    };
-
+  machines[curMachine].materialDetails={
+    partNo:partNo,
+    partName:partName,
+    qty:qty
+  };
 
   closeMaterialModal();
-
-
-  executeStatusUpdate(
-    "MATERIAL REQUIREMENT"
-  );
+  executeStatusUpdate("MATERIAL REQUIREMENT");
 
 }
 
@@ -3653,158 +2705,61 @@ function submitMaterialRequirement(){
 function executeStatusUpdate(s){
 
   if(!machines[curMachine]){
-
-    machines[curMachine]=
-      getDefaultMachine();
-
+    machines[curMachine]=getDefaultMachine();
   }
-
 
   machines[curMachine].status=s;
 
-
   return saveMachine(curMachine)
-
     .then(()=>{
 
-      const route =
-        ROUTE_MAP[s]
-        ||
-        ROUTE_MAP.RUNNING;
+      const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;
 
+      loudPopup(curMachine, s, operator.name, route);
 
-      loudPopup(
-        curMachine,
-        s,
-        operator.name,
-        route
-      );
-
-
-      let date =
-        new Date()
-          .toLocaleString("en-IN");
-
-
+      let date = new Date().toLocaleString("en-IN");
       let matInfo="";
 
-
-      if(
-        machines[curMachine]
-          .materialDetails
-      ){
-
-        const d =
-          machines[curMachine]
-            .materialDetails;
-
-
-        matInfo =
-          "%0A%0A*📦 MATERIAL DETAILS:*"+
-          "%0APart No: "+
-          encodeURIComponent(d.partNo)+
-          "%0APart Name: "+
-          encodeURIComponent(d.partName)+
-          "%0AQty: "+
-          encodeURIComponent(d.qty);
-
+      if(machines[curMachine].materialDetails){
+        const d = machines[curMachine].materialDetails;
+        matInfo = "%0A%0A*📦 MATERIAL DETAILS:*"+
+                  "%0APart No: "+encodeURIComponent(d.partNo)+
+                  "%0APart Name: "+encodeURIComponent(d.partName)+
+                  "%0AQty: "+encodeURIComponent(d.qty);
       }
 
+      const msg = "*🚨 BREMBO ALERT*"+
+                  "%0A%0AMachine: "+encodeURIComponent(curMachine)+
+                  "%0AStatus: *"+encodeURIComponent(s)+"*"+
+                  matInfo+
+                  "%0AOperator: "+encodeURIComponent(operator.name)+
+                  "%0AID: "+encodeURIComponent(operator.id)+
+                  "%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")"+
+                  "%0ATime: "+encodeURIComponent(date)+
+                  "%0A%0AAction Required By: "+encodeURIComponent(route.name);
 
-      const msg =
-        "*🚨 BREMBO ALERT*"+
-        "%0A%0AMachine: "+
-        encodeURIComponent(curMachine)+
-        "%0AStatus: *"+
-        encodeURIComponent(s)+
-        "*"+
-        matInfo+
-        "%0AOperator: "+
-        encodeURIComponent(operator.name)+
-        "%0AID: "+
-        encodeURIComponent(operator.id)+
-        "%0AShift: "+
-        operator.shift+
-        " ("+
-        encodeURIComponent(
-          getShiftRange(operator.shift)
-        )+
-        ")" +
-        "%0ATime: "+
-        encodeURIComponent(date)+
-        "%0A%0AAction Required By: "+
-        encodeURIComponent(route.name);
+      lastWa = "https://wa.me/"+route.no+"?text="+msg;
 
-
-      lastWa =
-        "https://wa.me/"+
-        route.no+
-        "?text="+
-        msg;
-
-
-      document.getElementById(
-        "routeInfo"
-      ).style.display="block";
-
-
-      document.getElementById(
-        "routeInfo"
-      ).innerHTML=`
-
-        <b style="color:#ffd000">
-          ROUTE INFO
-        </b>
-
-        <br>
-
-        Route To:
-        ${route.name}
-
-        <br>
-
+      document.getElementById("routeInfo").style.display="block";
+      document.getElementById("routeInfo").innerHTML=`
+        <b style="color:#ffd000">ROUTE INFO</b><br>
+        Route To: ${route.name}<br>
         ☎ +${route.no}
-
       `;
 
-
-      document.getElementById(
-        "waBtn"
-      ).style.display="block";
-
-
-      document.getElementById(
-        "waBtn"
-      ).innerText=
-        "◉ SEND WHATSAPP";
-
+      document.getElementById("waBtn").style.display="block";
+      document.getElementById("waBtn").innerText="◉ SEND WHATSAPP";
 
       setTimeout(()=>{
-
-        window.open(
-          lastWa,
-          "_blank"
-        );
-
+        window.open(lastWa, "_blank");
       },700);
 
-
-      renderCards();
-
-      renderList();
-
-      renderDepartmentDashboard();
+      render();
 
     })
-
     .catch(err=>{
-
       console.error(err);
-
-      alert(
-        "Firebase update failed. Please check Internet connection."
-      );
-
+      alert("Firebase update failed. Please check Internet connection.");
     });
 
 }
@@ -3815,16 +2770,9 @@ function executeStatusUpdate(s){
 ========================================================= */
 
 function openWA(){
-
   if(lastWa){
-
-    window.open(
-      lastWa,
-      "_blank"
-    );
-
+    window.open(lastWa, "_blank");
   }
-
 }
 
 
@@ -3833,14 +2781,12 @@ function openWA(){
 ========================================================= */
 
 function escapeHtml(value){
-
   return String(value ?? "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
-
 }
 
 
@@ -3851,280 +2797,87 @@ function escapeHtml(value){
 function downloadShiftExcel(){
 
   try{
-
     const rows=[];
 
-
     ALL_MACHINES_LIST.forEach(id=>{
-
-      const m =
-        machines[id]
-        ||
-        getDefaultMachine();
-
-
-      const op =
-        m.op
-        ||
-        {};
-
-
-      const mat =
-        m.materialDetails
-        ||
-        {};
-
-
+      const m = machines[id] || getDefaultMachine();
+      const op = m.op || {};
+      const mat = m.materialDetails || {};
       let deptName="-";
 
-
-      if(
-        m.status==="BREAKDOWN"
-      ){
-
+      if(m.status==="BREAKDOWN"){
         deptName="Maintenance";
-
-      }
-
-      else if(
-        m.status==="CMM NOT OK" ||
-        m.status==="SIGN PENDING"
-      ){
-
+      }else if(m.status==="CMM NOT OK" || m.status==="SIGN PENDING"){
         deptName="Quality";
-
-      }
-
-      else if(
-        m.status==="FIXTURE NOT OK" ||
-        m.status==="FIXTURE OK"
-      ){
-
+      }else if(m.status==="FIXTURE NOT OK" || m.status==="FIXTURE OK"){
         deptName="Tool Room";
-
-      }
-
-      else if(
-        m.status==="LOT READY"
-      ){
-
+      }else if(m.status==="LOT READY"){
         deptName="Loading";
-
-      }
-
-      else if(
-        m.status==="MATERIAL REQUIREMENT" ||
-        m.status==="MATERIAL SHORTAGE"
-      ){
-
+      }else if(m.status==="MATERIAL REQUIREMENT" || m.status==="MATERIAL SHORTAGE"){
         deptName="Store Department";
-
-      }
-
-      else if(
-        m.status==="LOT HOLD"
-      ){
-
+      }else if(m.status==="LOT HOLD"){
         deptName="Supervisor";
-
-      }
-
-      else{
-
+      }else{
         deptName="Running";
-
       }
-
 
       rows.push({
-
         "Machine No":id,
-
         "Status":m.status || "RUNNING",
-
-        "Operator Name":
-          op.name || "-",
-
-        "Operator ID":
-          op.id || "-",
-
-        "Shift":
-          op.shift || "-",
-
-        "Login Time":
-          op.time || "-",
-
-        "Material Part No":
-          mat.partNo || "-",
-
-        "Material Part Name":
-          mat.partName || "-",
-
-        "Quantity":
-          mat.qty || "-",
-
-        "Department Responsible":
-          deptName
-
+        "Operator Name":op.name || "-",
+        "Operator ID":op.id || "-",
+        "Shift":op.shift || "-",
+        "Login Time":op.time || "-",
+        "Material Part No":mat.partNo || "-",
+        "Material Part Name":mat.partName || "-",
+        "Quantity":mat.qty || "-",
+        "Department Responsible":deptName
       });
-
     });
 
-
-    /* XLSX library available */
-
-    if(
-      typeof XLSX !== "undefined"
-    ){
-
-      const worksheet =
-        XLSX.utils.json_to_sheet(
-          rows
-        );
-
-
+    if(typeof XLSX !== "undefined"){
+      const worksheet = XLSX.utils.json_to_sheet(rows);
       worksheet["!cols"]=[
-
-        {wch:14},
-        {wch:24},
-        {wch:22},
-        {wch:16},
-        {wch:10},
-        {wch:16},
-        {wch:20},
-        {wch:30},
-        {wch:12},
-        {wch:24}
-
+        {wch:14},{wch:24},{wch:22},{wch:16},{wch:10},
+        {wch:16},{wch:20},{wch:30},{wch:12},{wch:24}
       ];
-
-
-      const workbook =
-        XLSX.utils.book_new();
-
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Shift Report"
-      );
-
-
-      const date =
-        new Date()
-          .toISOString()
-          .slice(0,10);
-
-
-      XLSX.writeFile(
-        workbook,
-        "Brembo_Shift_Report_"+date+".xlsx"
-      );
-
-
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");
+      const date = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(workbook, "Brembo_Shift_Report_"+date+".xlsx");
       return;
-
     }
 
-
-    /* CSV fallback */
-
     const header=[
-      "Machine No",
-      "Status",
-      "Operator Name",
-      "Operator ID",
-      "Shift",
-      "Login Time",
-      "Material Part No",
-      "Material Part Name",
-      "Quantity",
-      "Department Responsible"
+      "Machine No","Status","Operator Name","Operator ID","Shift",
+      "Login Time","Material Part No","Material Part Name","Quantity","Department Responsible"
     ];
-
-
-    const csv=[
-      header.join(",")
-    ];
-
-
+    const csv=[header.join(",")];
     rows.forEach(row=>{
-
-      csv.push(
-
-        header
-          .map(h=>
-            csvEscape(row[h])
-          )
-          .join(",")
-
-      );
-
+      csv.push(header.map(h=>csvEscape(row[h])).join(","));
     });
 
-
-    const blob =
-      new Blob(
-        [csv.join("\n")],
-        {
-          type:"text/csv;charset=utf-8;"
-        }
-      );
-
-
-    const url =
-      URL.createObjectURL(blob);
-
-
-    const link =
-      document.createElement("a");
-
-
+    const blob = new Blob([csv.join("\n")], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
     link.href=url;
-
-    link.download=
-      "Brembo_Shift_Report_"+
-      new Date()
-        .toISOString()
-        .slice(0,10)+
-      ".csv";
-
-
+    link.download="Brembo_Shift_Report_"+new Date().toISOString().slice(0,10)+".csv";
     document.body.appendChild(link);
-
     link.click();
-
     document.body.removeChild(link);
-
     URL.revokeObjectURL(url);
 
-
   }catch(err){
-
-    console.error(
-      "Excel Error:",
-      err
-    );
-
-    alert(
-      "Excel download failed. Please try again."
-    );
-
+    console.error("Excel Error:", err);
+    alert("Excel download failed. Please try again.");
   }
 
 }
 
 
 function csvEscape(value){
-
-  const v =
-    String(value ?? "");
-
-
-  return '"'+
-    v.replace(/"/g,'""')+
-    '"';
-
+  const v = String(value ?? "");
+  return '"'+v.replace(/"/g,'""')+'"';
 }
 
 
@@ -4134,101 +2887,39 @@ function csvEscape(value){
 
 function departmentLogin(){
 
-  const dep =
-    document.getElementById(
-      "departmentSelect"
-    ).value;
-
-
-  const pin =
-    document.getElementById(
-      "departmentPin"
-    ).value;
-
+  const dep = document.getElementById("departmentSelect").value;
+  const pin = document.getElementById("departmentPin").value;
 
   if(!dep || !pin){
-
-    alert(
-      "Please select department and enter PIN."
-    );
-
+    alert("Please select department and enter PIN.");
     return;
-
   }
 
-
-  const config =
-    DEPARTMENT_CONFIG[dep];
-
-
+  const config = DEPARTMENT_CONFIG[dep];
   if(!config){
-
-    alert(
-      "Invalid department."
-    );
-
+    alert("Invalid department.");
     return;
-
   }
-
 
   if(pin!==config.pin){
-
-    alert(
-      "Wrong Department PIN! Access Denied!"
-    );
-
+    alert("Wrong Department PIN! Access Denied!");
     return;
-
   }
 
-
   department=dep;
-
   operator=null;
-
   materialRequirementMode=false;
 
+  localStorage.setItem("brembo_department", dep);
+  localStorage.removeItem("brembo_v7");
+  localStorage.removeItem("brembo_shift");
 
-  localStorage.setItem(
-    "brembo_department",
-    dep
-  );
-
-
-  localStorage.removeItem(
-    "brembo_v7"
-  );
-
-
-  localStorage.removeItem(
-    "brembo_shift"
-  );
-
-
-  document.getElementById(
-    "login"
-  ).style.display="none";
-
-
-  document.getElementById(
-    "operatorDashboard"
-  ).style.display="none";
-
-
-  document.getElementById(
-    "departmentDashboard"
-  ).style.display="block";
-
-
-  deptSelectedMachine =
-    ALL_MACHINES_LIST[0];
-
+  document.getElementById("login").style.display="none";
+  document.getElementById("operatorDashboard").style.display="none";
+  document.getElementById("departmentDashboard").style.display="block";
 
   deptSeriesFilter="ALL";
-
-  deptStatusFilter="ALL";
-
+  deptStatusFilter="ISSUE";
 
   renderDepartmentDashboard();
 
@@ -4240,24 +2931,10 @@ function departmentLogin(){
 ========================================================= */
 
 function departmentLogout(){
-
-  if(
-    !confirm(
-      "Logout from department dashboard?"
-    )
-  ) return;
-
-
-  localStorage.removeItem(
-    "brembo_department"
-  );
-
-
+  if(!confirm("Logout from department dashboard?")) return;
+  localStorage.removeItem("brembo_department");
   department=null;
-
-
   location.reload();
-
 }
 
 
@@ -4266,49 +2943,20 @@ function departmentLogout(){
 ========================================================= */
 
 function setDeptSeries(series){
-
   deptSeriesFilter=series;
 
-
-  [
-    "ALL",
-    "EN",
-    "MK",
-    "M",
-    "L",
-    "PN",
-    "BR"
-  ].forEach(x=>{
-
-    const el =
-      document.getElementById(
-        "deptBtn"+x
-      );
-
-
+  ["ALL","EN","MK","M","L","PN","BR"].forEach(x=>{
+    const el = document.getElementById("deptBtn"+x);
     if(el){
-
       if(x===series){
-
-        el.classList.add(
-          "active"
-        );
-
+        el.classList.add("active");
       }else{
-
-        el.classList.remove(
-          "active"
-        );
-
+        el.classList.remove("active");
       }
-
     }
-
   });
 
-
   renderDepartmentDashboard();
-
 }
 
 
@@ -4317,75 +2965,21 @@ function setDeptSeries(series){
 ========================================================= */
 
 function setDeptStatusFilter(st){
-
   deptStatusFilter=st;
+  materialRequirementMode = (st==="MATERIAL REQUIREMENT");
 
-  materialRequirementMode =
-    st==="MATERIAL REQUIREMENT";
-
-
-  [
-    "ALL",
-    "RUNNING",
-    "ISSUE"
-  ].forEach(x=>{
-
-    const el =
-      document.getElementById(
-        "deptCard"+x
-      );
-
-
+  ["ALL","ISSUE"].forEach(x=>{
+    const el = document.getElementById("deptCard"+x);
     if(el){
-
       if(x===st){
-
-        el.classList.add(
-          "active"
-        );
-
+        el.classList.add("active");
       }else{
-
-        el.classList.remove(
-          "active"
-        );
-
+        el.classList.remove("active");
       }
-
     }
-
   });
 
-
-  const matBtn =
-    document.getElementById(
-      "materialRequirementBtn"
-    );
-
-
-  if(matBtn){
-
-    if(
-      materialRequirementMode
-    ){
-
-      matBtn.classList.add(
-        "active"
-      );
-
-    }else{
-
-      matBtn.classList.remove(
-        "active"
-      );
-
-    }
-
-  }
-
-
   renderDepartmentDashboard();
-
 }
 
 
@@ -4394,360 +2988,117 @@ function setDeptStatusFilter(st){
 ========================================================= */
 
 function toggleMaterialRequirements(){
+  if(department!=="store") return;
 
-  if(
-    department!=="store"
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    materialRequirementMode
-  ){
-
+  if(materialRequirementMode){
     materialRequirementMode=false;
-
-    deptStatusFilter="ALL";
-
+    deptStatusFilter="ISSUE";
   }else{
-
     materialRequirementMode=true;
-
-    deptStatusFilter=
-      "MATERIAL REQUIREMENT";
-
+    deptStatusFilter="MATERIAL REQUIREMENT";
   }
-
-
-  [
-    "ALL",
-    "RUNNING",
-    "ISSUE"
-  ].forEach(x=>{
-
-    const el =
-      document.getElementById(
-        "deptCard"+x
-      );
-
-
-    if(el){
-
-      el.classList.remove(
-        "active"
-      );
-
-    }
-
-  });
-
 
   renderDepartmentDashboard();
-
 }
 
 
 /* =========================================================
-   DEPARTMENT DASHBOARD
+   DEPARTMENT DASHBOARD (Only machines with issues)
 ========================================================= */
 
 function renderDepartmentDashboard(){
 
   if(!department) return;
 
-
-  const config =
-    DEPARTMENT_CONFIG[department];
-
-
+  const config = DEPARTMENT_CONFIG[department];
   if(!config) return;
 
+  document.getElementById("deptTitle").innerText = config.name + " DASHBOARD";
+  document.getElementById("deptBadge").innerText = config.name;
 
-  document.getElementById(
-    "deptTitle"
-  ).innerText =
-    config.name+
-    " DASHBOARD";
+  // Calculate issue count specifically relevant to this department
+  let issueMachines = ALL_MACHINES_LIST.filter(id=>{
+    const m = machines[id] || getDefaultMachine();
+    if(m.status === "RUNNING") return false;
 
+    if(config.issueStatus){
+      return m.status === config.issueStatus;
+    }
+    return true; // For supervisor / generic fallback
+  });
 
-  document.getElementById(
-    "deptBadge"
-  ).innerText =
-    config.name;
+  document.getElementById("deptIssue").innerText = issueMachines.length;
 
-
-  document.getElementById(
-    "deptTotal"
-  ).innerText =
-    ALL_MACHINES_LIST.length;
-
-
-  const running =
-    Object.values(machines)
-      .filter(
-        m=>m.status==="RUNNING"
-      ).length;
-
-
-  document.getElementById(
-    "deptRunning"
-  ).innerText =
-    running;
-
-
-  let issue=0;
-
-
-  if(config.issueStatus){
-
-    issue =
-      Object.values(machines)
-        .filter(
-          m=>
-            m.status===
-            config.issueStatus
-        ).length;
-
-  }else{
-
-    issue =
-      Object.values(machines)
-        .filter(
-          m=>
-            m.status!=="RUNNING"
-        ).length;
-
-  }
-
-
-  document.getElementById(
-    "deptIssue"
-  ).innerText =
-    issue;
-
-
-  /* Store special button */
-
-  const matBtn =
-    document.getElementById(
-      "materialRequirementBtn"
-    );
-
-
-  const matCount =
-    Object.values(machines)
-      .filter(
-        m=>
-          m.status===
-          "MATERIAL REQUIREMENT"
-      ).length;
-
+  // Store special button
+  const matBtn = document.getElementById("materialRequirementBtn");
+  const matCount = Object.values(machines).filter(m=>m.status==="MATERIAL REQUIREMENT").length;
 
   if(department==="store"){
-
     matBtn.style.display="block";
-
-
-    document.getElementById(
-      "materialReqCount"
-    ).innerText =
-      matCount;
-
-
-    if(
-      materialRequirementMode
-    ){
-
-      matBtn.classList.add(
-        "active"
-      );
-
+    document.getElementById("materialReqCount").innerText = matCount;
+    if(materialRequirementMode){
+      matBtn.classList.add("active");
     }else{
+      matBtn.classList.remove("active");
+    }
+  }else{
+    matBtn.style.display="none";
+  }
 
-      matBtn.classList.remove(
-        "active"
-      );
-
+  // Filter machines for grid: Only show machines having issues related to this department
+  const filtered = ALL_MACHINES_LIST.filter(id=>{
+    const m = machines[id] || getDefaultMachine();
+    
+    // Running machines are ignored on department screen unless requested via view all
+    if(m.status === "RUNNING" && deptStatusFilter !== "ALL") {
+      return false;
     }
 
-  }else{
+    const seriesMatch = (deptSeriesFilter==="ALL" || id.startsWith(deptSeriesFilter));
+    
+    let statusMatch = true;
+    if(deptStatusFilter === "ISSUE"){
+      if(config.issueStatus){
+        statusMatch = (m.status === config.issueStatus);
+      }else{
+        statusMatch = (m.status !== "RUNNING");
+      }
+    }else if(deptStatusFilter === "MATERIAL REQUIREMENT"){
+      statusMatch = (m.status === "MATERIAL REQUIREMENT");
+    }
 
-    matBtn.style.display="none";
+    return seriesMatch && statusMatch;
+  });
 
+  document.getElementById("deptGridTitle").innerText = "MACHINES REQUIRING ATTENTION ("+filtered.length+")";
+
+  const grid = document.getElementById("deptMachineGrid");
+  
+  if(filtered.length === 0){
+    grid.innerHTML = `<div style="grid-column: span 5; text-align:center; padding: 20px; color: #777;">No machines currently have issues for your department.</div>`;
+    deptSelectedMachine = null;
+    renderDepartmentSelected();
+    return;
   }
 
+  grid.innerHTML = filtered.map(id=>{
+    const m = machines[id] || getDefaultMachine();
+    const selected = (deptSelectedMachine===id) ? "selected" : "";
+    let color="#ef4444";
+    if(m.status==="MATERIAL REQUIREMENT") color="#eab308";
+    if(m.status==="MATERIAL SHORTAGE") color="#b91c1c";
 
-  /* Filter machines */
+    return `
+      <div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">
+        ${id}
+        <span class="deptMachineStatus" style="color:${color}">${m.status}</span>
+      </div>
+    `;
+  }).join("");
 
-  const filtered =
-    ALL_MACHINES_LIST.filter(id=>{
-
-      const m =
-        machines[id]
-        ||
-        getDefaultMachine();
-
-
-      const seriesMatch =
-        deptSeriesFilter==="ALL"
-        ||
-        id.startsWith(
-          deptSeriesFilter
-        );
-
-
-      let statusMatch=true;
-
-
-      if(
-        deptStatusFilter==="RUNNING"
-      ){
-
-        statusMatch =
-          m.status==="RUNNING";
-
-      }
-
-
-      if(
-        deptStatusFilter==="ISSUE"
-      ){
-
-        statusMatch =
-          config.issueStatus
-          ?
-          m.status===
-          config.issueStatus
-          :
-          m.status!=="RUNNING";
-
-      }
-
-
-      if(
-        deptStatusFilter===
-        "MATERIAL REQUIREMENT"
-      ){
-
-        statusMatch =
-          m.status===
-          "MATERIAL REQUIREMENT";
-
-      }
-
-
-      return (
-        seriesMatch &&
-        statusMatch
-      );
-
-    });
-
-
-  document.getElementById(
-    "deptGridTitle"
-  ).innerText =
-    "SELECT MACHINE ("+
-    filtered.length+
-    ")";
-
-
-  const grid =
-    document.getElementById(
-      "deptMachineGrid"
-    );
-
-
-  grid.innerHTML =
-    filtered.map(id=>{
-
-      const m =
-        machines[id]
-        ||
-        getDefaultMachine();
-
-
-      const selected =
-        deptSelectedMachine===id
-        ? "selected"
-        : "";
-
-
-      let color="#22c55e";
-
-
-      if(
-        m.status==="MATERIAL REQUIREMENT"
-      ){
-
-        color="#eab308";
-
-      }
-
-      else if(
-        m.status==="MATERIAL SHORTAGE"
-      ){
-
-        color="#b91c1c";
-
-      }
-
-      else if(
-        m.status!=="RUNNING"
-      ){
-
-        color="#ef4444";
-
-      }
-
-
-      return `
-
-        <div
-          class="deptMachine ${selected}"
-          onclick="selectDepartmentMachine('${id}')">
-
-          ${id}
-
-          <span
-            class="deptMachineStatus"
-            style="color:${color}">
-
-            ${m.status}
-
-          </span>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-
-  /* If selected machine not in current filter */
-
-  if(
-    filtered.length &&
-    !filtered.includes(
-      deptSelectedMachine
-    )
-  ){
-
-    deptSelectedMachine =
-      filtered[0];
-
+  if(!filtered.includes(deptSelectedMachine)){
+    deptSelectedMachine = filtered[0];
   }
-
-
-  if(!filtered.length){
-
-    deptSelectedMachine=null;
-
-  }
-
 
   renderDepartmentSelected();
 
@@ -4759,15 +3110,9 @@ function renderDepartmentDashboard(){
 ========================================================= */
 
 function selectDepartmentMachine(id){
-
   if(!machines[id]) return;
-
-
   deptSelectedMachine=id;
-
-
   renderDepartmentDashboard();
-
 }
 
 
@@ -4777,389 +3122,86 @@ function selectDepartmentMachine(id){
 
 function renderDepartmentSelected(){
 
-  const box =
-    document.getElementById(
-      "deptSelected"
-    );
-
+  const box = document.getElementById("deptSelected");
 
   if(!deptSelectedMachine){
-
-    box.innerHTML=`
-
-      <div style="
-        text-align:center;
-        color:#777;
-        padding:20px">
-
-        No machine found for this filter.
-
-      </div>
-
-    `;
-
+    box.innerHTML=`<div style="text-align:center;color:#777;padding:20px">No machine selected or available.</div>`;
     return;
-
   }
 
-
-  const m =
-    machines[deptSelectedMachine];
-
-
+  const m = machines[deptSelectedMachine];
   if(!m){
-
-    box.innerHTML=
-      "Please select machine.";
-
+    box.innerHTML="Please select machine.";
     return;
-
   }
 
+  const op = m.op;
+  const config = DEPARTMENT_CONFIG[department];
 
-  const op =
-    m.op;
-
-
-  const config =
-    DEPARTMENT_CONFIG[department];
-
-
-  let statusColor="#22c55e";
-
-
-  if(
-    m.status==="MATERIAL REQUIREMENT"
-  ){
-
-    statusColor="#eab308";
-
-  }
-
-  else if(
-    m.status==="MATERIAL SHORTAGE"
-  ){
-
-    statusColor="#b91c1c";
-
-  }
-
-  else if(
-    m.status!=="RUNNING"
-  ){
-
-    statusColor="#ef4444";
-
-  }
-
+  let statusColor="#ef4444";
+  if(m.status==="RUNNING") statusColor="#22c55e";
+  if(m.status==="MATERIAL REQUIREMENT") statusColor="#eab308";
+  if(m.status==="MATERIAL SHORTAGE") statusColor="#b91c1c";
 
   let html=`
-
-    <h2 style="
-      font-size:28px;
-      font-weight:900">
-
-      ${deptSelectedMachine}
-
-    </h2>
-
-    <div style="
-      margin:8px 0;
-      font-size:13px">
-
-      Current Status:
-
-      <b style="
-        color:${statusColor}">
-
-        ${m.status}
-
-      </b>
-
+    <h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>
+    <div style="margin:8px 0;font-size:13px">
+      Current Status: <b style="color:${statusColor}">${m.status}</b>
     </div>
-
   `;
-
-
-  /* Material Details */
 
   if(m.materialDetails){
-
     html+=`
-
-      <div style="
-        background:#2a2508;
-        border:1px dashed #eab308;
-        padding:14px;
-        border-radius:10px;
-        font-size:13px;
-        line-height:1.8;
-        margin-bottom:12px">
-
-        <div style="
-          color:#eab308;
-          font-size:14px;
-          font-weight:900;
-          margin-bottom:6px">
-
-          📦 MATERIAL REQUIREMENT
-
-        </div>
-
-        <b>Machine:</b>
-        ${deptSelectedMachine}
-
-        <br>
-
-        <b>Part No:</b>
-        ${escapeHtml(
-          m.materialDetails.partNo
-        )}
-
-        <br>
-
-        <b>Part Name:</b>
-        ${escapeHtml(
-          m.materialDetails.partName
-        )}
-
-        <br>
-
-        <b>Quantity:</b>
-        ${escapeHtml(
-          String(
-            m.materialDetails.qty
-          )
-        )}
-
+      <div style="background:#2a2508;border:1px dashed #eab308;padding:14px;border-radius:10px;font-size:13px;line-height:1.8;margin-bottom:12px">
+        <div style="color:#eab308;font-size:14px;font-weight:900;margin-bottom:6px">📦 MATERIAL REQUIREMENT</div>
+        <b>Machine:</b> ${deptSelectedMachine}<br>
+        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>
+        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>
+        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}
       </div>
-
     `;
-
   }
-
-
-  /* Operator */
 
   if(op){
-
     html+=`
-
       <div class="viewBox">
-
-        <b style="color:#22c55e">
-          OPERATOR INFORMATION
-        </b>
-
-        <br>
-
-        ID:
-        ${escapeHtml(op.id)}
-
-        <br>
-
-        Name:
-        ${escapeHtml(op.name)}
-
-        <br>
-
-        Machine:
-        ${escapeHtml(
-          op.machine ||
-          deptSelectedMachine
-        )}
-
-        <br>
-
-        Shift:
-        ${escapeHtml(
-          op.shift ||
-          "-"
-        )}
-
-        <br>
-
-        Time:
-        ${escapeHtml(
-          op.time ||
-          "-"
-        )}
-
+        <b style="color:#22c55e">OPERATOR INFORMATION</b><br>
+        ID: ${escapeHtml(op.id)}<br>
+        Name: ${escapeHtml(op.name)}<br>
+        Machine: ${escapeHtml(op.machine || deptSelectedMachine)}<br>
+        Shift: ${escapeHtml(op.shift || "-")}<br>
+        Time: ${escapeHtml(op.time || "-")}
       </div>
-
     `;
-
   }else{
-
-    html+=`
-
-      <div class="viewBox">
-
-        <b style="color:#777">
-          NO OPERATOR ASSIGNED
-        </b>
-
-      </div>
-
-    `;
-
+    html+=`<div class="viewBox"><b style="color:#777">NO OPERATOR ASSIGNED</b></div>`;
   }
 
-
-  /* Supervisor */
-
-  if(
-    department==="supervisor"
-  ){
-
+  if(department==="supervisor"){
     html+=`
-
       <div class="viewOnly">
-
-        <div style="
-          font-size:18px;
-          font-weight:900;
-          color:#a855f7">
-
-          VIEW ONLY
-
-        </div>
-
-        <div style="
-          font-size:11px;
-          color:#777;
-          margin-top:6px">
-
-          Supervisor can view machine,
-          operator, shift and status.
-
-          <br>
-
-          No status changes are allowed.
-
-        </div>
-
+        <div style="font-size:18px;font-weight:900;color:#a855f7">VIEW ONLY</div>
+        <div style="font-size:11px;color:#777;margin-top:6px">Supervisor can view machine details. No actions required.</div>
       </div>
-
     `;
-
-
     box.innerHTML=html;
-
     return;
-
   }
 
-
-  /* Store Material Requirement information */
-
-  if(
-    department==="store" &&
-    m.status==="MATERIAL REQUIREMENT"
-  ){
-
-    html+=`
-
-      <div style="
-        margin-top:14px;
-        padding:12px;
-        border:1px solid #eab308;
-        border-radius:10px;
-        background:#171305;
-        color:#ffd000;
-        font-size:12px">
-
-        📦
-
-        <b>
-          MATERIAL REQUIRED
-        </b>
-
-        <br>
-
-        Please arrange material
-        for this machine.
-
-      </div>
-
-    `;
-
-  }
-
-
-  html+=`
-
-    <div style="
-      margin-top:14px;
-      font-weight:900">
-
-      ${config.name}
-      ACTIONS
-
-    </div>
-
-  `;
-
+  html+=`<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
 
   config.actions.forEach(action=>{
-
-    const isRed =
-      action.status===
-      "MATERIAL SHORTAGE";
-
-
-    const bg =
-      isRed
-      ?
-      "linear-gradient(180deg,#991b1b,#7f1d1d)"
-      :
-      "#103817";
-
-
-    const border =
-      isRed
-      ?
-      "#ef4444"
-      :
-      "#22c55e";
-
-
-    const color =
-      isRed
-      ?
-      "#fca5a5"
-      :
-      "#35ff48";
-
+    const isRed = (action.status==="MATERIAL SHORTAGE");
+    const bg = isRed ? "linear-gradient(180deg,#991b1b,#7f1d1d)" : "#103817";
+    const border = isRed ? "#ef4444" : "#22c55e";
+    const color = isRed ? "#fca5a5" : "#35ff48";
 
     html+=`
-
-      <button
-
-        onclick="
-          departmentUpdateStatus(
-            '${action.status}'
-          )
-        "
-
-        style="
-          width:100%;
-          margin-top:10px;
-          padding:15px;
-          border:1px solid ${border};
-          border-radius:10px;
-          background:${bg};
-          color:${color};
-          font-weight:900">
-
+      <button onclick="departmentUpdateStatus('${action.status}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid ${border};border-radius:10px;background:${bg};color:${color};font-weight:900">
         ${action.label}
-
       </button>
-
     `;
-
   });
-
 
   box.innerHTML=html;
 
@@ -5173,211 +3215,66 @@ function renderDepartmentSelected(){
 function departmentUpdateStatus(status){
 
   if(!department){
-
-    alert(
-      "Department login required."
-    );
-
+    alert("Department login required.");
     return;
-
   }
 
-
-  const config =
-    DEPARTMENT_CONFIG[department];
-
-
-  const allowed =
-    config.actions.some(
-      a=>a.status===status
-    );
-
+  const config = DEPARTMENT_CONFIG[department];
+  const allowed = config.actions.some(a=>a.status===status);
 
   if(!allowed){
-
-    alert(
-      "Access denied."
-    );
-
+    alert("Access denied.");
     return;
-
   }
-
 
   if(!deptSelectedMachine){
-
-    alert(
-      "Please select a machine first."
-    );
-
+    alert("Please select a machine first.");
     return;
-
   }
 
+  const id = deptSelectedMachine;
 
-  const id =
-    deptSelectedMachine;
-
-
-  if(!confirm(
-    "Mark "+
-    id+
-    " as "+
-    status+
-    "?"
-  )){
-
+  if(!confirm("Mark "+id+" as "+status+"?")){
     return;
-
   }
-
 
   if(!machines[id]){
-
-    machines[id]=
-      getDefaultMachine();
-
+    machines[id]=getDefaultMachine();
   }
-
 
   machines[id].status=status;
 
-
   if(status==="RUNNING"){
-
-    machines[id]
-      .materialDetails=null;
-
+    machines[id].materialDetails=null;
   }
 
-
   saveMachine(id)
-
     .then(()=>{
-
-      const route =
-        ROUTE_MAP[status]
-        ||
-        ROUTE_MAP.RUNNING;
-
-
-      loudPopup(
-        id,
-        status,
-        config.name,
-        route
-      );
-
+      const route = ROUTE_MAP[status] || ROUTE_MAP.RUNNING;
+      loudPopup(id, status, config.name, route);
 
       if(status!=="RUNNING"){
+        const msg = "*🚨 BREMBO ALERT*"+
+                    "%0A%0AMachine: "+encodeURIComponent(id)+
+                    "%0AStatus: *"+encodeURIComponent(status)+"*"+
+                    "%0ADepartment: "+encodeURIComponent(config.name)+
+                    "%0ATime: "+encodeURIComponent(new Date().toLocaleString("en-IN"))+
+                    "%0A%0AAction Required By: "+encodeURIComponent(route.name);
 
-        const msg =
-
-          "*🚨 BREMBO ALERT*"+
-          "%0A%0AMachine: "+
-          encodeURIComponent(id)+
-          "%0AStatus: *"+
-          encodeURIComponent(status)+
-          "*"+
-          "%0ADepartment: "+
-          encodeURIComponent(config.name)+
-          "%0ATime: "+
-          encodeURIComponent(
-            new Date()
-              .toLocaleString("en-IN")
-          )+
-          "%0A%0AAction Required By: "+
-          encodeURIComponent(
-            route.name
-          );
-
-
-        lastWa =
-          "https://wa.me/"+
-          route.no+
-          "?text="+
-          msg;
-
+        lastWa = "https://wa.me/"+route.no+"?text="+msg;
 
         setTimeout(()=>{
-
-          window.open(
-            lastWa,
-            "_blank"
-          );
-
+          window.open(lastWa, "_blank");
         },700);
-
       }
-
 
       renderDepartmentDashboard();
 
     })
-
     .catch(err=>{
-
       console.error(err);
-
-      alert(
-        "Firebase update failed. Please check Internet."
-      );
-
+      alert("Firebase update failed. Please check Internet.");
     });
-
-}
-
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function render(){
-
-  if(
-    !operator &&
-    !department
-  ){
-
-    return;
-
-  }
-
-
-  if(operator){
-
-    document.getElementById(
-      "operatorDashboard"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "departmentDashboard"
-    ).style.display="none";
-
-
-    renderCards();
-
-    renderList();
-
-  }
-
-
-  if(department){
-
-    document.getElementById(
-      "operatorDashboard"
-    ).style.display="none";
-
-
-    document.getElementById(
-      "departmentDashboard"
-    ).style.display="block";
-
-
-    renderDepartmentDashboard();
-
-  }
 
 }
 
@@ -5387,106 +3284,39 @@ function render(){
 ========================================================= */
 
 fillMachineDropdown();
-
 load();
-
-setInterval(
-  checkShiftAutoReset,
-  10000
-);
+setInterval(checkShiftAutoReset, 10000);
 
 
 /* =========================================================
    RESTORE LOGIN
 ========================================================= */
 
-const savedOperator =
-  localStorage.getItem(
-    "brembo_v7"
-  );
+const savedOperator = localStorage.getItem("brembo_v7");
+const savedDepartment = localStorage.getItem("brembo_department");
 
-
-const savedDepartment =
-  localStorage.getItem(
-    "brembo_department"
-  );
-
-
-if(
-  savedDepartment &&
-  DEPARTMENT_CONFIG[
-    savedDepartment
-  ]
-){
-
-  department =
-    savedDepartment;
-
+if(savedDepartment && DEPARTMENT_CONFIG[savedDepartment]){
+  department = savedDepartment;
   operator=null;
-
-  document.getElementById(
-    "login"
-  ).style.display="none";
-
-  document.getElementById(
-    "departmentDashboard"
-  ).style.display="block";
-
-  deptSelectedMachine =
-    ALL_MACHINES_LIST[0];
-
+  document.getElementById("login").style.display="none";
+  document.getElementById("departmentDashboard").style.display="block";
+  deptSeriesFilter="ALL";
   renderDepartmentDashboard();
-
 }
-
 else if(savedOperator){
-
   try{
-
-    operator =
-      JSON.parse(
-        savedOperator
-      );
-
-
+    operator = JSON.parse(savedOperator);
     if(!operator.machine){
-
-      localStorage.removeItem(
-        "brembo_v7"
-      );
-
-    }
-
-    else if(
-      !checkShiftAutoReset()
-    ){
-
-      document.getElementById(
-        "login"
-      ).style.display="none";
-
-
-      document.getElementById(
-        "operatorDashboard"
-      ).style.display="block";
-
-
+      localStorage.removeItem("brembo_v7");
+    }else if(!checkShiftAutoReset()){
+      document.getElementById("login").style.display="none";
+      document.getElementById("operatorDashboard").style.display="block";
       applyOperator();
-
     }
-
-  }
-
-  catch(e){
-
+  }catch(e){
     console.error(e);
-
-    localStorage.removeItem(
-      "brembo_v7"
-    );
-
+    localStorage.removeItem("brembo_v7");
   }
-
 }
 
 
@@ -5494,19 +3324,11 @@ else if(savedOperator){
    SERVICE WORKER
 ========================================================= */
 
-if(
-  "serviceWorker" in navigator
-){
-
-  navigator.serviceWorker
-    .register("sw.js")
-    .catch(
-      ()=>{}
-    );
-
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
 
 </script>
 
 </body>
-  </html>
+</html>
