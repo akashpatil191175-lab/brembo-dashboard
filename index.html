@@ -976,6 +976,11 @@ button:active{
   </div>
 
   <div class="deptContent">
+    <!-- SHIFT END EXCEL DOWNLOAD BUTTON -->
+    <button onclick="downloadShiftExcel()" class="loginBtn" style="background:linear-gradient(135deg,#22c55e,#15803d);border-color:#16a34a;color:#fff;margin-bottom:16px;box-shadow:0 4px 15px rgba(34,197,94,0.3)">
+      📥 DOWNLOAD SHIFT REPORT (EXCEL / CSV)
+    </button>
+
     <div class="deptStats">
       <div class="deptStat active" id="deptCardALL" onclick="setDeptStatusFilter('ALL')">
         <small>TOTAL MACHINES</small>
@@ -1398,8 +1403,8 @@ function renderList(){
     const st = machines[id].status;
     
     let color="#22c55e";
-    if(st==="MATERIAL REQUIREMENT") color="#eab308"; // पिवळा/गोल्डन रंग
-    else if(st==="MATERIAL SHORTAGE") color="#b91c1c"; // गडद लाल रंग
+    if(st==="MATERIAL REQUIREMENT") color="#eab308";
+    else if(st==="MATERIAL SHORTAGE") color="#b91c1c";
     else if(st!=="RUNNING") color="#ef3340";
 
     return `
@@ -1649,6 +1654,61 @@ function openWA(){
   if(lastWa) window.open(lastWa,"_blank");
 }
 
+/* =========================================================
+   SHIFT REPORT EXCEL DOWNLOAD FUNCTION
+========================================================= */
+function downloadShiftExcel() {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  
+  // CSV Headers
+  csvContent += "Machine No,Status,Operator Name,Operator ID,Shift,Login Time,Material Part No,Material Part Name,Quantity,Department Responsible\n";
+
+  ALL_MACHINES_LIST.forEach(id => {
+    let m = machines[id] || { status: "RUNNING", op: null, materialDetails: null };
+    let opName = m.op ? `"${m.op.name}"` : "No Operator";
+    let opId = m.op ? m.op.id : "-";
+    let shift = m.op ? m.op.shift : "-";
+    let time = m.op ? m.op.time : "-";
+    
+    let partNo = m.materialDetails ? `"${m.materialDetails.partNo}"` : "-";
+    let partName = m.materialDetails ? `"${m.materialDetails.partName}"` : "-";
+    let qty = m.materialDetails ? m.materialDetails.qty : "-";
+
+    // Find Department based on status
+    let deptName = "-";
+    if(m.status === "BREAKDOWN") deptName = "Maintenance";
+    else if(m.status === "CMM NOT OK" || m.status === "SIGN PENDING") deptName = "Quality";
+    else if(m.status === "FIXTURE NOT OK" || m.status === "FIXTURE OK") deptName = "Tool Room";
+    else if(m.status === "LOT READY") deptName = "Loading";
+    else if(m.status === "MATERIAL REQUIREMENT" || m.status === "MATERIAL SHORTAGE") deptName = "Store Department";
+    else if(m.status === "LOT HOLD") deptName = "Supervisor";
+    else deptName = "Running";
+
+    let row = [
+      id,
+      `"${m.status}"`,
+      opName,
+      opId,
+      shift,
+      `"${time}"`,
+      partNo,
+      partName,
+      qty,
+      `"${deptName}"`
+    ].join(",");
+
+    csvContent += row + "\n";
+  });
+
+  let encodedUri = encodeURI(csvContent);
+  let link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Brembo_Shift_Report_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function departmentLogin(){
   const dep = document.getElementById("departmentSelect").value;
   const pin = document.getElementById("departmentPin").value;
@@ -1849,7 +1909,7 @@ function renderDepartmentSelected(){
 
 function departmentUpdateStatus(status){
   if(!department){
-    alert("Department login required.");
+    alert("Department login report required.");
     return;
   }
   const config = DEPARTMENT_CONFIG[department];
