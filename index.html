@@ -39,7 +39,7 @@ transition: all 0.2s ease;
 #login{
 position:fixed;
 inset:0;
-background: radial-gradient(circle at center, #111827 0%, #05070a 100%);
+background: radial-gradient(circle at center, #0c1017 0%, #030406 100%);
 z-index:9999;
 display:flex;
 align-items:center;
@@ -48,50 +48,50 @@ padding:20px;
 overflow:auto;
 }
 
-/* Glowing Neon Brembo Box */
+/* हुबेहूब इमेज प्रमाणे Neon Red Glow Card Box */
 .loginBox{
-background: linear-gradient(145deg, #0d121c 0%, #080b12 100%);
-padding:40px 30px;
-border-radius:28px;
-width:450px;
+background: linear-gradient(145deg, #0d121c 0%, #06090f 100%);
+padding:45px 35px;
+border-radius:32px;
+width:460px;
 max-width:100%;
 text-align:center;
-border:1.5px solid rgba(255, 26, 26, 0.4);
-box-shadow: 0 0 35px rgba(255, 0, 0, 0.25), inset 0 0 20px rgba(0, 0, 0, 0.8);
+border:1.5px solid rgba(255, 0, 0, 0.6);
+box-shadow: 0 0 50px rgba(255, 0, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.9);
 }
 
 .brandLogo {
-width: 280px;
+width: 260px;
 height: auto;
-margin: 0 auto 10px auto;
+margin: 0 auto 8px auto;
 display: block;
-filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.5));
+filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.6));
 }
 
 .topBarLogo {
-width: 140px;
+width: 130px;
 height: auto;
 display: inline-block;
 vertical-align: middle;
-filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.4));
+filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.4));
 }
 
 .loginSub{
 font-size:11px;
 color:#94a3b8;
-margin-bottom:15px;
-letter-spacing:3px;
+margin-bottom:18px;
+letter-spacing:3.5px;
 font-weight:700;
 text-transform: uppercase;
 }
 
-/* Red Glowing Divider Line */
+/* इमेजमधील ग्लोइंग रेड डिवाईडर लाईन */
 .glow-divider {
 height: 2px;
-background: linear-gradient(90deg, transparent, #ff1a1a, transparent);
+background: linear-gradient(90deg, transparent, #ff0000, transparent);
 margin: 0 auto 25px auto;
-width: 85%;
-box-shadow: 0 0 10px #ff1a1a, 0 0 15px #ff1a1a;
+width: 90%;
+box-shadow: 0 0 12px #ff0000, 0 0 20px #ff0000;
 }
 
 /* FORM INPUTS & SELECT BOXES */
@@ -110,20 +110,20 @@ transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .loginInput{
-background:#0d1424;
+background:#090d16;
 color:#ffffff;
-border:1px solid #2a364f;
+border:1px solid #1e293b;
 }
 
 .loginInput:focus{
 border-color:#ff1a1a;
-box-shadow: 0 0 10px rgba(255, 26, 26, 0.4);
+box-shadow: 0 0 12px rgba(255, 26, 26, 0.5);
 }
 
 .loginSelect{
-background:#131c31;
+background:#090d16;
 color:#ffffff;
-border:1px solid #2a364f;
+border:1px solid #1e293b;
 appearance:none;
 -webkit-appearance:none;
 -moz-appearance:none;
@@ -135,7 +135,7 @@ background-position-y: 50%;
 
 .loginSelect:focus{
 border-color:#ff1a1a;
-box-shadow: 0 0 10px rgba(255, 26, 26, 0.4);
+box-shadow: 0 0 12px rgba(255, 26, 26, 0.5);
 }
 
 .loginSelect option{
@@ -144,23 +144,25 @@ color:#fff;
 padding:10px;
 }
 
+/* ऑपरेटर लॉगिन बटन */
 .loginBtn{
 width:100%;
-height:52px;
-background: linear-gradient(180deg, #ff2a2a 0%, #cc0000 100%);
+height:54px;
+background: linear-gradient(180deg, #ff1a1a 0%, #b30000 100%);
 color:#fff;
-border:1px solid rgba(255, 255, 255, 0.2);
-border-radius:14px;
-font-weight:800;
-font-size:15px;
+border:1px solid rgba(255, 255, 255, 0.25);
+border-radius:16px;
+font-weight:900;
+font-size:16px;
 margin-top:18px;
-box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
-letter-spacing:1px;
+box-shadow: 0 6px 22px rgba(255, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+letter-spacing:1.5px;
+text-transform: uppercase;
 }
 
 .loginBtn:hover{
 transform: translateY(-2px);
-box-shadow: 0 8px 25px rgba(255, 0, 0, 0.7);
+box-shadow: 0 8px 28px rgba(255, 0, 0, 0.8);
 }
 
 .loginBtn:active{
@@ -172,10 +174,10 @@ display:grid;
 grid-template-columns:1fr 1fr;
 gap:8px;
 margin-bottom:18px;
-background:#090d16;
+background:#05070a;
 padding:4px;
 border-radius:12px;
-border:1px solid #2a364f;
+border:1px solid #1e293b;
 }
 
 .modeBtn{
@@ -192,7 +194,7 @@ letter-spacing:0.5px;
 .modeBtn.active{
 background:#ff1a1a;
 color:#ffffff;
-box-shadow: 0 0 10px rgba(255, 26, 26, 0.5);
+box-shadow: 0 0 10px rgba(255, 26, 26, 0.6);
 }
 
 .departmentLogin{
@@ -222,7 +224,7 @@ max-width:90%
 #materialModal{
 position:fixed;
 inset:0;
-background:rgba(9, 13, 22, 0.9);
+background:rgba(5, 7, 10, 0.9);
 backdrop-filter: blur(8px);
 z-index:999999;
 display:none;
@@ -232,13 +234,13 @@ padding:20px;
 }
 
 .modalContent{
-background:#121a2d;
-padding:24px;
-border-radius:20px;
+background:#0d121c;
+padding:26px;
+border-radius:24px;
 width:400px;
 max-width:100%;
 border:1px solid #ec4899;
-box-shadow:0 0 30px rgba(236,72,153,0.2);
+box-shadow:0 0 35px rgba(236,72,153,0.3);
 }
 
 .topBar{
@@ -541,7 +543,7 @@ line-height:1.5
 <input id="matPartName" class="loginInput" placeholder="PART NAME">
 <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">
 <button onclick="submitMaterialShortage()" class="loginBtn" style="background:linear-gradient(135deg, #ec4899 0%, #db2777 100%);box-shadow:0 4px 14px rgba(236, 72, 153, 0.35)">SUBMIT & SEND ALERT</button>
-<button onclick="closeMaterialModal()" class="loginBtn" style="background:#2a364f;color:#fff;margin-top:8px;box-shadow:none">CANCEL</button>
+<button onclick="closeMaterialModal()" class="loginBtn" style="background:#1e293b;color:#fff;margin-top:8px;box-shadow:none">CANCEL</button>
 </div>
 </div>
 
@@ -558,6 +560,7 @@ line-height:1.5
 </svg>
 <p class="loginSub">OFFICIAL HIGH PERFORMANCE</p>
 <div class="glow-divider"></div>
+
 <div class="modeBar">
 <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>
 <button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>
@@ -575,7 +578,7 @@ line-height:1.5
 <option value="C">Shift C (12:00 AM - 7:45 AM)</option>
 </select>
 <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>
-<button onclick="doLogin()" class="loginBtn">DASHBOARD</button>
+<button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>
 </div>
 
 <!-- DEPARTMENT LOGIN -->
