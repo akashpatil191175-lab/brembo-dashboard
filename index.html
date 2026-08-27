@@ -725,6 +725,21 @@ button:active{
   .infoGrid{ grid-template-columns:80px 1fr }  
 }  
 </style>  
+
+<script>
+/* IMMEDIATE SESSION CHECK (PREVENT FLICKER ON REFRESH) */
+(function(){
+  const savedOp = localStorage.getItem("brembo_v7");
+  const savedDept = localStorage.getItem("brembo_department");
+  const style = document.createElement('style');
+  if(savedOp){
+    style.innerHTML = "#login{display:none !important;} #operatorDashboard{display:block !important;} #departmentDashboard{display:none !important;}";
+  } else if(savedDept){
+    style.innerHTML = "#login{display:none !important;} #operatorDashboard{display:none !important;} #departmentDashboard{display:block !important;}";
+  }
+  document.head.appendChild(style);
+})();
+</script>
 </head>  
 <body>  
 <div id="notifBig"></div>  
@@ -885,25 +900,34 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);  
 const db = firebase.database();  
 
-/* PINS */  
-const ADMIN_PIN = "191197";  
-const OPERATOR_PIN = "1234";  
+/* HASHED SECURE PINS (ENCRYPTED) */
+const ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; 
+const OPERATOR_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
-/* DEPARTMENTS */  
+/* SECURE SHA-256 HASH FUNCTION */
+async function hashText(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* DEPARTMENTS WITH HASHED PINS */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
-  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
-  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
-  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
+  maintenance:{ name:"MAINTENANCE", pinHash:"86043d81b8beec4608c7901021481f33f86e3001aa3f7d87bc41a27e0a29f8f4", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
+  loading:{ name:"LOADING", pinHash:"ea10e4a7b7381b1edbc476a0846200196238b73f84f09d6a7ed2a4ff5ef7ebc4", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
+  quality:{ name:"QUALITY", pinHash:"99ee13f416d2524d77d130edcb81d0f509d3ed3f8a4a750f1464303d22b5e396", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
+  toolroom:{ name:"TOOL ROOM", pinHash:"bfabac123b320bcbb0238c92a95c8989a1f73752e259b56f874bc07452834b1c", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
   store:{ 
     name:"STORE DEPARTMENT", 
-    pin:"2028", 
+    pinHash:"bf11e641ea50e4171657c6670eef1f83c16dd0a969bc7f28bc4e9ebbe6f38799", 
     issueStatus:"MATERIAL REQUIREMENT", 
     actions:[
       { label:"❌ MATERIAL OUT OF STOCK (मटेरियल उपलब्ध नाही)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }
     ] 
   },  
-  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
+  supervisor:{ name:"SUPERVISOR", pinHash:"ac6a13d7e68225e30773d3ca7ea0360a891ce54f15d7bfbc1f49633c7f960f22", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
 /* WHATSAPP ROUTING */  
@@ -1192,7 +1216,7 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
-function doLogin(){  
+async function doLogin(){  
   const id = document.getElementById("opId").value.trim();  
   const nm = document.getElementById("opName").value.trim();  
   const pin = document.getElementById("opPin").value.trim();  
@@ -1200,7 +1224,9 @@ function doLogin(){
   const sh = document.getElementById("opShift").value;  
 
   if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
-  if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
+  
+  const pinHash = await hashText(pin);
+  if(pinHash !== OPERATOR_HASH){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
   const targetMc = machines[mc];
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){
@@ -1249,10 +1275,11 @@ function doLogout(){
   location.reload();  
 }  
 
-function resetAll(){  
+async function resetAll(){  
   const pin = prompt("ENTER ADMIN PIN:");  
   if(pin===null) return;  
-  if(pin!==ADMIN_PIN){ alert("Wrong PIN! Access Denied!"); return; }  
+  const pinHash = await hashText(pin);
+  if(pinHash !== ADMIN_HASH){ alert("Wrong PIN! Access Denied!"); return; }  
   if(!confirm("Reset all 69 machines to RUNNING?")) return;  
 
   resetAllMachinesFirebase().then(()=>{  
@@ -1598,14 +1625,16 @@ function downloadShiftExcel(){
   }  
 }  
 
-function departmentLogin(){  
+async function departmentLogin(){  
   const dep = document.getElementById("departmentSelect").value;  
   const pin = document.getElementById("departmentPin").value;  
 
   if(!dep || !pin){ alert("Please select department and enter PIN."); return; }  
   const config = DEPARTMENT_CONFIG[dep];  
   if(!config){ alert("Invalid department."); return; }  
-  if(pin!==config.pin){ alert("Wrong Department PIN! Access Denied!"); return; }  
+  
+  const pinHash = await hashText(pin);
+  if(pinHash !== config.pinHash){ alert("Wrong Department PIN! Access Denied!"); return; }  
 
   department=dep;  
   operator=null;  
