@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>  
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
@@ -895,7 +895,14 @@ const DEPARTMENT_CONFIG = {
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
   quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
   toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL SHORTAGE", actions:[] },  
+  store:{ 
+    name:"STORE DEPARTMENT", 
+    pin:"2028", 
+    issueStatus:"MATERIAL REQUIREMENT", 
+    actions:[
+      { label:"❌ MATERIAL OUT OF STOCK (मटेरियल उपलब्ध नाही)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }
+    ] 
+  },  
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
@@ -1126,10 +1133,8 @@ function load(){
   });  
 }  
 
-/* PROBLEM 1 FIX: Auto Refresh session retention */
 function checkExistingSession(){
-  if(operator || department) return; // already loaded in runtime
-  
+  if(operator || department) return;  
   const savedOp = localStorage.getItem("brembo_v7");
   const savedDept = localStorage.getItem("brembo_department");
   
@@ -1140,7 +1145,7 @@ function checkExistingSession(){
       document.getElementById("login").style.display="none";
       document.getElementById("operatorDashboard").style.display="block";
       document.getElementById("departmentDashboard").style.display="none";
-      applyOperator(true); // skip overwrite
+      applyOperator(true);
     } catch(e){
       localStorage.removeItem("brembo_v7");
     }
@@ -1187,7 +1192,6 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
-/* PROBLEM 3 FIX: Single operator machine login strict check */
 function doLogin(){  
   const id = document.getElementById("opId").value.trim();  
   const nm = document.getElementById("opName").value.trim();  
@@ -1198,7 +1202,6 @@ function doLogin(){
   if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
   if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
-  // Check if machine currently assigned to someone else
   const targetMc = machines[mc];
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){
     if(!confirm("Machine "+mc+" is already logged in by "+targetMc.op.name+" ("+targetMc.op.id+"). Overwrite login?")){
@@ -1350,7 +1353,6 @@ function operatorSelectMachine(id){
   renderOperatorMachineList();  
 }  
 
-/* PROBLEM 3 FIX: Only show operator details on logged-in machine */
 function sel(id){  
   if(!machines[id]) return;  
   curMachine=id;  
@@ -1424,7 +1426,6 @@ function sel(id){
 
   const statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING","MATERIAL REQUIREMENT"];  
 
-  /* PROBLEM 2 FIX: Add Material Received Button on Operator panel */
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");
     
@@ -1444,7 +1445,6 @@ function sel(id){
   }  
 }  
 
-/* PROBLEM 2 FIX: Function for Material Received */
 function clearMaterialRequirement(){
   if(!operator){ alert("Operator login required."); return; }
   if(curMachine!==operator.machine){ alert("Access denied."); return; }
@@ -1741,7 +1741,7 @@ function renderDepartmentSelected(){
     html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
     config.actions.forEach(a=>{
       if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #eab308;border-radius:10px;background:#3a2902;color:#ffcc00;font-weight:900">${a.label}</button>`;
       }
     });
   } else {
@@ -1768,7 +1768,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);
 
   saveMachine(deptSelectedMachine).then(()=>{
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" | Added: "+(addIssue||""), DEPARTMENT_CONFIG[department].name);
     renderDepartmentDashboard();
   }).catch(err=>{
     console.error(err);
@@ -1776,7 +1776,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   });
 }
 
-// Initialize on page load
 window.onload = function(){
   fillMachineDropdown();
   load();
