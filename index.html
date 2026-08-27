@@ -929,15 +929,15 @@ const OPERATOR_PIN = "1234";
 
 /* DEPARTMENTS */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", status:"RUNNING" }] },  
-  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", status:"RUNNING" }] },  
-  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", status:"RUNNING" }] },  
-  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", status:"RUNNING" }] },  
+  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
+  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
+  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
+  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
   store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL SHORTAGE", actions:[  
-    { label:"❌ MATERIAL OUT OF STOCK (RED SHORTAGE)", status:"MATERIAL SHORTAGE" },  
-    { label:"MATERIAL SUPPLIED (RUNNING)", status:"RUNNING" }  
+    { label:"❌ MATERIAL OUT OF STOCK (RED SHORTAGE)", clearsIssue:null, addIssue:"MATERIAL SHORTAGE" },  
+    { label:"MATERIAL SUPPLIED (RUNNING)", clearsIssue:"MATERIAL REQUIREMENT", clearsIssue2:"MATERIAL SHORTAGE" }  
   ]},  
-  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[] }  
+  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
 /* WHATSAPP ROUTING */  
@@ -1058,8 +1058,36 @@ function checkShiftAutoReset(){
   return false;  
 }  
 
+/* HYBRID DATA MIGRATION HELPERS */
+function getMachineIssues(m){
+  if(!m) return {};
+  if(m.issues && typeof m.issues === 'object') return m.issues;
+  let obj = {};
+  if(m.status && m.status !== "RUNNING"){
+    obj[m.status] = { by: m.op ? m.op.name : "Operator", time: m.op ? m.op.time : "-" };
+  }
+  return obj;
+}
+
+function getMachineStatusString(m){
+  if(!m) return "RUNNING";
+  const issues = getMachineIssues(m);
+  const keys = Object.keys(issues);
+  if(keys.length === 0) return "RUNNING";
+  return keys.join(", ");
+}
+
+function hasStatus(m, st){
+  if(!m) return false;
+  if(st === "RUNNING"){
+    return Object.keys(getMachineIssues(m)).length === 0;
+  }
+  const issues = getMachineIssues(m);
+  return !!issues[st];
+}
+
 function getDefaultMachine(){  
-  return { status:"RUNNING", op:null, materialDetails:null };  
+  return { status:"RUNNING", issues:{}, op:null, materialDetails:null };  
 }  
 
 function getAllMachines(){  
@@ -1070,14 +1098,26 @@ function getAllMachines(){
 
 function saveMachine(id){  
   if(!id || !machines[id]){ return Promise.reject(new Error("Invalid machine")); }  
+  machines[id].status = getMachineStatusString(machines[id]);
   return db.ref("machines/"+id).set(machines[id]);  
 }  
 
 function resetAllMachinesFirebase(){  
   const updates={};  
-  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", op:null }; });  
+  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", issues:{}, op:null }; });  
   return db.ref().update(updates);  
 }  
+
+function logStatusAction(mc, action, detail, user){
+  db.ref("statusLogs").push({
+    machine: mc,
+    action: action,
+    detail: detail,
+    user: user || "System",
+    timestamp: Date.now(),
+    timeStr: new Date().toLocaleString("en-IN")
+  });
+}
 
 function getPendingMaterialRequestCount(){
   return Object.values(materialRequests||{}).filter(r=>r && (!r.status||r.status==="PENDING")).length;
@@ -1146,8 +1186,8 @@ function renderSelectedMaterialRequest(){
   if(st==="PENDING"){
     html+='<div style="margin-top:14px;font-weight:900">STORE DEPARTMENT ACTIONS</div>';
     DEPARTMENT_CONFIG.store.actions.forEach(a=>{
-      const red=a.status==="MATERIAL SHORTAGE";
-      html+=`<button onclick="departmentUpdateMaterialRequest('${a.status}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid ${red?"#ef4444":"#22c55e"};border-radius:10px;background:${red?"linear-gradient(180deg,#991b1b,#7f1d1d)":"#103817"};color:${red?"#fca5a5":"#35ff48"};font-weight:900">${a.label}</button>`;
+      const red=a.addIssue==="MATERIAL SHORTAGE";
+      html+=`<button onclick="departmentUpdateMaterialRequest('${a.addIssue||'RUNNING'}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid ${red?"#ef4444":"#22c55e"};border-radius:10px;background:${red?"linear-gradient(180deg,#991b1b,#7f1d1d)":"#103817"};color:${red?"#fca5a5":"#35ff48"};font-weight:900">${a.label}</button>`;
     });
   } else html+='<div class="viewOnly"><b>REQUEST HISTORY</b><br><span style="font-size:11px;color:#777">This request is retained and is not deleted by machine status or shift reset.</span></div>';
   box.innerHTML=html;
@@ -1164,8 +1204,21 @@ function departmentUpdateMaterialRequest(status){
   updates["materialRequests/"+r.requestId+"/status"]=actionStatus;
   updates["materialRequests/"+r.requestId+"/actionAt"]=new Date().toLocaleString("en-IN");
   updates["materialRequests/"+r.requestId+"/actionBy"]="STORE DEPARTMENT";
-  if(r.machine) updates["machines/"+r.machine+"/status"]=status==="RUNNING"?"RUNNING":"MATERIAL SHORTAGE";
-  db.ref().update(updates).then(()=>renderDepartmentDashboard()).catch(err=>{
+  
+  const m = machines[r.machine] || getDefaultMachine();
+  let issues = getMachineIssues(m);
+  delete issues["MATERIAL REQUIREMENT"];
+  if(status === "MATERIAL SHORTAGE"){
+    issues["MATERIAL SHORTAGE"] = { by: "STORE DEPARTMENT", time: new Date().toLocaleTimeString("en-IN") };
+  }
+  m.issues = issues;
+  m.status = getMachineStatusString(m);
+  updates["machines/"+r.machine] = m;
+
+  db.ref().update(updates).then(()=>{
+    logStatusAction(r.machine, "STORE ACTION", actionStatus, "STORE");
+    renderDepartmentDashboard();
+  }).catch(err=>{
     console.error(err); alert("Firebase update failed. Please check Internet.");
   });
 }
@@ -1191,8 +1244,12 @@ function load(){
     machines={};  
     const missing=[];  
     ALL_MACHINES_LIST.forEach(id=>{  
-      if(d[id]){ machines[id]=d[id]; }
-      else{ machines[id]=getDefaultMachine(); missing.push(id); }  
+      if(d[id]){ 
+        machines[id]=d[id]; 
+        machines[id].issues = getMachineIssues(d[id]);
+      } else{ 
+        machines[id]=getDefaultMachine(); missing.push(id); 
+      }  
     });  
 
     if(missing.length){  
@@ -1202,10 +1259,13 @@ function load(){
     }  
 
     for(let id of ALL_MACHINES_LIST){  
-      if(prev[id] && machines[id] && prev[id].status !== machines[id].status){  
+      const stNow = getMachineStatusString(machines[id]);
+      const stPrev = getMachineStatusString(prev[id]);
+      if(prev[id] && stPrev !== stNow){  
         const who = machines[id].op ? machines[id].op.name : "Someone";  
-        const route = ROUTE_MAP[machines[id].status] || ROUTE_MAP.RUNNING;  
-        loudPopup(id, machines[id].status, who, route);  
+        const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";
+        const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
+        loudPopup(id, stNow, who, route);  
       }  
     }  
 
@@ -1313,6 +1373,7 @@ function resetAll(){
 
   resetAllMachinesFirebase().then(()=>{  
     machines=getAllMachines();  
+    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN");
     alert("All 69 machines are RUNNING!");  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1332,7 +1393,7 @@ function getStatusCount(status){
   if(status==="TOTAL"){ return ALL_MACHINES_LIST.length; }  
   return ALL_MACHINES_LIST.filter(id=>{  
     const m = machines[id] || getDefaultMachine();  
-    return m.status===status;  
+    return hasStatus(m, status);  
   }).length;  
 }  
 
@@ -1380,7 +1441,7 @@ function renderOperatorMachineList(){
   }else{  
     filtered = ALL_MACHINES_LIST.filter(id=>{  
       const m = machines[id] || getDefaultMachine();  
-      return m.status===operatorStatusFilter;  
+      return hasStatus(m, operatorStatusFilter);  
     });  
     title.innerText = "⚙️ "+getStatusDisplayName(operatorStatusFilter)+" MACHINES";  
     sub.innerText = "Machines currently showing this status.";  
@@ -1395,7 +1456,8 @@ function renderOperatorMachineList(){
   grid.innerHTML = filtered.map(id=>{  
     const m = machines[id] || getDefaultMachine();  
     const selected = curMachine===id ? "selected" : "";  
-    return `<div class="machineResult ${selected}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(m.status)}</span></div>`;  
+    const stStr = getMachineStatusString(m);
+    return `<div class="machineResult ${selected}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
 }  
 
@@ -1412,7 +1474,9 @@ function sel(id){
   curMachine=id;  
   const m = machines[id];  
   const op = m.op;  
-  const route = ROUTE_MAP[m.status] || ROUTE_MAP.RUNNING;  
+  const issues = getMachineIssues(m);
+  const mainIssue = Object.keys(issues)[0] || "RUNNING";
+  const route = ROUTE_MAP[mainIssue] || ROUTE_MAP.RUNNING;  
   let matHtml="";  
 
   if(m.materialDetails){  
@@ -1424,13 +1488,9 @@ function sel(id){
       </div>`;  
   }  
 
+  const statusStr = getMachineStatusString(m);
   let badgeBg="#a30b11";  
-  if(m.status==="RUNNING"){ badgeBg="#087f23"; }
-  else if(m.status==="MATERIAL REQUIREMENT"){ badgeBg="#ca8a04"; }
-  else if(m.status==="MATERIAL SHORTAGE"){ badgeBg="#b91c1c"; }
-  else if(m.status==="CMM NOT OK"){ badgeBg="#006fc9"; }
-  else if(m.status==="FIXTURE NOT OK"){ badgeBg="#8b21b4"; }
-  else if(m.status==="LOT READY"){ badgeBg="#d97706"; }  
+  if(statusStr==="RUNNING"){ badgeBg="#087f23"; }
 
   const isOwnMachine = operator && id===operator.machine;  
   document.getElementById("machineDetail").innerHTML=`  
@@ -1441,7 +1501,7 @@ function sel(id){
           ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:12px;font-weight:800;margin-left:10px">VIEW ONLY</span>`}  
         </div>  
         <div class="statusLine">  
-          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${m.status}</b>  
+          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${statusStr}</b>  
           ${operator ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
         </div>  
       </div>  
@@ -1532,8 +1592,7 @@ function submitMaterialRequirement(){
   closeMaterialModal();
 
   ref.set(request).then(()=>{
-    machines[curMachine].status="MATERIAL REQUIREMENT";
-    return saveMachine(curMachine);
+    return executeStatusUpdate("MATERIAL REQUIREMENT");
   }).then(()=>{
     const route=ROUTE_MAP["MATERIAL REQUIREMENT"]||ROUTE_MAP.RUNNING;
     loudPopup(curMachine,"MATERIAL REQUIREMENT",operator.name,route);
@@ -1557,9 +1616,17 @@ function executeStatusUpdate(s){
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
   if(!machines[curMachine]){ machines[curMachine]=getDefaultMachine(); }  
-  machines[curMachine].status=s;  
+
+  let issues = getMachineIssues(machines[curMachine]);
+  if(s === "RUNNING"){
+    issues = {};
+  } else {
+    issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };
+  }
+  machines[curMachine].issues = issues;
 
   return saveMachine(curMachine).then(()=>{  
+    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name);
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     loudPopup(curMachine, s, operator.name, route);  
 
@@ -1570,7 +1637,7 @@ function executeStatusUpdate(s){
       matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty);  
     }  
 
-    const msg = "*🚨 BREMBO ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(s)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
+    const msg = "*🚨 BREMBO ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(getMachineStatusString(machines[curMachine]))+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
     document.getElementById("routeInfo").style.display="block";  
@@ -1600,19 +1667,20 @@ function downloadShiftExcel(){
       const m = machines[id] || getDefaultMachine();  
       const op = m.op || {};  
       const mat = m.materialDetails || {};  
+      const stStr = getMachineStatusString(m);
 
       let deptName="-";  
-      if(m.status==="BREAKDOWN"){ deptName="Maintenance"; }
-      else if(m.status==="CMM NOT OK" || m.status==="SIGN PENDING"){ deptName="Quality"; }
-      else if(m.status==="FIXTURE NOT OK" || m.status==="FIXTURE OK"){ deptName="Tool Room"; }
-      else if(m.status==="LOT READY"){ deptName="Loading"; }
-      else if(m.status==="MATERIAL REQUIREMENT" || m.status==="MATERIAL SHORTAGE"){ deptName="Store Department"; }
-      else if(m.status==="LOT HOLD"){ deptName="Supervisor"; }
+      if(hasStatus(m, "BREAKDOWN")){ deptName="Maintenance"; }
+      else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }
+      else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }
+      else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }
+      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName="Store Department"; }
+      else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }
       else{ deptName="Running"; }  
 
       rows.push({  
         "Machine No":id,  
-        "Status": m.status || "RUNNING",  
+        "Status": stStr,  
         "Operator Name": op.name || "-",  
         "Operator ID": op.id || "-",  
         "Shift": op.shift || "-",  
@@ -1703,7 +1771,7 @@ function getDepartmentFilteredMachines(){
   if(departmentStatusFilter==="TOTAL"){ return ALL_MACHINES_LIST.slice(); }  
   return ALL_MACHINES_LIST.filter(id=>{  
     const m = machines[id] || getDefaultMachine();  
-    return (m.status === departmentStatusFilter);  
+    return hasStatus(m, departmentStatusFilter);  
   });  
 }  
 
@@ -1756,17 +1824,12 @@ function renderDepartmentMachineGrid(){
   grid.innerHTML = filtered.map(id=>{  
     const m = machines[id] || getDefaultMachine();  
     const selected = deptSelectedMachine===id ? "selected" : "";  
+    const stStr = getMachineStatusString(m);
 
     let color="#ef4444";  
-    if(m.status==="RUNNING"){ color="#22c55e"; }  
-    if(m.status==="MATERIAL REQUIREMENT"){ color="#eab308"; }  
-    if(m.status==="MATERIAL SHORTAGE"){ color="#b91c1c"; }  
-    if(m.status==="CMM NOT OK"){ color="#0099ff"; }  
-    if(m.status==="FIXTURE NOT OK"){ color="#c83cff"; }  
-    if(m.status==="LOT READY"){ color="#ff9800"; }  
-    if(m.status==="LOT HOLD"){ color="#ffd000"; }  
+    if(stStr==="RUNNING"){ color="#22c55e"; }  
 
-    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(m.status)}</span></div>`;  
+    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
   renderDepartmentSelected();  
 }  
@@ -1796,26 +1859,33 @@ function renderDepartmentSelected(){
 
   const op = m.op;  
   const config = DEPARTMENT_CONFIG[department];  
+  const stStr = getMachineStatusString(m);
 
   let statusColor="#ef4444";  
-  if(m.status==="RUNNING"){ statusColor="#22c55e"; }  
-  if(m.status==="MATERIAL REQUIREMENT"){ statusColor="#eab308"; }  
-  if(m.status==="MATERIAL SHORTAGE"){ statusColor="#b91c1c"; }  
-  if(m.status==="CMM NOT OK"){ statusColor="#0099ff"; }  
-  if(m.status==="FIXTURE NOT OK"){ statusColor="#c83cff"; }  
-  if(m.status==="LOT READY"){ color="#ff9800"; }  
+  if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
   let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>
-  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${m.status}</b></div>`;
+  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${stStr}</b></div>`;
 
   if(op){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;
   }
 
-  if(config && config.actions && config.actions.length > 0 && m.status === config.issueStatus){
+  let hasDeptIssue = false;
+  if(config && config.actions && config.actions.length > 0){
+    config.actions.forEach(a=>{
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
+        hasDeptIssue = true;
+      }
+    });
+  }
+
+  if(hasDeptIssue){
     html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
     config.actions.forEach(a=>{
-      html += `<button onclick="updateDepartmentMachineStatus('${a.status}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
+      }
     });
   } else {
     html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">No specific pending action required for your department on this machine.</span></div>`;
@@ -1824,12 +1894,24 @@ function renderDepartmentSelected(){
   box.innerHTML = html;
 }
 
-function updateDepartmentMachineStatus(newStatus){
+function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;
-  if(!confirm("Change status of "+deptSelectedMachine+" to "+newStatus+"?")) return;
+  if(!confirm("Confirm action on "+deptSelectedMachine+"?")) return;
 
-  machines[deptSelectedMachine].status = newStatus;
+  let m = machines[deptSelectedMachine];
+  let issues = getMachineIssues(m);
+
+  if(clearIssue1) delete issues[clearIssue1];
+  if(clearIssue2) delete issues[clearIssue2];
+  if(addIssue){
+    issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };
+  }
+
+  m.issues = issues;
+  m.status = getMachineStatusString(m);
+
   saveMachine(deptSelectedMachine).then(()=>{
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);
     renderDepartmentDashboard();
   }).catch(err=>{
     console.error(err);
