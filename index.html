@@ -2821,11 +2821,6 @@ function operatorSelectMachine(id){
 
   if(!operator) return;
 
-  /*
-    Operator can view all machines,
-    but can update only assigned machine.
-  */
-
   if(!machines[id]) return;
 
   curMachine=id;
@@ -2834,22 +2829,11 @@ function operatorSelectMachine(id){
 
   renderOperatorMachineList();
 
-  setTimeout(()=>{
-
-    document
-      .getElementById("machineDetail")
-      ?.scrollIntoView({
-        behavior:"smooth",
-        block:"start"
-      });
-
-  },100);
-
 }
 
 
 /* =========================================================
-   SELECT MACHINE DETAIL
+   SELECT MACHINE DETAIL (Fixed)
 ========================================================= */
 
 function sel(id){
@@ -3242,12 +3226,6 @@ function assign(){
 
   }
 
-
-  /*
-    Important:
-    Operator can assign only own machine.
-  */
-
   if(curMachine!==operator.machine){
 
     alert(
@@ -3259,14 +3237,12 @@ function assign(){
 
   }
 
-
   if(!machines[curMachine]){
 
     machines[curMachine]=
       getDefaultMachine();
 
   }
-
 
   machines[curMachine].op={
 
@@ -3283,7 +3259,6 @@ function assign(){
     shift:operator.shift
 
   };
-
 
   saveMachine(curMachine)
 
@@ -3324,7 +3299,6 @@ function upd(s){
 
   }
 
-
   if(curMachine!==operator.machine){
 
     alert(
@@ -3336,7 +3310,6 @@ function upd(s){
 
   }
 
-
   if(s==="MATERIAL REQUIREMENT"){
 
     openMaterialModal();
@@ -3344,7 +3317,6 @@ function upd(s){
     return;
 
   }
-
 
   machines[curMachine].materialDetails=null;
 
@@ -3419,7 +3391,6 @@ function submitMaterialRequirement(){
 
   }
 
-
   machines[curMachine].materialDetails={
 
     partNo:partNo,
@@ -3429,7 +3400,6 @@ function submitMaterialRequirement(){
     qty:qty
 
   };
-
 
   closeMaterialModal();
 
@@ -3454,7 +3424,6 @@ function executeStatusUpdate(s){
 
   }
 
-
   if(curMachine!==operator.machine){
 
     alert(
@@ -3465,7 +3434,6 @@ function executeStatusUpdate(s){
 
   }
 
-
   if(!machines[curMachine]){
 
     machines[curMachine]=
@@ -3473,9 +3441,7 @@ function executeStatusUpdate(s){
 
   }
 
-
   machines[curMachine].status=s;
-
 
   return saveMachine(curMachine)
 
@@ -3667,7 +3633,6 @@ function downloadShiftExcel(){
 
     const rows=[];
 
-
     ALL_MACHINES_LIST.forEach(id=>{
 
       const m =
@@ -3686,7 +3651,6 @@ function downloadShiftExcel(){
         {};
 
       let deptName="-";
-
 
       if(m.status==="BREAKDOWN"){
 
@@ -3733,7 +3697,6 @@ function downloadShiftExcel(){
         deptName="Running";
 
       }
-
 
       rows.push({
 
@@ -3786,7 +3749,6 @@ function downloadShiftExcel(){
 
     });
 
-
     if(
       typeof XLSX !== "undefined"
     ){
@@ -3795,7 +3757,6 @@ function downloadShiftExcel(){
         XLSX.utils.json_to_sheet(
           rows
         );
-
 
       worksheet["!cols"]=[
 
@@ -3812,10 +3773,8 @@ function downloadShiftExcel(){
 
       ];
 
-
       const workbook =
         XLSX.utils.book_new();
-
 
       XLSX.utils.book_append_sheet(
         workbook,
@@ -3823,12 +3782,10 @@ function downloadShiftExcel(){
         "Shift Report"
       );
 
-
       const date =
         new Date()
           .toISOString()
           .slice(0,10);
-
 
       XLSX.writeFile(
         workbook,
@@ -3837,85 +3794,9 @@ function downloadShiftExcel(){
         ".xlsx"
       );
 
-
       return;
 
     }
-
-
-    const header=[
-
-      "Machine No",
-      "Status",
-      "Operator Name",
-      "Operator ID",
-      "Shift",
-      "Login Time",
-      "Material Part No",
-      "Material Part Name",
-      "Quantity",
-      "Department Responsible"
-
-    ];
-
-
-    const csv=[
-      header.join(",")
-    ];
-
-
-    rows.forEach(row=>{
-
-      csv.push(
-        header
-          .map(
-            h=>csvEscape(row[h])
-          )
-          .join(",")
-      );
-
-    });
-
-
-    const blob =
-      new Blob(
-        [csv.join("\n")],
-        {
-          type:
-            "text/csv;charset=utf-8;"
-        }
-      );
-
-
-    const url =
-      URL.createObjectURL(
-        blob
-      );
-
-
-    const link =
-      document.createElement("a");
-
-
-    link.href=url;
-
-
-    link.download =
-      "Brembo_Shift_Report_"+
-      new Date()
-        .toISOString()
-        .slice(0,10)+
-      ".csv";
-
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-
 
   }catch(err){
 
@@ -3929,18 +3810,6 @@ function downloadShiftExcel(){
     );
 
   }
-
-}
-
-
-function csvEscape(value){
-
-  const v =
-    String(value ?? "");
-
-  return '"'+
-    v.replace(/"/g,'""')+
-    '"';
 
 }
 
@@ -3972,10 +3841,8 @@ function departmentLogin(){
 
   }
 
-
   const config =
     DEPARTMENT_CONFIG[dep];
-
 
   if(!config){
 
@@ -3987,7 +3854,6 @@ function departmentLogin(){
 
   }
 
-
   if(pin!==config.pin){
 
     alert(
@@ -3998,7 +3864,6 @@ function departmentLogin(){
 
   }
 
-
   department=dep;
 
   operator=null;
@@ -4008,7 +3873,6 @@ function departmentLogin(){
   departmentStatusFilter="TOTAL";
 
   deptSelectedMachine=null;
-
 
   localStorage.setItem(
     "brembo_department",
@@ -4023,21 +3887,17 @@ function departmentLogin(){
     "brembo_shift"
   );
 
-
   document.getElementById(
     "login"
   ).style.display="none";
-
 
   document.getElementById(
     "operatorDashboard"
   ).style.display="none";
 
-
   document.getElementById(
     "departmentDashboard"
   ).style.display="block";
-
 
   renderDepartmentDashboard();
 
@@ -4055,7 +3915,6 @@ function departmentLogout(){
       "Logout from department dashboard?"
     )
   ) return;
-
 
   localStorage.removeItem(
     "brembo_department"
@@ -4088,7 +3947,6 @@ function setDepartmentStatusFilter(status){
 
   }
 
-
   deptSelectedMachine=null;
 
   renderDepartmentDashboard();
@@ -4104,7 +3962,6 @@ function toggleMaterialRequirements(){
 
   if(department!=="store") return;
 
-
   if(materialRequirementMode){
 
     materialRequirementMode=false;
@@ -4119,7 +3976,6 @@ function toggleMaterialRequirements(){
       "MATERIAL REQUIREMENT";
 
   }
-
 
   deptSelectedMachine=null;
 
@@ -4159,16 +4015,6 @@ function getDepartmentFilteredMachines(){
 
   }
 
-
-  const config =
-    DEPARTMENT_CONFIG[department];
-
-
-  /*
-    TOTAL = all machines
-    Other status = exact status
-  */
-
   if(
     departmentStatusFilter==="TOTAL"
   ){
@@ -4176,7 +4022,6 @@ function getDepartmentFilteredMachines(){
     return ALL_MACHINES_LIST.slice();
 
   }
-
 
   return ALL_MACHINES_LIST.filter(id=>{
 
@@ -4203,13 +4048,10 @@ function renderDepartmentDashboard(){
 
   if(!department) return;
 
-
   const config =
     DEPARTMENT_CONFIG[department];
 
-
   if(!config) return;
-
 
   document.getElementById(
     "deptTitle"
@@ -4217,23 +4059,17 @@ function renderDepartmentDashboard(){
     config.name+
     " DASHBOARD";
 
-
   document.getElementById(
     "deptBadge"
   ).innerText =
     config.name;
 
-
   renderDepartmentStatusCards();
-
-
-  /* STORE MATERIAL BUTTON */
 
   const matBtn =
     document.getElementById(
       "materialRequirementBtn"
     );
-
 
   const matCount =
     ALL_MACHINES_LIST.filter(id=>{
@@ -4250,7 +4086,6 @@ function renderDepartmentDashboard(){
 
     }).length;
 
-
   if(department==="store"){
 
     matBtn.style.display="block";
@@ -4259,7 +4094,6 @@ function renderDepartmentDashboard(){
       "materialReqCount"
     ).innerText =
       matCount;
-
 
     if(materialRequirementMode){
 
@@ -4281,7 +4115,6 @@ function renderDepartmentDashboard(){
 
   }
 
-
   renderDepartmentMachineGrid();
 
 }
@@ -4298,25 +4131,20 @@ function renderDepartmentMachineGrid(){
       "deptMachineGrid"
     );
 
-
   if(!grid) return;
-
 
   const filtered =
     getDepartmentFilteredMachines();
-
 
   const title =
     document.getElementById(
       "deptGridTitle"
     );
 
-
   const count =
     document.getElementById(
       "deptGridCount"
     );
-
 
   if(
     departmentStatusFilter==="TOTAL"
@@ -4336,11 +4164,9 @@ function renderDepartmentMachineGrid(){
 
   }
 
-
   count.innerText =
     filtered.length+
     " MACHINES";
-
 
   if(filtered.length===0){
 
@@ -4368,7 +4194,6 @@ function renderDepartmentMachineGrid(){
 
   }
 
-
   if(
     !filtered.includes(
       deptSelectedMachine
@@ -4380,7 +4205,6 @@ function renderDepartmentMachineGrid(){
 
   }
 
-
   grid.innerHTML =
     filtered.map(id=>{
 
@@ -4389,15 +4213,12 @@ function renderDepartmentMachineGrid(){
         ||
         getDefaultMachine();
 
-
       const selected =
         deptSelectedMachine===id
         ? "selected"
         : "";
 
-
       let color="#ef4444";
-
 
       if(m.status==="RUNNING"){
         color="#22c55e";
@@ -4427,7 +4248,6 @@ function renderDepartmentMachineGrid(){
         color="#ffd000";
       }
 
-
       return `
 
         <div
@@ -4452,7 +4272,6 @@ function renderDepartmentMachineGrid(){
 
     }).join("");
 
-
   renderDepartmentSelected();
 
 }
@@ -4466,25 +4285,9 @@ function selectDepartmentMachine(id){
 
   if(!machines[id]) return;
 
-
   deptSelectedMachine=id;
 
-
   renderDepartmentMachineGrid();
-
-
-  setTimeout(()=>{
-
-    document
-      .getElementById(
-        "deptSelected"
-      )
-      ?.scrollIntoView({
-        behavior:"smooth",
-        block:"center"
-      });
-
-  },100);
 
 }
 
@@ -4500,9 +4303,7 @@ function renderDepartmentSelected(){
       "deptSelected"
     );
 
-
   if(!box) return;
-
 
   if(!deptSelectedMachine){
 
@@ -4523,12 +4324,10 @@ function renderDepartmentSelected(){
 
   }
 
-
   const m =
     machines[
       deptSelectedMachine
     ];
-
 
   if(!m){
 
@@ -4539,19 +4338,15 @@ function renderDepartmentSelected(){
 
   }
 
-
   const op =
     m.op;
-
 
   const config =
     DEPARTMENT_CONFIG[
       department
     ];
 
-
   let statusColor="#ef4444";
-
 
   if(m.status==="RUNNING"){
     statusColor="#22c55e";
@@ -4581,7 +4376,6 @@ function renderDepartmentSelected(){
     statusColor="#ffd000";
   }
 
-
   let html=`
 
     <h2 style="
@@ -4608,7 +4402,6 @@ function renderDepartmentSelected(){
     </div>
 
   `;
-
 
   if(m.materialDetails){
 
@@ -4664,7 +4457,6 @@ function renderDepartmentSelected(){
     `;
 
   }
-
 
   if(op){
 
@@ -4730,11 +4522,6 @@ function renderDepartmentSelected(){
 
   }
 
-
-  /*
-    Supervisor = View Only
-  */
-
   if(
     department==="supervisor"
   ){
@@ -4766,17 +4553,11 @@ function renderDepartmentSelected(){
 
     `;
 
-
     box.innerHTML=html;
 
     return;
 
   }
-
-
-  /*
-    Department actions
-  */
 
   html+=`
 
@@ -4791,13 +4572,11 @@ function renderDepartmentSelected(){
 
   `;
 
-
   config.actions.forEach(action=>{
 
     const isRed =
       action.status ===
       "MATERIAL SHORTAGE";
-
 
     const bg =
       isRed
@@ -4806,7 +4585,6 @@ function renderDepartmentSelected(){
       :
       "#103817";
 
-
     const border =
       isRed
       ?
@@ -4814,14 +4592,12 @@ function renderDepartmentSelected(){
       :
       "#22c55e";
 
-
     const color =
       isRed
       ?
       "#fca5a5"
       :
       "#35ff48";
-
 
     html+=`
 
@@ -4845,7 +4621,6 @@ function renderDepartmentSelected(){
 
   });
 
-
   box.innerHTML=html;
 
 }
@@ -4867,18 +4642,15 @@ function departmentUpdateStatus(status){
 
   }
 
-
   const config =
     DEPARTMENT_CONFIG[
       department
     ];
 
-
   const allowed =
     config.actions.some(
       a=>a.status===status
     );
-
 
   if(!allowed){
 
@@ -4890,7 +4662,6 @@ function departmentUpdateStatus(status){
 
   }
 
-
   if(!deptSelectedMachine){
 
     alert(
@@ -4901,10 +4672,8 @@ function departmentUpdateStatus(status){
 
   }
 
-
   const id =
     deptSelectedMachine;
-
 
   if(!confirm(
     "Mark "+
@@ -4918,7 +4687,6 @@ function departmentUpdateStatus(status){
 
   }
 
-
   if(!machines[id]){
 
     machines[id]=
@@ -4926,10 +4694,8 @@ function departmentUpdateStatus(status){
 
   }
 
-
   machines[id].status =
     status;
-
 
   if(status==="RUNNING"){
 
@@ -4937,7 +4703,6 @@ function departmentUpdateStatus(status){
       .materialDetails=null;
 
   }
-
 
   saveMachine(id)
 
@@ -4948,14 +4713,12 @@ function departmentUpdateStatus(status){
         ||
         ROUTE_MAP.RUNNING;
 
-
       loudPopup(
         id,
         status,
         config.name,
         route
       );
-
 
       if(
         status!=="RUNNING"
@@ -4982,13 +4745,11 @@ function departmentUpdateStatus(status){
             route.name
           );
 
-
         lastWa =
           "https://wa.me/"+
           route.no+
           "?text="+
           msg;
-
 
         setTimeout(()=>{
 
@@ -5000,7 +4761,6 @@ function departmentUpdateStatus(status){
         },700);
 
       }
-
 
       renderDepartmentDashboard();
 
@@ -5035,17 +4795,9 @@ function renderAllDashboards(){
       "departmentDashboard"
     ).style.display="none";
 
-
     renderOperatorStatusCards();
 
     renderOperatorMachineList();
-
-
-    /*
-      Default detail = assigned machine.
-      If user has already selected another
-      machine, keep that selected machine.
-    */
 
     if(
       !curMachine ||
@@ -5057,7 +4809,6 @@ function renderAllDashboards(){
 
     }
 
-
     if(
       machines[curMachine]
     ){
@@ -5066,11 +4817,9 @@ function renderAllDashboards(){
 
     }
 
-
     return;
 
   }
-
 
   if(department){
 
@@ -5082,13 +4831,11 @@ function renderAllDashboards(){
       "departmentDashboard"
     ).style.display="block";
 
-
     renderDepartmentDashboard();
 
     return;
 
   }
-
 
 }
 
@@ -5115,7 +4862,6 @@ const savedOperator =
   localStorage.getItem(
     "brembo_v7"
   );
-
 
 const savedDepartment =
   localStorage.getItem(
@@ -5157,7 +4903,6 @@ else if(savedOperator){
       JSON.parse(
         savedOperator
       );
-
 
     if(!operator.machine){
 
@@ -5211,4 +4956,4 @@ if(
 </script>
 
 </body>
-  </html>
+</html>
