@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
@@ -245,7 +245,7 @@ button:active{
 }  
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(9,1fr);  
+  grid-template-columns:repeat(8,1fr);  
   gap:9px;  
   padding:16px 26px 10px;  
   background:#050505  
@@ -602,7 +602,7 @@ button:active{
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(9,1fr);  
+  grid-template-columns:repeat(8,1fr);  
   gap:9px;  
   padding:16px 26px 10px  
 }  
@@ -692,7 +692,7 @@ button:active{
   border: 1px solid #22c55e;
 }
 @media(max-width:1200px){  
-  .statusCards, .deptStatusCards{ grid-template-columns:repeat(5,1fr) }  
+  .statusCards, .deptStatusCards{ grid-template-columns:repeat(4,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
 }  
@@ -725,21 +725,6 @@ button:active{
   .infoGrid{ grid-template-columns:80px 1fr }  
 }  
 </style>  
-
-<script>
-/* IMMEDIATE SESSION CHECK (PREVENT FLICKER ON REFRESH) */
-(function(){
-  const savedOp = localStorage.getItem("brembo_v7");
-  const savedDept = localStorage.getItem("brembo_department");
-  const style = document.createElement('style');
-  if(savedOp){
-    style.innerHTML = "#login{display:none !important;} #operatorDashboard{display:block !important;} #departmentDashboard{display:none !important;}";
-  } else if(savedDept){
-    style.innerHTML = "#login{display:none !important;} #operatorDashboard{display:none !important;} #departmentDashboard{display:block !important;}";
-  }
-  document.head.appendChild(style);
-})();
-</script>
 </head>  
 <body>  
 <div id="notifBig"></div>  
@@ -900,34 +885,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);  
 const db = firebase.database();  
 
-/* HASHED SECURE PINS (ENCRYPTED) */
-const ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // 7890
-const OPERATOR_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // 1111
+/* PINS */  
+const ADMIN_PIN = "191197";  
+const OPERATOR_PIN = "1234";  
 
-/* SECURE SHA-256 HASH FUNCTION */
-async function hashText(text) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-/* DEPARTMENTS WITH CORRECTED HASHED PINS */  
+/* DEPARTMENTS */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ name:"MAINTENANCE", pinHash:"86043d81b8beec4608c7901021481f33f86e3001aa3f7d87bc41a27e0a29f8f4", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] }, // 2222
-  loading:{ name:"LOADING", pinHash:"ea10e4a7b7381b1edbc476a0846200196238b73f84f09d6a7ed2a4ff5ef7ebc4", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] }, // 3333 
-  quality:{ name:"QUALITY", pinHash:"99ee13f416d2524d77d130edcb81d0f509d3ed3f8a4a750f1464303d22b5e396", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] }, // 4444
-  toolroom:{ name:"TOOL ROOM", pinHash:"bfabac123b320bcbb0238c92a95c8989a1f73752e259b56f874bc07452834b1c", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] }, // 5555
-  store:{ 
-    name:"STORE DEPARTMENT", 
-    pinHash:"1a2d53018e69818817a86c6734d400e9988220973a110a1586566d7e67fb2f6b", // 6666 (FIXED)
-    issueStatus:"MATERIAL REQUIREMENT", 
-    actions:[
-      { label:"❌ MATERIAL OUT OF STOCK (मटेरियल उपलब्ध नाही)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }
-    ] 
-  },  
-  supervisor:{ name:"SUPERVISOR", pinHash:"4124976451e7379d71761e0b57fa2384a5aa44ff379d845e69e4ccdd99684078", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] } // 7777 (FIXED) 
+  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
+  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
+  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
+  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
+  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[] },  
+  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
 /* WHATSAPP ROUTING */  
@@ -940,7 +909,6 @@ const ROUTE_MAP = {
   "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },  
   "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
   "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173" },  
-  "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173" },  
   "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }  
 };  
 
@@ -956,7 +924,7 @@ const ALL_MACHINES_LIST = (()=>{
   return a;  
 })();  
 
-/* STATUS CONFIG */  
+/* STATUS CONFIG (Shortage removed) */  
 const STATUS_CONFIG = [  
   { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
   { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
@@ -965,8 +933,7 @@ const STATUS_CONFIG = [
   { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
   { key:"LOT READY", title:"LOT READY", icon:"⚙️", accent:"#ff9800" },  
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
-  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" },  
-  { key:"MATERIAL SHORTAGE", title:"SHORTAGE", icon:"⚙️", accent:"#ff1744" }  
+  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" }
 ];  
 
 /* GLOBAL VARIABLES */  
@@ -1158,7 +1125,8 @@ function load(){
 }  
 
 function checkExistingSession(){
-  if(operator || department) return;  
+  if(operator || department) return; 
+  
   const savedOp = localStorage.getItem("brembo_v7");
   const savedDept = localStorage.getItem("brembo_department");
   
@@ -1216,7 +1184,7 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
-async function doLogin(){  
+function doLogin(){  
   const id = document.getElementById("opId").value.trim();  
   const nm = document.getElementById("opName").value.trim();  
   const pin = document.getElementById("opPin").value.trim();  
@@ -1224,9 +1192,7 @@ async function doLogin(){
   const sh = document.getElementById("opShift").value;  
 
   if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
-  
-  const pinHash = await hashText(pin);
-  if(pinHash !== OPERATOR_HASH){ alert("Wrong Operator PIN! Access Denied."); return; }  
+  if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
   const targetMc = machines[mc];
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){
@@ -1275,11 +1241,10 @@ function doLogout(){
   location.reload();  
 }  
 
-async function resetAll(){  
+function resetAll(){  
   const pin = prompt("ENTER ADMIN PIN:");  
   if(pin===null) return;  
-  const pinHash = await hashText(pin);
-  if(pinHash !== ADMIN_HASH){ alert("Wrong PIN! Access Denied!"); return; }  
+  if(pin!==ADMIN_PIN){ alert("Wrong PIN! Access Denied!"); return; }  
   if(!confirm("Reset all 69 machines to RUNNING?")) return;  
 
   resetAllMachinesFirebase().then(()=>{  
@@ -1456,7 +1421,7 @@ function sel(id){
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){
       btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - 0 Req)</span><span>✓</span></button>` + btns;
     }
 
@@ -1480,7 +1445,6 @@ function clearMaterialRequirement(){
   let m = machines[curMachine];
   let issues = getMachineIssues(m);
   delete issues["MATERIAL REQUIREMENT"];
-  delete issues["MATERIAL SHORTAGE"];
   
   m.issues = issues;
   m.materialDetails = null;
@@ -1593,7 +1557,7 @@ function downloadShiftExcel(){
       else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }
       else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }
       else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }
-      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName="Store Department"; }
+      else if(hasStatus(m, "MATERIAL REQUIREMENT")){ deptName="Store Department"; }
       else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }
       else{ deptName="Running"; }  
 
@@ -1625,16 +1589,14 @@ function downloadShiftExcel(){
   }  
 }  
 
-async function departmentLogin(){  
+function departmentLogin(){  
   const dep = document.getElementById("departmentSelect").value;  
   const pin = document.getElementById("departmentPin").value;  
 
   if(!dep || !pin){ alert("Please select department and enter PIN."); return; }  
   const config = DEPARTMENT_CONFIG[dep];  
   if(!config){ alert("Invalid department."); return; }  
-  
-  const pinHash = await hashText(pin);
-  if(pinHash !== config.pinHash){ alert("Wrong Department PIN! Access Denied!"); return; }  
+  if(pin!==config.pin){ alert("Wrong Department PIN! Access Denied!"); return; }  
 
   department=dep;  
   operator=null;  
@@ -1770,7 +1732,7 @@ function renderDepartmentSelected(){
     html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
     config.actions.forEach(a=>{
       if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #eab308;border-radius:10px;background:#3a2902;color:#ffcc00;font-weight:900">${a.label}</button>`;
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
       }
     });
   } else {
@@ -1797,7 +1759,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);
 
   saveMachine(deptSelectedMachine).then(()=>{
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" | Added: "+(addIssue||""), DEPARTMENT_CONFIG[department].name);
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);
     renderDepartmentDashboard();
   }).catch(err=>{
     console.error(err);
@@ -1805,6 +1767,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   });
 }
 
+// Initialize on page load
 window.onload = function(){
   fillMachineDropdown();
   load();
