@@ -901,8 +901,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();  
 
 /* HASHED SECURE PINS (ENCRYPTED) */
-const ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; 
-const OPERATOR_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+const ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // 7890
+const OPERATOR_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // 1111
 
 /* SECURE SHA-256 HASH FUNCTION */
 async function hashText(text) {
@@ -913,21 +913,21 @@ async function hashText(text) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* DEPARTMENTS WITH HASHED PINS */  
+/* DEPARTMENTS WITH CORRECTED HASHED PINS */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ name:"MAINTENANCE", pinHash:"86043d81b8beec4608c7901021481f33f86e3001aa3f7d87bc41a27e0a29f8f4", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
-  loading:{ name:"LOADING", pinHash:"ea10e4a7b7381b1edbc476a0846200196238b73f84f09d6a7ed2a4ff5ef7ebc4", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
-  quality:{ name:"QUALITY", pinHash:"99ee13f416d2524d77d130edcb81d0f509d3ed3f8a4a750f1464303d22b5e396", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
-  toolroom:{ name:"TOOL ROOM", pinHash:"bfabac123b320bcbb0238c92a95c8989a1f73752e259b56f874bc07452834b1c", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
+  maintenance:{ name:"MAINTENANCE", pinHash:"86043d81b8beec4608c7901021481f33f86e3001aa3f7d87bc41a27e0a29f8f4", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] }, // 2222
+  loading:{ name:"LOADING", pinHash:"ea10e4a7b7381b1edbc476a0846200196238b73f84f09d6a7ed2a4ff5ef7ebc4", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] }, // 3333 
+  quality:{ name:"QUALITY", pinHash:"99ee13f416d2524d77d130edcb81d0f509d3ed3f8a4a750f1464303d22b5e396", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] }, // 4444
+  toolroom:{ name:"TOOL ROOM", pinHash:"bfabac123b320bcbb0238c92a95c8989a1f73752e259b56f874bc07452834b1c", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] }, // 5555
   store:{ 
     name:"STORE DEPARTMENT", 
-    pinHash:"bf11e641ea50e4171657c6670eef1f83c16dd0a969bc7f28bc4e9ebbe6f38799", 
+    pinHash:"1a2d53018e69818817a86c6734d400e9988220973a110a1586566d7e67fb2f6b", // 6666 (FIXED)
     issueStatus:"MATERIAL REQUIREMENT", 
     actions:[
       { label:"❌ MATERIAL OUT OF STOCK (मटेरियल उपलब्ध नाही)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }
     ] 
   },  
-  supervisor:{ name:"SUPERVISOR", pinHash:"ac6a13d7e68225e30773d3ca7ea0360a891ce54f15d7bfbc1f49633c7f960f22", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
+  supervisor:{ name:"SUPERVISOR", pinHash:"4124976451e7379d71761e0b57fa2384a5aa44ff379d845e69e4ccdd99684078", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] } // 7777 (FIXED) 
 };  
 
 /* WHATSAPP ROUTING */  
