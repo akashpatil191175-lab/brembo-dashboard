@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#050505">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <title>Brembo - 69 Machines</title>
 
@@ -369,7 +370,7 @@ button:active{
   margin-top:7px
 }
 
-/* ================= MACHINE RESULT AREA ================= */
+/* ================= MACHINE RESULT ================= */
 
 .statusMachineArea{
   padding:8px 26px 15px
@@ -458,20 +459,11 @@ button:active{
   overflow:hidden
 }
 
-.panelHeader{
-  padding:15px 20px;
-  border-bottom:1px solid #292929;
-  font-size:14px;
-  font-weight:900;
-  color:#888;
-  letter-spacing:1px
-}
-
-/* ================= DETAIL ================= */
-
 .detailPanel{
   padding:20px
 }
+
+/* ================= DETAIL ================= */
 
 .detailTop{
   display:grid;
@@ -674,7 +666,187 @@ button:active{
   border-radius:18px;
   padding:24px;
   width:400px;
-  max-width:100%
+  max-width:100%;
+  max-height:90vh;
+  overflow:auto
+}
+
+/* ================= MATERIAL REQUEST PANEL ================= */
+
+#materialRequestPanel{
+  display:none;
+  margin:10px 26px 18px;
+  background:#0b0b0b;
+  border:1px solid #eab308;
+  border-radius:14px;
+  overflow:hidden
+}
+
+.materialPanelHeader{
+  padding:15px 18px;
+  border-bottom:1px solid #3b3208;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap
+}
+
+.materialPanelTitle{
+  color:#ffd000;
+  font-size:15px;
+  font-weight:900
+}
+
+.materialPanelSub{
+  color:#777;
+  font-size:10px;
+  margin-top:4px
+}
+
+.materialTabs{
+  display:flex;
+  gap:7px;
+  padding:12px;
+  border-bottom:1px solid #292929;
+  background:#090909
+}
+
+.materialTab{
+  padding:9px 14px;
+  border-radius:8px;
+  border:1px solid #333;
+  background:#111;
+  color:#888;
+  font-size:11px;
+  font-weight:900
+}
+
+.materialTab.active{
+  background:#eab308;
+  border-color:#facc15;
+  color:#000
+}
+
+.materialRequestList{
+  padding:12px;
+  display:grid;
+  gap:10px;
+  max-height:600px;
+  overflow:auto
+}
+
+.materialRequestCard{
+  background:#121212;
+  border:1px solid #333;
+  border-radius:12px;
+  padding:14px
+}
+
+.materialRequestCard.pending{
+  border-color:#eab308;
+  box-shadow:0 0 12px rgba(234,179,8,.08)
+}
+
+.materialRequestCard.action{
+  border-color:#22c55e
+}
+
+.materialRequestTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  flex-wrap:wrap
+}
+
+.requestId{
+  color:#ffd000;
+  font-size:14px;
+  font-weight:900
+}
+
+.requestStatus{
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:9px;
+  font-weight:900
+}
+
+.requestStatus.pending{
+  background:#eab308;
+  color:#000
+}
+
+.requestStatus.action{
+  background:#22c55e;
+  color:#000
+}
+
+.requestStatus.shortage{
+  background:#ef4444;
+  color:#fff
+}
+
+.materialRequestGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:12px
+}
+
+.materialRequestInfo{
+  background:#090909;
+  border:1px solid #252525;
+  border-radius:8px;
+  padding:9px
+}
+
+.materialRequestInfoLabel{
+  color:#777;
+  font-size:9px;
+  font-weight:700
+}
+
+.materialRequestInfoValue{
+  color:#eee;
+  font-size:12px;
+  font-weight:900;
+  margin-top:3px;
+  word-break:break-word
+}
+
+.materialActionRow{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px
+}
+
+.materialActionBtn{
+  min-height:44px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:900
+}
+
+.materialSupplyBtn{
+  border:1px solid #22c55e;
+  background:#103817;
+  color:#39ff52
+}
+
+.materialShortageBtn{
+  border:1px solid #ef4444;
+  background:#3a1111;
+  color:#ff7777
+}
+
+.materialHistoryNote{
+  margin-top:9px;
+  color:#777;
+  font-size:10px;
+  line-height:1.5
 }
 
 /* ================= DEPARTMENT ================= */
@@ -716,7 +888,6 @@ button:active{
   margin:auto
 }
 
-/* Department status cards */
 .deptStatusCards{
   display:grid;
   grid-template-columns:repeat(9,1fr);
@@ -866,6 +1037,10 @@ button:active{
     flex-wrap:wrap
   }
 
+  .materialRequestGrid{
+    grid-template-columns:repeat(2,1fr)
+  }
+
 }
 
 @media(max-width:800px){
@@ -978,6 +1153,10 @@ button:active{
     margin:10px
   }
 
+  #materialRequestPanel{
+    margin:10px
+  }
+
   .deptTitle{
     font-size:18px
   }
@@ -988,6 +1167,18 @@ button:active{
 
   .infoGrid .assignBtn{
     grid-column:1 / -1
+  }
+
+  .materialRequestGrid{
+    grid-template-columns:1fr
+  }
+
+  .materialActionRow{
+    grid-template-columns:1fr
+  }
+
+  .materialTabs{
+    overflow-x:auto
   }
 
 }
@@ -1009,6 +1200,10 @@ button:active{
       MATERIAL REQUIREMENT
     </h2>
 
+    <div style="font-size:10px;color:#777;margin-bottom:8px;text-align:center">
+      New request will be saved separately. Previous requests will NOT be deleted.
+    </div>
+
     <input id="matPartNo"
            class="loginInput"
            placeholder="PART NO">
@@ -1025,7 +1220,7 @@ button:active{
     <button onclick="submitMaterialRequirement()"
             class="loginBtn"
             style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">
-      SUBMIT REQUIREMENT & NOTIFY STORE
+      SUBMIT NEW REQUIREMENT & NOTIFY STORE
     </button>
 
     <button onclick="closeMaterialModal()"
@@ -1069,8 +1264,6 @@ button:active{
       </button>
 
     </div>
-
-    <!-- OPERATOR -->
 
     <div id="operatorLogin">
 
@@ -1117,8 +1310,6 @@ button:active{
       </button>
 
     </div>
-
-    <!-- DEPARTMENT -->
 
     <div id="departmentLogin"
          style="display:none">
@@ -1253,13 +1444,9 @@ button:active{
 
   </div>
 
-  <!-- OPERATOR STATUS ICON DASHBOARD -->
-
   <div id="operatorStatusCards"
        class="statusCards">
   </div>
-
-  <!-- OPERATOR STATUS MACHINE LIST -->
 
   <div class="statusMachineArea">
 
@@ -1293,8 +1480,6 @@ button:active{
     </div>
 
   </div>
-
-  <!-- MAIN MACHINE DETAIL -->
 
   <div class="mainBox">
 
@@ -1359,7 +1544,8 @@ button:active{
       </span>
 
       <button onclick="downloadShiftExcel()"
-              class="excelSmallBtn">
+              class="excelSmallBtn pill"
+              style="color:#22c55e">
         📥 EXCEL
       </button>
 
@@ -1394,13 +1580,60 @@ button:active{
 
     </button>
 
-    <!-- DEPARTMENT STATUS ICONS -->
+    <!-- MATERIAL REQUEST HISTORY PANEL -->
+
+    <div id="materialRequestPanel">
+
+      <div class="materialPanelHeader">
+
+        <div>
+          <div class="materialPanelTitle">
+            📦 MATERIAL REQUEST MANAGEMENT
+          </div>
+
+          <div class="materialPanelSub">
+            Every request is stored separately. Machine status does not delete or replace requests.
+          </div>
+        </div>
+
+        <div id="materialTotalText"
+             style="font-size:10px;color:#aaa;font-weight:900">
+          0 REQUESTS
+        </div>
+
+      </div>
+
+      <div class="materialTabs">
+
+        <button id="materialPendingTab"
+                class="materialTab active"
+                onclick="setMaterialRequestView('PENDING')">
+          PENDING
+        </button>
+
+        <button id="materialHistoryTab"
+                class="materialTab"
+                onclick="setMaterialRequestView('HISTORY')">
+          HISTORY
+        </button>
+
+        <button id="materialAllTab"
+                class="materialTab"
+                onclick="setMaterialRequestView('ALL')">
+          ALL REQUESTS
+        </button>
+
+      </div>
+
+      <div id="materialRequestList"
+           class="materialRequestList">
+      </div>
+
+    </div>
 
     <div id="departmentStatusCards"
          class="deptStatusCards">
     </div>
-
-    <!-- DEPARTMENT MACHINE LIST -->
 
     <div class="deptMachineBox">
 
@@ -1430,8 +1663,6 @@ button:active{
       </div>
 
     </div>
-
-    <!-- SELECTED MACHINE -->
 
     <div class="deptMachineBox">
 
@@ -1484,7 +1715,6 @@ const db = firebase.database();
 ========================================================= */
 
 const ADMIN_PIN = "191197";
-
 const OPERATOR_PIN = "1234";
 
 
@@ -1748,6 +1978,8 @@ const STATUS_CONFIG = [
 
 let machines = {};
 
+let materialRequests = {};
+
 let operator = null;
 
 let department = null;
@@ -1765,6 +1997,8 @@ let operatorStatusFilter = "TOTAL";
 let departmentStatusFilter = "TOTAL";
 
 let deptSelectedMachine = null;
+
+let materialRequestView = "PENDING";
 
 
 /* =========================================================
@@ -1808,7 +2042,7 @@ function getShiftRange(s){
 
 
 /* =========================================================
-   FIREBASE CONNECTION STATUS
+   FIREBASE CONNECTION
 ========================================================= */
 
 function setFirebaseStatus(online){
@@ -1827,7 +2061,6 @@ function setFirebaseStatus(online){
     if(online){
 
       el.classList.remove("firebaseOffline");
-
       el.classList.add("firebaseOnline");
 
       el.innerHTML=
@@ -1836,7 +2069,6 @@ function setFirebaseStatus(online){
     }else{
 
       el.classList.remove("firebaseOnline");
-
       el.classList.add("firebaseOffline");
 
       el.innerHTML=
@@ -1853,13 +2085,11 @@ function setFirebaseStatus(online){
     if(online){
 
       fb.innerText="LIVE - Firebase Connected";
-
       fb.style.color="#22c55e";
 
     }else{
 
       fb.innerText="OFFLINE - Check Internet";
-
       fb.style.color="#ef4444";
 
     }
@@ -1878,6 +2108,8 @@ db.ref(".info/connected").on("value",snap=>{
 
 /* =========================================================
    SHIFT AUTO RESET
+   IMPORTANT:
+   THIS NEVER TOUCHES materialRequests
 ========================================================= */
 
 function checkShiftAutoReset(){
@@ -1892,10 +2124,7 @@ function checkShiftAutoReset(){
     document.getElementById("liveShiftBadge");
 
   if(badge){
-
-    badge.innerText =
-      "SHIFT: "+live;
-
+    badge.innerText="SHIFT: "+live;
   }
 
   const txt =
@@ -1919,13 +2148,12 @@ function checkShiftAutoReset(){
       saved+
       " Ended! Shift "+
       live+
-      " Started. Auto Resetting System."
+      " Started. Machine status will reset. Material Requests will remain محفوظ."
     );
 
     resetAllMachinesFirebase().then(()=>{
 
       localStorage.removeItem("brembo_v7");
-
       localStorage.removeItem("brembo_shift");
 
       location.reload();
@@ -1959,9 +2187,7 @@ function getDefaultMachine(){
 
     status:"RUNNING",
 
-    op:null,
-
-    materialDetails:null
+    op:null
 
   };
 
@@ -2005,7 +2231,8 @@ function saveMachine(id){
 
 
 /* =========================================================
-   RESET ALL
+   RESET MACHINES ONLY
+   MATERIAL REQUESTS ARE NEVER TOUCHED
 ========================================================= */
 
 function resetAllMachinesFirebase(){
@@ -2018,9 +2245,7 @@ function resetAllMachinesFirebase(){
 
       status:"RUNNING",
 
-      op:null,
-
-      materialDetails:null
+      op:null
 
     };
 
@@ -2032,10 +2257,10 @@ function resetAllMachinesFirebase(){
 
 
 /* =========================================================
-   LOAD FIREBASE
+   LOAD MACHINES
 ========================================================= */
 
-function load(){
+function loadMachines(){
 
   db.ref("machines").on("value",snap=>{
 
@@ -2081,7 +2306,6 @@ function load(){
 
     });
 
-
     if(missing.length){
 
       const updates={};
@@ -2095,7 +2319,6 @@ function load(){
       db.ref().update(updates);
 
     }
-
 
     for(let id of ALL_MACHINES_LIST){
 
@@ -2126,12 +2349,10 @@ function load(){
 
     }
 
-
     prev =
       JSON.parse(
         JSON.stringify(machines)
       );
-
 
     const fb =
       document.getElementById("fbStat");
@@ -2152,11 +2373,36 @@ function load(){
   },error=>{
 
     console.error(
-      "Firebase read error:",
+      "Firebase machine read error:",
       error
     );
 
     setFirebaseStatus(false);
+
+  });
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST LISTENER
+========================================================= */
+
+function loadMaterialRequests(){
+
+  db.ref("materialRequests").on("value",snap=>{
+
+    materialRequests =
+      snap.val() || {};
+
+    renderAllDashboards();
+
+  },error=>{
+
+    console.error(
+      "Firebase material request read error:",
+      error
+    );
 
   });
 
@@ -2181,25 +2427,20 @@ function showLoginMode(mode){
   const depBtn =
     document.getElementById("departmentModeBtn");
 
-
   if(mode==="operator"){
 
     op.style.display="block";
-
     dep.style.display="none";
 
     opBtn.classList.add("active");
-
     depBtn.classList.remove("active");
 
   }else{
 
     op.style.display="none";
-
     dep.style.display="block";
 
     opBtn.classList.remove("active");
-
     depBtn.classList.add("active");
 
   }
@@ -2260,7 +2501,6 @@ function doLogin(){
     document.getElementById("opShift")
       .value;
 
-
   if(!id || !nm || !pin || !mc || !sh){
 
     alert(
@@ -2270,7 +2510,6 @@ function doLogin(){
     return;
 
   }
-
 
   if(pin!==OPERATOR_PIN){
 
@@ -2282,26 +2521,17 @@ function doLogin(){
 
   }
 
-
   operator={
 
     id:id,
-
     name:nm,
-
     machine:mc,
-
     shift:sh,
-
-    time:
-      new Date()
-        .toLocaleTimeString("en-IN")
+    time:new Date().toLocaleTimeString("en-IN")
 
   };
 
-
   department=null;
-
 
   localStorage.setItem(
     "brembo_v7",
@@ -2313,13 +2543,11 @@ function doLogin(){
     sh
   );
 
-
   document.getElementById("login")
     .style.display="none";
 
   document.getElementById("operatorDashboard")
     .style.display="block";
-
 
   applyOperator();
 
@@ -2334,7 +2562,6 @@ function applyOperator(){
 
   if(!operator) return;
 
-
   document.getElementById("wel")
     .innerText =
       operator.name+
@@ -2342,26 +2569,21 @@ function applyOperator(){
       operator.id+
       ")";
 
-
   document.getElementById("welMc")
     .innerText =
       operator.machine;
-
 
   document.getElementById("welShift")
     .innerText =
       "Shift "+
       operator.shift;
 
-
   document.getElementById("shiftRangeTop")
     .innerText =
       getShiftRange(operator.shift);
 
-
   curMachine =
     operator.machine;
-
 
   if(!machines[operator.machine]){
 
@@ -2370,27 +2592,17 @@ function applyOperator(){
 
   }
 
-
   machines[operator.machine].op={
 
     name:operator.name,
-
     id:operator.id,
-
-    time:
-      new Date()
-        .toLocaleTimeString("en-IN"),
-
+    time:new Date().toLocaleTimeString("en-IN"),
     machine:operator.machine,
-
     shift:operator.shift
 
   };
 
-
-  saveMachine(
-    operator.machine
-  ).catch(err=>{
+  saveMachine(operator.machine).catch(err=>{
 
     console.error(err);
 
@@ -2399,7 +2611,6 @@ function applyOperator(){
     );
 
   });
-
 
   renderAllDashboards();
 
@@ -2415,7 +2626,6 @@ function doLogout(){
   if(!confirm("Logout?")) return;
 
   localStorage.removeItem("brembo_v7");
-
   localStorage.removeItem("brembo_shift");
 
   operator=null;
@@ -2427,6 +2637,7 @@ function doLogout(){
 
 /* =========================================================
    ADMIN RESET
+   ONLY MACHINES
 ========================================================= */
 
 function resetAll(){
@@ -2435,7 +2646,6 @@ function resetAll(){
     prompt("ENTER ADMIN PIN:");
 
   if(pin===null) return;
-
 
   if(pin!==ADMIN_PIN){
 
@@ -2447,11 +2657,9 @@ function resetAll(){
 
   }
 
-
   if(!confirm(
-    "Reset all 69 machines to RUNNING?"
+    "Reset all 69 machines to RUNNING?\n\nMaterial Request history will NOT be deleted."
   )) return;
-
 
   resetAllMachinesFirebase()
     .then(()=>{
@@ -2460,7 +2668,7 @@ function resetAll(){
         getAllMachines();
 
       alert(
-        "All 69 machines are RUNNING!"
+        "All 69 machines are RUNNING.\nMaterial Requests are preserved."
       );
 
       renderAllDashboards();
@@ -2493,14 +2701,13 @@ function loudPopup(
   const b =
     document.getElementById("notifBig");
 
-
   b.innerHTML=`
 
-    🚨 ${mid}
+    🚨 ${escapeHtml(mid)}
 
     <br><br>
 
-    ${st}
+    ${escapeHtml(st)}
 
     <br><br>
 
@@ -2508,13 +2715,13 @@ function loudPopup(
       font-size:13px;
       color:#ffeb3b
     ">
-      To: ${routeTo.name}
+      To: ${escapeHtml(routeTo.name)}
     </span>
 
     <br>
 
     <span style="font-size:11px">
-      By: ${who}
+      By: ${escapeHtml(who)}
     </span>
 
     <br><br>
@@ -2532,9 +2739,7 @@ function loudPopup(
 
   `;
 
-
   b.style.display="block";
-
 
   if(navigator.vibrate){
 
@@ -2544,12 +2749,358 @@ function loudPopup(
 
   }
 
-
   setTimeout(()=>{
 
     b.style.display="none";
 
   },9000);
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST ID
+========================================================= */
+
+function generateMaterialRequestId(){
+
+  const now =
+    Date.now();
+
+  const random =
+    Math.floor(
+      100 +
+      Math.random()*900
+    );
+
+  return "MR-"+now+"-"+random;
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST OBJECT
+========================================================= */
+
+function createMaterialRequest(
+  machine,
+  partNo,
+  partName,
+  qty
+){
+
+  const requestId =
+    generateMaterialRequestId();
+
+  const now =
+    new Date();
+
+  const request={
+
+    requestId:requestId,
+
+    machine:machine,
+
+    partNo:partNo,
+
+    partName:partName,
+
+    qty:String(qty),
+
+    status:"PENDING",
+
+    requestedBy:operator
+      ? operator.name
+      : "",
+
+    requestedById:operator
+      ? operator.id
+      : "",
+
+    shift:operator
+      ? operator.shift
+      : "",
+
+    createdAt:now.getTime(),
+
+    createdDate:now.toLocaleString("en-IN"),
+
+    actionTaken:false,
+
+    actionBy:"",
+
+    actionDepartment:"",
+
+    actionAt:null,
+
+    actionDate:"",
+
+    actionStatus:""
+
+  };
+
+  return request;
+
+}
+
+
+/* =========================================================
+   SAVE NEW MATERIAL REQUEST
+   IMPORTANT: PUSH/SET UNIQUE ID
+========================================================= */
+
+function saveMaterialRequest(request){
+
+  if(!request || !request.requestId){
+
+    return Promise.reject(
+      new Error("Invalid Material Request")
+    );
+
+  }
+
+  return db
+    .ref(
+      "materialRequests/"+
+      request.requestId
+    )
+    .set(request);
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST PENDING COUNT
+========================================================= */
+
+function getPendingMaterialRequests(){
+
+  return Object.values(
+    materialRequests || {}
+  ).filter(r=>
+    r &&
+    r.status==="PENDING"
+  );
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST ALL
+========================================================= */
+
+function getAllMaterialRequestsSorted(){
+
+  return Object.values(
+    materialRequests || {}
+  )
+  .filter(Boolean)
+  .sort(
+    (a,b)=>
+      Number(b.createdAt||0) -
+      Number(a.createdAt||0)
+  );
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST SUBMIT
+========================================================= */
+
+function submitMaterialRequirement(){
+
+  if(!operator){
+
+    alert(
+      "Operator login required."
+    );
+
+    return;
+
+  }
+
+  if(curMachine!==operator.machine){
+
+    alert(
+      "You can create Material Requirement only for your assigned machine."
+    );
+
+    return;
+
+  }
+
+  const partNo =
+    document.getElementById("matPartNo")
+      .value.trim();
+
+  const partName =
+    document.getElementById("matPartName")
+      .value.trim();
+
+  const qty =
+    document.getElementById("matQty")
+      .value.trim();
+
+  if(!partNo || !partName || !qty){
+
+    alert(
+      "Please fill Part No, Part Name, and Quantity!"
+    );
+
+    return;
+
+  }
+
+  const request =
+    createMaterialRequest(
+      curMachine,
+      partNo,
+      partName,
+      qty
+    );
+
+  saveMaterialRequest(request)
+
+    .then(()=>{
+
+      closeMaterialModal();
+
+      alert(
+        "Material Requirement saved successfully.\n\nRequest ID: "+
+        request.requestId+
+        "\n\nPrevious requests are NOT changed or deleted."
+      );
+
+      const route =
+        ROUTE_MAP["MATERIAL REQUIREMENT"];
+
+      loudPopup(
+        curMachine,
+        "MATERIAL REQUIREMENT",
+        operator.name,
+        route
+      );
+
+      const msg =
+        "*🚨 BREMBO MATERIAL REQUIREMENT*"+
+        "%0A%0ARequest ID: *"+
+        encodeURIComponent(request.requestId)+
+        "*"+
+        "%0AMachine: *"+
+        encodeURIComponent(request.machine)+
+        "*"+
+        "%0APart No: "+
+        encodeURIComponent(request.partNo)+
+        "%0APart Name: "+
+        encodeURIComponent(request.partName)+
+        "%0AQuantity: "+
+        encodeURIComponent(request.qty)+
+        "%0AOperator: "+
+        encodeURIComponent(request.requestedBy)+
+        "%0AID: "+
+        encodeURIComponent(request.requestedById)+
+        "%0AShift: "+
+        encodeURIComponent(request.shift)+
+        "%0ATime: "+
+        encodeURIComponent(request.createdDate)+
+        "%0A%0AAction Required By: "+
+        encodeURIComponent(route.name);
+
+      lastWa =
+        "https://wa.me/"+
+        route.no+
+        "?text="+
+        msg;
+
+      document.getElementById(
+        "routeInfo"
+      ).style.display="block";
+
+      document.getElementById(
+        "routeInfo"
+      ).innerHTML=`
+
+        <b style="color:#ffd000">
+          MATERIAL REQUEST ROUTE
+        </b>
+
+        <br>
+
+        Request ID:
+        <b>${escapeHtml(request.requestId)}</b>
+
+        <br>
+
+        Route To:
+        ${escapeHtml(route.name)}
+
+        <br>
+
+        ☎ +${escapeHtml(route.no)}
+
+      `;
+
+      document.getElementById(
+        "waBtn"
+      ).style.display="block";
+
+      document.getElementById(
+        "waBtn"
+      ).innerText =
+        "◉ SEND WHATSAPP";
+
+      setTimeout(()=>{
+
+        window.open(
+          lastWa,
+          "_blank"
+        );
+
+      },700);
+
+      renderAllDashboards();
+
+    })
+
+    .catch(err=>{
+
+      console.error(
+        "Material request save error:",
+        err
+      );
+
+      alert(
+        "Material Request save failed.\nPlease check Firebase connection."
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   MATERIAL MODAL
+========================================================= */
+
+function openMaterialModal(){
+
+  document.getElementById("matPartNo").value="";
+  document.getElementById("matPartName").value="";
+  document.getElementById("matQty").value="";
+
+  document.getElementById(
+    "materialModal"
+  ).style.display="flex";
+
+}
+
+
+function closeMaterialModal(){
+
+  document.getElementById(
+    "materialModal"
+  ).style.display="none";
 
 }
 
@@ -2562,6 +3113,12 @@ function getStatusCount(status){
 
   if(status==="TOTAL"){
     return ALL_MACHINES_LIST.length;
+  }
+
+  if(status==="MATERIAL REQUIREMENT"){
+
+    return getPendingMaterialRequests().length;
+
   }
 
   return ALL_MACHINES_LIST.filter(id=>{
@@ -2581,7 +3138,11 @@ function getStatusCount(status){
    RENDER STATUS CARDS
 ========================================================= */
 
-function renderStatusCards(containerId, activeStatus, clickFunction){
+function renderStatusCards(
+  containerId,
+  activeStatus,
+  clickFunction
+){
 
   const container =
     document.getElementById(containerId);
@@ -2618,8 +3179,7 @@ function renderStatusCards(containerId, activeStatus, clickFunction){
 
           </div>
 
-          <div
-            class="statusCardCount">
+          <div class="statusCardCount">
             ${count}
           </div>
 
@@ -2637,7 +3197,7 @@ function renderStatusCards(containerId, activeStatus, clickFunction){
 
 
 /* =========================================================
-   GET STATUS LABEL
+   STATUS LABEL
 ========================================================= */
 
 function getStatusDisplayName(status){
@@ -2660,7 +3220,6 @@ function setOperatorStatusFilter(status){
   operatorStatusFilter=status;
 
   renderOperatorStatusCards();
-
   renderOperatorMachineList();
 
 }
@@ -2709,11 +3268,11 @@ function renderOperatorMachineList(){
 
   if(!grid) return;
 
-
   let filtered=[];
 
-
-  if(operatorStatusFilter==="TOTAL"){
+  if(
+    operatorStatusFilter==="TOTAL"
+  ){
 
     filtered=ALL_MACHINES_LIST.slice();
 
@@ -2722,6 +3281,29 @@ function renderOperatorMachineList(){
 
     sub.innerText=
       "Select a machine to view details. Operator updates are locked to your assigned machine.";
+
+  }else if(
+    operatorStatusFilter==="MATERIAL REQUIREMENT"
+  ){
+
+    const pending =
+      getPendingMaterialRequests();
+
+    const uniqueMachines =
+      [...new Set(
+        pending.map(r=>r.machine)
+      )];
+
+    filtered =
+      uniqueMachines.filter(
+        id=>ALL_MACHINES_LIST.includes(id)
+      );
+
+    title.innerText=
+      "⚙️ MATERIAL REQUEST MACHINES";
+
+    sub.innerText=
+      "Machines having one or more pending material requests.";
 
   }else{
 
@@ -2748,11 +3330,9 @@ function renderOperatorMachineList(){
 
   }
 
-
   count.innerText =
     filtered.length+
     " MACHINES";
-
 
   if(filtered.length===0){
 
@@ -2776,7 +3356,6 @@ function renderOperatorMachineList(){
 
   }
 
-
   grid.innerHTML =
     filtered.map(id=>{
 
@@ -2789,6 +3368,28 @@ function renderOperatorMachineList(){
         ? "selected"
         : "";
 
+      let statusText =
+        getStatusDisplayName(
+          m.status
+        );
+
+      if(
+        operatorStatusFilter===
+        "MATERIAL REQUIREMENT"
+      ){
+
+        const countReq =
+          getPendingMaterialRequests()
+            .filter(r=>r.machine===id)
+            .length;
+
+        statusText =
+          countReq+
+          " PENDING REQUEST"+
+          (countReq>1 ? "S" : "");
+
+      }
+
       return `
 
         <div
@@ -2797,10 +3398,9 @@ function renderOperatorMachineList(){
 
           ${id}
 
-          <span
-            class="machineResultStatus">
+          <span class="machineResultStatus">
 
-            ${getStatusDisplayName(m.status)}
+            ${statusText}
 
           </span>
 
@@ -2833,7 +3433,31 @@ function operatorSelectMachine(id){
 
 
 /* =========================================================
-   SELECT MACHINE DETAIL (Fixed)
+   GET MACHINE PENDING REQUESTS
+========================================================= */
+
+function getMachineMaterialRequests(machine){
+
+  return getAllMaterialRequestsSorted()
+    .filter(r=>
+      r.machine===machine
+    );
+
+}
+
+
+function getMachinePendingMaterialRequests(machine){
+
+  return getMachineMaterialRequests(machine)
+    .filter(r=>
+      r.status==="PENDING"
+    );
+
+}
+
+
+/* =========================================================
+   MACHINE DETAIL
 ========================================================= */
 
 function sel(id){
@@ -2853,48 +3477,137 @@ function sel(id){
     ||
     ROUTE_MAP.RUNNING;
 
-  let matHtml="";
+  const machineRequests =
+    getMachineMaterialRequests(id);
 
+  const pendingRequests =
+    machineRequests.filter(
+      r=>r.status==="PENDING"
+    );
 
-  if(m.materialDetails){
+  let materialHistoryHtml="";
 
-    matHtml=`
+  if(machineRequests.length){
+
+    materialHistoryHtml=`
 
       <div style="
-        background:#2a2508;
-        border:1px dashed #eab308;
-        padding:10px;
+        background:#191503;
+        border:1px solid #5a4a0a;
+        padding:12px;
         border-radius:10px;
-        font-size:12px;
-        margin-top:8px;
-        line-height:1.5">
+        margin-top:10px">
 
-        <b style="color:#eab308">
-          📦 MATERIAL REQUIREMENT DETAILS
-        </b>
+        <div style="
+          color:#eab308;
+          font-size:12px;
+          font-weight:900">
 
-        <br>
+          📦 MATERIAL REQUEST HISTORY
 
-        Part No:
-        ${escapeHtml(
-          m.materialDetails.partNo
-        )}
+          <span style="
+            float:right;
+            color:#ffd000">
 
-        <br>
+            ${machineRequests.length}
 
-        Part Name:
-        ${escapeHtml(
-          m.materialDetails.partName
-        )}
+          </span>
 
-        <br>
+        </div>
 
-        Qty:
-        ${escapeHtml(
-          String(
-            m.materialDetails.qty
-          )
-        )}
+        <div style="
+          margin-top:9px;
+          display:grid;
+          gap:7px">
+
+          ${
+            machineRequests.slice(0,8)
+            .map(r=>{
+
+              const stClass =
+                r.status==="PENDING"
+                ? "background:#eab308;color:#000"
+                : r.status==="MATERIAL SHORTAGE"
+                ? "background:#ef4444;color:#fff"
+                : "background:#22c55e;color:#000";
+
+              return `
+
+                <div style="
+                  padding:9px;
+                  border:1px solid #3b3208;
+                  border-radius:8px;
+                  background:#090909;
+                  font-size:11px">
+
+                  <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:7px">
+
+                    <b style="color:#ffd000">
+                      ${escapeHtml(r.requestId)}
+                    </b>
+
+                    <span style="
+                      ${stClass};
+                      padding:3px 7px;
+                      border-radius:10px;
+                      font-size:8px;
+                      font-weight:900">
+
+                      ${escapeHtml(r.status)}
+
+                    </span>
+
+                  </div>
+
+                  <div style="
+                    margin-top:5px;
+                    color:#ccc">
+
+                    ${escapeHtml(r.partNo)}
+                    —
+                    ${escapeHtml(r.partName)}
+                    —
+                    Qty: ${escapeHtml(r.qty)}
+
+                  </div>
+
+                  <div style="
+                    margin-top:3px;
+                    color:#666;
+                    font-size:9px">
+
+                    ${escapeHtml(r.createdDate || "-")}
+
+                  </div>
+
+                </div>
+
+              `;
+
+            }).join("")
+          }
+
+        </div>
+
+        ${
+          machineRequests.length>8
+          ?
+          `
+          <div style="
+            margin-top:7px;
+            color:#777;
+            font-size:9px">
+
+            Showing latest 8 requests. Complete history is available in Store Department.
+
+          </div>
+          `
+          :
+          ""
+        }
 
       </div>
 
@@ -2919,11 +3632,9 @@ function sel(id){
     badgeBg="#d97706";
   }
 
-
   const isOwnMachine =
     operator &&
     id===operator.machine;
-
 
   document.getElementById(
     "machineDetail"
@@ -2936,7 +3647,7 @@ function sel(id){
         <div>
 
           <span class="machineTitle">
-            ${id}
+            ${escapeHtml(id)}
           </span>
 
           ${
@@ -2967,9 +3678,31 @@ function sel(id){
             padding:6px 10px;
             border-radius:6px">
 
-            ${m.status}
+            ${escapeHtml(m.status)}
 
           </b>
+
+          ${
+            pendingRequests.length
+            ?
+            `
+            <span style="
+              background:#eab308;
+              color:#000;
+              padding:5px 8px;
+              border-radius:6px;
+              font-size:9px;
+              font-weight:900">
+
+              ${pendingRequests.length}
+              MATERIAL REQUEST
+              ${pendingRequests.length>1?"S":""}
+
+            </span>
+            `
+            :
+            ""
+          }
 
           ${
             operator
@@ -2979,8 +3712,8 @@ function sel(id){
 
             <b style="color:#ffd000">
 
-              ${operator.shift}
-              (${getShiftRange(operator.shift)})
+              ${escapeHtml(operator.shift)}
+              (${escapeHtml(getShiftRange(operator.shift))})
 
             </b>
             `
@@ -2999,18 +3732,18 @@ function sel(id){
         </div>
 
         <div class="routeLine">
-          👤 ${route.name}
+          👤 ${escapeHtml(route.name)}
         </div>
 
         <div class="routeLine">
-          ☎ +${route.no}
+          ☎ +${escapeHtml(route.no)}
         </div>
 
       </div>
 
     </div>
 
-    ${matHtml}
+    ${materialHistoryHtml}
 
   `;
 
@@ -3039,7 +3772,6 @@ function sel(id){
 
           <div></div>
 
-
           <div class="label">
             Name
           </div>
@@ -3056,7 +3788,7 @@ function sel(id){
               class="assignBtn"
               onclick="assign()">
 
-              👤 ASSIGN ME (${id})
+              👤 ASSIGN ME (${escapeHtml(id)})
 
             </button>
             `
@@ -3064,33 +3796,29 @@ function sel(id){
             `<div></div>`
           }
 
-
           <div class="label">
             Machine
           </div>
 
           <div class="value">
-            ${id}
+            ${escapeHtml(id)}
           </div>
 
           <div></div>
-
 
           <div class="label">
             Shift
           </div>
 
-          <div
-            class="value"
-            style="color:#ffd000">
+          <div class="value"
+               style="color:#ffd000">
 
-            ${operator.shift}
-            (${getShiftRange(operator.shift)})
+            ${escapeHtml(operator.shift)}
+            (${escapeHtml(getShiftRange(operator.shift))})
 
           </div>
 
           <div></div>
-
 
           <div class="label">
             Login Time
@@ -3099,8 +3827,8 @@ function sel(id){
           <div class="value">
             ${
               op
-              ? op.time
-              : operator.time
+              ? escapeHtml(op.time)
+              : escapeHtml(operator.time)
             }
           </div>
 
@@ -3153,7 +3881,7 @@ function sel(id){
               ${
                 s==="MATERIAL REQUIREMENT"
                 ?
-                "📦 MATERIAL REQUIREMENT (मागणी)"
+                "📦 NEW MATERIAL REQUIREMENT"
                 :
                 s
               }
@@ -3202,8 +3930,12 @@ function sel(id){
     document.getElementById(
       "lockMsg"
     ).innerText =
+      operator
+      ?
       "View only. Your assigned machine is: "+
-      operator.machine;
+      operator.machine
+      :
+      "";
 
   }
 
@@ -3247,15 +3979,9 @@ function assign(){
   machines[curMachine].op={
 
     name:operator.name,
-
     id:operator.id,
-
-    time:
-      new Date()
-        .toLocaleTimeString("en-IN"),
-
+    time:new Date().toLocaleTimeString("en-IN"),
     machine:operator.machine,
-
     shift:operator.shift
 
   };
@@ -3265,7 +3991,6 @@ function assign(){
     .then(()=>{
 
       sel(curMachine);
-
       renderOperatorMachineList();
 
     })
@@ -3318,100 +4043,15 @@ function upd(s){
 
   }
 
-  machines[curMachine].materialDetails=null;
-
   executeStatusUpdate(s);
 
 }
 
 
 /* =========================================================
-   MATERIAL MODAL
-========================================================= */
-
-function openMaterialModal(){
-
-  document.getElementById(
-    "matPartNo"
-  ).value="";
-
-  document.getElementById(
-    "matPartName"
-  ).value="";
-
-  document.getElementById(
-    "matQty"
-  ).value="";
-
-  document.getElementById(
-    "materialModal"
-  ).style.display="flex";
-
-}
-
-
-function closeMaterialModal(){
-
-  document.getElementById(
-    "materialModal"
-  ).style.display="none";
-
-}
-
-
-/* =========================================================
-   MATERIAL SUBMIT
-========================================================= */
-
-function submitMaterialRequirement(){
-
-  const partNo =
-    document.getElementById(
-      "matPartNo"
-    ).value.trim();
-
-  const partName =
-    document.getElementById(
-      "matPartName"
-    ).value.trim();
-
-  const qty =
-    document.getElementById(
-      "matQty"
-    ).value.trim();
-
-
-  if(!partNo || !partName || !qty){
-
-    alert(
-      "Please fill Part No, Part Name, and Quantity!"
-    );
-
-    return;
-
-  }
-
-  machines[curMachine].materialDetails={
-
-    partNo:partNo,
-
-    partName:partName,
-
-    qty:qty
-
-  };
-
-  closeMaterialModal();
-
-  executeStatusUpdate(
-    "MATERIAL REQUIREMENT"
-  );
-
-}
-
-
-/* =========================================================
-   EXECUTE STATUS UPDATE
+   EXECUTE MACHINE STATUS UPDATE
+   IMPORTANT:
+   NEVER CHANGES MATERIAL REQUESTS
 ========================================================= */
 
 function executeStatusUpdate(s){
@@ -3452,7 +4092,6 @@ function executeStatusUpdate(s){
         ||
         ROUTE_MAP.RUNNING;
 
-
       loudPopup(
         curMachine,
         s,
@@ -3460,34 +4099,9 @@ function executeStatusUpdate(s){
         route
       );
 
-
-      let date =
+      const date =
         new Date()
           .toLocaleString("en-IN");
-
-      let matInfo="";
-
-
-      if(
-        machines[curMachine]
-          .materialDetails
-      ){
-
-        const d =
-          machines[curMachine]
-            .materialDetails;
-
-        matInfo =
-          "%0A%0A*📦 MATERIAL DETAILS:*"+
-          "%0APart No: "+
-          encodeURIComponent(d.partNo)+
-          "%0APart Name: "+
-          encodeURIComponent(d.partName)+
-          "%0AQty: "+
-          encodeURIComponent(d.qty);
-
-      }
-
 
       const msg =
         "*🚨 BREMBO ALERT*"+
@@ -3496,13 +4110,12 @@ function executeStatusUpdate(s){
         "%0AStatus: *"+
         encodeURIComponent(s)+
         "*"+
-        matInfo+
         "%0AOperator: "+
         encodeURIComponent(operator.name)+
         "%0AID: "+
         encodeURIComponent(operator.id)+
         "%0AShift: "+
-        operator.shift+
+        encodeURIComponent(operator.shift)+
         " ("+
         encodeURIComponent(
           getShiftRange(operator.shift)
@@ -3513,18 +4126,15 @@ function executeStatusUpdate(s){
         "%0A%0AAction Required By: "+
         encodeURIComponent(route.name);
 
-
       lastWa =
         "https://wa.me/"+
         route.no+
         "?text="+
         msg;
 
-
       document.getElementById(
         "routeInfo"
       ).style.display="block";
-
 
       document.getElementById(
         "routeInfo"
@@ -3537,25 +4147,22 @@ function executeStatusUpdate(s){
         <br>
 
         Route To:
-        ${route.name}
+        ${escapeHtml(route.name)}
 
         <br>
 
-        ☎ +${route.no}
+        ☎ +${escapeHtml(route.no)}
 
       `;
-
 
       document.getElementById(
         "waBtn"
       ).style.display="block";
 
-
       document.getElementById(
         "waBtn"
       ).innerText =
         "◉ SEND WHATSAPP";
-
 
       setTimeout(()=>{
 
@@ -3565,7 +4172,6 @@ function executeStatusUpdate(s){
         );
 
       },700);
-
 
       renderAllDashboards();
 
@@ -3611,293 +4217,83 @@ function escapeHtml(value){
   return String(value ?? "")
 
     .replace(/&/g,"&amp;")
-
     .replace(/</g,"&lt;")
-
     .replace(/>/g,"&gt;")
-
     .replace(/"/g,"&quot;")
-
     .replace(/'/g,"&#039;");
 
 }
 
 
 /* =========================================================
-   EXCEL REPORT
+   MATERIAL REQUEST VIEW
 ========================================================= */
 
-function downloadShiftExcel(){
+function setMaterialRequestView(view){
 
-  try{
+  materialRequestView=view;
 
-    const rows=[];
+  document
+    .getElementById("materialPendingTab")
+    ?.classList.remove("active");
 
-    ALL_MACHINES_LIST.forEach(id=>{
+  document
+    .getElementById("materialHistoryTab")
+    ?.classList.remove("active");
 
-      const m =
-        machines[id]
-        ||
-        getDefaultMachine();
+  document
+    .getElementById("materialAllTab")
+    ?.classList.remove("active");
 
-      const op =
-        m.op
-        ||
-        {};
+  if(view==="PENDING"){
 
-      const mat =
-        m.materialDetails
-        ||
-        {};
+    document
+      .getElementById("materialPendingTab")
+      ?.classList.add("active");
 
-      let deptName="-";
+  }else if(view==="HISTORY"){
 
-      if(m.status==="BREAKDOWN"){
+    document
+      .getElementById("materialHistoryTab")
+      ?.classList.add("active");
 
-        deptName="Maintenance";
+  }else{
 
-      }else if(
-        m.status==="CMM NOT OK"
-        ||
-        m.status==="SIGN PENDING"
-      ){
-
-        deptName="Quality";
-
-      }else if(
-        m.status==="FIXTURE NOT OK"
-        ||
-        m.status==="FIXTURE OK"
-      ){
-
-        deptName="Tool Room";
-
-      }else if(
-        m.status==="LOT READY"
-      ){
-
-        deptName="Loading";
-
-      }else if(
-        m.status==="MATERIAL REQUIREMENT"
-        ||
-        m.status==="MATERIAL SHORTAGE"
-      ){
-
-        deptName="Store Department";
-
-      }else if(
-        m.status==="LOT HOLD"
-      ){
-
-        deptName="Supervisor";
-
-      }else{
-
-        deptName="Running";
-
-      }
-
-      rows.push({
-
-        "Machine No":id,
-
-        "Status":
-          m.status
-          ||
-          "RUNNING",
-
-        "Operator Name":
-          op.name
-          ||
-          "-",
-
-        "Operator ID":
-          op.id
-          ||
-          "-",
-
-        "Shift":
-          op.shift
-          ||
-          "-",
-
-        "Login Time":
-          op.time
-          ||
-          "-",
-
-        "Material Part No":
-          mat.partNo
-          ||
-          "-",
-
-        "Material Part Name":
-          mat.partName
-          ||
-          "-",
-
-        "Quantity":
-          mat.qty
-          ||
-          "-",
-
-        "Department Responsible":
-          deptName
-
-      });
-
-    });
-
-    if(
-      typeof XLSX !== "undefined"
-    ){
-
-      const worksheet =
-        XLSX.utils.json_to_sheet(
-          rows
-        );
-
-      worksheet["!cols"]=[
-
-        {wch:14},
-        {wch:24},
-        {wch:22},
-        {wch:16},
-        {wch:10},
-        {wch:16},
-        {wch:20},
-        {wch:30},
-        {wch:12},
-        {wch:24}
-
-      ];
-
-      const workbook =
-        XLSX.utils.book_new();
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Shift Report"
-      );
-
-      const date =
-        new Date()
-          .toISOString()
-          .slice(0,10);
-
-      XLSX.writeFile(
-        workbook,
-        "Brembo_Shift_Report_"+
-        date+
-        ".xlsx"
-      );
-
-      return;
-
-    }
-
-  }catch(err){
-
-    console.error(
-      "Excel Error:",
-      err
-    );
-
-    alert(
-      "Excel download failed. Please try again."
-    );
+    document
+      .getElementById("materialAllTab")
+      ?.classList.add("active");
 
   }
+
+  renderMaterialRequestPanel();
 
 }
 
 
 /* =========================================================
-   DEPARTMENT LOGIN
+   MATERIAL REQUEST PANEL TOGGLE
 ========================================================= */
 
-function departmentLogin(){
+function toggleMaterialRequirements(){
 
-  const dep =
-    document.getElementById(
-      "departmentSelect"
-    ).value;
+  if(department!=="store") return;
 
-  const pin =
-    document.getElementById(
-      "departmentPin"
-    ).value;
+  materialRequirementMode =
+    !materialRequirementMode;
 
+  if(materialRequirementMode){
 
-  if(!dep || !pin){
+    departmentStatusFilter =
+      "MATERIAL REQUIREMENT";
 
-    alert(
-      "Please select department and enter PIN."
-    );
+  }else{
 
-    return;
+    departmentStatusFilter =
+      "TOTAL";
 
   }
-
-  const config =
-    DEPARTMENT_CONFIG[dep];
-
-  if(!config){
-
-    alert(
-      "Invalid department."
-    );
-
-    return;
-
-  }
-
-  if(pin!==config.pin){
-
-    alert(
-      "Wrong Department PIN! Access Denied!"
-    );
-
-    return;
-
-  }
-
-  department=dep;
-
-  operator=null;
-
-  materialRequirementMode=false;
-
-  departmentStatusFilter="TOTAL";
 
   deptSelectedMachine=null;
-
-  localStorage.setItem(
-    "brembo_department",
-    dep
-  );
-
-  localStorage.removeItem(
-    "brembo_v7"
-  );
-
-  localStorage.removeItem(
-    "brembo_shift"
-  );
-
-  document.getElementById(
-    "login"
-  ).style.display="none";
-
-  document.getElementById(
-    "operatorDashboard"
-  ).style.display="none";
-
-  document.getElementById(
-    "departmentDashboard"
-  ).style.display="block";
 
   renderDepartmentDashboard();
 
@@ -3905,24 +4301,531 @@ function departmentLogin(){
 
 
 /* =========================================================
-   DEPARTMENT LOGOUT
+   RENDER MATERIAL REQUEST PANEL
 ========================================================= */
 
-function departmentLogout(){
+function renderMaterialRequestPanel(){
 
-  if(
-    !confirm(
-      "Logout from department dashboard?"
-    )
-  ) return;
+  const panel =
+    document.getElementById(
+      "materialRequestPanel"
+    );
 
-  localStorage.removeItem(
-    "brembo_department"
-  );
+  if(!panel) return;
 
-  department=null;
+  if(department!=="store"){
 
-  location.reload();
+    panel.style.display="none";
+
+    return;
+
+  }
+
+  if(!materialRequirementMode){
+
+    panel.style.display="none";
+
+    return;
+
+  }
+
+  panel.style.display="block";
+
+  const all =
+    getAllMaterialRequestsSorted();
+
+  const pending =
+    all.filter(
+      r=>r.status==="PENDING"
+    );
+
+  let list=[];
+
+  if(materialRequestView==="PENDING"){
+
+    list=pending;
+
+  }else if(materialRequestView==="HISTORY"){
+
+    list=all.filter(
+      r=>r.status!=="PENDING"
+    );
+
+  }else{
+
+    list=all;
+
+  }
+
+  document.getElementById(
+    "materialTotalText"
+  ).innerText =
+    all.length+
+    " TOTAL • "+
+    pending.length+
+    " PENDING";
+
+  const container =
+    document.getElementById(
+      "materialRequestList"
+    );
+
+  if(!list.length){
+
+    container.innerHTML=`
+
+      <div style="
+        text-align:center;
+        color:#777;
+        padding:30px;
+        font-size:12px;
+        font-weight:700">
+
+        ${
+          materialRequestView==="PENDING"
+          ?
+          "NO PENDING MATERIAL REQUESTS"
+          :
+          "NO MATERIAL REQUEST HISTORY"
+        }
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    list.map(r=>
+      renderMaterialRequestCard(r)
+    ).join("");
+
+}
+
+
+/* =========================================================
+   MATERIAL REQUEST CARD
+========================================================= */
+
+function renderMaterialRequestCard(r){
+
+  const pending =
+    r.status==="PENDING";
+
+  const shortage =
+    r.status==="MATERIAL SHORTAGE";
+
+  let statusClass =
+    pending
+    ? "pending"
+    : "action";
+
+  let badgeClass =
+    pending
+    ? "pending"
+    : shortage
+    ? "shortage"
+    : "action";
+
+  let statusText =
+    r.status ||
+    "PENDING";
+
+  return `
+
+    <div class="materialRequestCard ${statusClass}">
+
+      <div class="materialRequestTop">
+
+        <div>
+
+          <div class="requestId">
+            ${escapeHtml(r.requestId)}
+          </div>
+
+          <div style="
+            color:#aaa;
+            font-size:10px;
+            margin-top:3px">
+
+            Machine:
+            <b style="color:#fff">
+              ${escapeHtml(r.machine)}
+            </b>
+
+          </div>
+
+        </div>
+
+        <span class="requestStatus ${badgeClass}">
+          ${escapeHtml(statusText)}
+        </span>
+
+      </div>
+
+      <div class="materialRequestGrid">
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            PART NO
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.partNo)}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            PART NAME
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.partName)}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            QUANTITY
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.qty)}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            REQUESTED DATE
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.createdDate || "-")}
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="materialRequestGrid"
+           style="margin-top:8px">
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            OPERATOR
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.requestedBy || "-")}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            EMPLOYEE ID
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.requestedById || "-")}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            SHIFT
+          </div>
+
+          <div class="materialRequestInfoValue">
+            ${escapeHtml(r.shift || "-")}
+          </div>
+
+        </div>
+
+        <div class="materialRequestInfo">
+
+          <div class="materialRequestInfoLabel">
+            ACTION
+          </div>
+
+          <div class="materialRequestInfoValue">
+
+            ${
+              r.actionDate
+              ?
+              escapeHtml(r.actionDate)
+              :
+              "WAITING"
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+      ${
+        pending
+        ?
+        `
+
+        <div class="materialActionRow">
+
+          <button
+            class="materialActionBtn materialSupplyBtn"
+            onclick="takeMaterialRequestAction('${escapeHtml(r.requestId)}','RUNNING')">
+
+            ✅ MATERIAL SUPPLIED
+            <br>
+            <span style="font-size:8px">
+              REQUEST WILL BECOME ACTION TAKEN
+            </span>
+
+          </button>
+
+          <button
+            class="materialActionBtn materialShortageBtn"
+            onclick="takeMaterialRequestAction('${escapeHtml(r.requestId)}','MATERIAL SHORTAGE')">
+
+            ❌ MATERIAL NOT AVAILABLE
+            <br>
+            <span style="font-size:8px">
+              MARK SHORTAGE
+            </span>
+
+          </button>
+
+        </div>
+
+        `
+        :
+        `
+        <div class="materialHistoryNote">
+
+          <b style="color:#aaa">
+            ACTION TAKEN:
+          </b>
+
+          ${escapeHtml(r.actionStatus || r.status)}
+
+          <br>
+
+          <b style="color:#aaa">
+            BY:
+          </b>
+
+          ${escapeHtml(r.actionBy || "-")}
+
+          ${
+            r.actionDepartment
+            ?
+            `
+            •
+            ${escapeHtml(r.actionDepartment)}
+            `
+            :
+            ""
+          }
+
+          ${
+            r.actionDate
+            ?
+            `
+            •
+            ${escapeHtml(r.actionDate)}
+            `
+            :
+            ""
+          }
+
+          <br>
+
+          This request remains permanently in history.
+
+        </div>
+
+        `
+
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   DEPARTMENT ACTION ON MATERIAL REQUEST
+   IMPORTANT:
+   CHANGES ONLY THAT REQUEST
+========================================================= */
+
+function takeMaterialRequestAction(
+  requestId,
+  actionStatus
+){
+
+  if(department!=="store"){
+
+    alert(
+      "Only Store Department can take Material Request action."
+    );
+
+    return;
+
+  }
+
+  const request =
+    materialRequests[
+      requestId
+    ];
+
+  if(!request){
+
+    alert(
+      "Material Request not found."
+    );
+
+    return;
+
+  }
+
+  if(request.status!=="PENDING"){
+
+    alert(
+      "This request has already been actioned."
+    );
+
+    return;
+
+  }
+
+  const confirmText =
+    actionStatus==="RUNNING"
+    ?
+    "Mark "+requestId+
+    " as MATERIAL SUPPLIED?\n\n"+
+    "The request will remain permanently in history."
+    :
+    "Mark "+requestId+
+    " as MATERIAL SHORTAGE?\n\n"+
+    "The request will remain permanently in history.";
+
+  if(!confirm(confirmText)){
+
+    return;
+
+  }
+
+  const now =
+    new Date();
+
+  const updatedRequest = {
+
+    ...request,
+
+    status:
+      actionStatus==="RUNNING"
+      ? "ACTION TAKEN"
+      : "MATERIAL SHORTAGE",
+
+    actionTaken:true,
+
+    actionBy:
+      department
+      ?
+      DEPARTMENT_CONFIG[
+        department
+      ].name
+      :
+      "STORE DEPARTMENT",
+
+    actionDepartment:
+      department
+      ?
+      DEPARTMENT_CONFIG[
+        department
+      ].name
+      :
+      "STORE DEPARTMENT",
+
+    actionAt:
+      now.getTime(),
+
+    actionDate:
+      now.toLocaleString("en-IN"),
+
+    actionStatus:
+      actionStatus==="RUNNING"
+      ?
+      "MATERIAL SUPPLIED"
+      :
+      "MATERIAL SHORTAGE"
+
+  };
+
+
+  /*
+    CRITICAL:
+    Only this exact request ID is updated.
+    No machine record is deleted.
+    No other material request is touched.
+  */
+
+  db.ref(
+    "materialRequests/"+
+    requestId
+  )
+  .set(updatedRequest)
+
+  .then(()=>{
+
+    alert(
+      requestId+
+      " updated successfully.\n\n"+
+      "Previous requests remain unchanged."
+    );
+
+    /*
+      IMPORTANT:
+      Do NOT automatically change machine status here.
+      Material Request action is independent from machine status.
+    */
+
+    renderMaterialRequestPanel();
+
+    renderDepartmentDashboard();
+
+  })
+
+  .catch(err=>{
+
+    console.error(
+      "Material action error:",
+      err
+    );
+
+    alert(
+      "Material Request action failed.\nPlease check Firebase connection."
+    );
+
+  });
 
 }
 
@@ -3944,36 +4847,6 @@ function setDepartmentStatusFilter(status){
   }else{
 
     materialRequirementMode=true;
-
-  }
-
-  deptSelectedMachine=null;
-
-  renderDepartmentDashboard();
-
-}
-
-
-/* =========================================================
-   STORE MATERIAL TOGGLE
-========================================================= */
-
-function toggleMaterialRequirements(){
-
-  if(department!=="store") return;
-
-  if(materialRequirementMode){
-
-    materialRequirementMode=false;
-
-    departmentStatusFilter="TOTAL";
-
-  }else{
-
-    materialRequirementMode=true;
-
-    departmentStatusFilter=
-      "MATERIAL REQUIREMENT";
 
   }
 
@@ -4020,6 +4893,25 @@ function getDepartmentFilteredMachines(){
   ){
 
     return ALL_MACHINES_LIST.slice();
+
+  }
+
+  if(
+    departmentStatusFilter==="MATERIAL REQUIREMENT"
+  ){
+
+    const pending =
+      getPendingMaterialRequests();
+
+    return [
+      ...new Set(
+        pending.map(
+          r=>r.machine
+        )
+      )
+    ].filter(
+      id=>ALL_MACHINES_LIST.includes(id)
+    );
 
   }
 
@@ -4072,19 +4964,7 @@ function renderDepartmentDashboard(){
     );
 
   const matCount =
-    ALL_MACHINES_LIST.filter(id=>{
-
-      const m =
-        machines[id]
-        ||
-        getDefaultMachine();
-
-      return (
-        m.status ===
-        "MATERIAL REQUIREMENT"
-      );
-
-    }).length;
+    getPendingMaterialRequests().length;
 
   if(department==="store"){
 
@@ -4114,6 +4994,8 @@ function renderDepartmentDashboard(){
     matBtn.style.display="none";
 
   }
+
+  renderMaterialRequestPanel();
 
   renderDepartmentMachineGrid();
 
@@ -4152,6 +5034,14 @@ function renderDepartmentMachineGrid(){
 
     title.innerText =
       "⚙️ ALL MACHINES";
+
+  }else if(
+    departmentStatusFilter===
+    "MATERIAL REQUIREMENT"
+  ){
+
+    title.innerText =
+      "📦 MACHINES WITH PENDING MATERIAL REQUESTS";
 
   }else{
 
@@ -4224,8 +5114,13 @@ function renderDepartmentMachineGrid(){
         color="#22c55e";
       }
 
-      if(m.status==="MATERIAL REQUIREMENT"){
+      if(
+        departmentStatusFilter===
+        "MATERIAL REQUIREMENT"
+      ){
+
         color="#eab308";
+
       }
 
       if(m.status==="MATERIAL SHORTAGE"){
@@ -4248,21 +5143,42 @@ function renderDepartmentMachineGrid(){
         color="#ffd000";
       }
 
+      let statusText =
+        getStatusDisplayName(
+          m.status
+        );
+
+      if(
+        departmentStatusFilter===
+        "MATERIAL REQUIREMENT"
+      ){
+
+        const pendingCount =
+          getMachinePendingMaterialRequests(id)
+            .length;
+
+        statusText =
+          pendingCount+
+          " PENDING MATERIAL "+
+          (pendingCount===1
+            ? "REQUEST"
+            : "REQUESTS");
+
+      }
+
       return `
 
         <div
           class="deptMachine ${selected}"
-          onclick="selectDepartmentMachine('${id}')">
+          onclick="selectDepartmentMachine('${escapeHtml(id)}')">
 
-          ${id}
+          ${escapeHtml(id)}
 
           <span
             class="deptMachineStatus"
             style="color:${color}">
 
-            ${getStatusDisplayName(
-              m.status
-            )}
+            ${escapeHtml(statusText)}
 
           </span>
 
@@ -4376,13 +5292,23 @@ function renderDepartmentSelected(){
     statusColor="#ffd000";
   }
 
+  const machineRequests =
+    getMachineMaterialRequests(
+      deptSelectedMachine
+    );
+
+  const pendingRequests =
+    machineRequests.filter(
+      r=>r.status==="PENDING"
+    );
+
   let html=`
 
     <h2 style="
       font-size:28px;
       font-weight:900">
 
-      ${deptSelectedMachine}
+      ${escapeHtml(deptSelectedMachine)}
 
     </h2>
 
@@ -4390,12 +5316,12 @@ function renderDepartmentSelected(){
       margin:8px 0;
       font-size:13px">
 
-      Current Status:
+      Current Machine Status:
 
       <b style="
         color:${statusColor}">
 
-        ${m.status}
+        ${escapeHtml(m.status)}
 
       </b>
 
@@ -4403,60 +5329,167 @@ function renderDepartmentSelected(){
 
   `;
 
-  if(m.materialDetails){
+
+  /* MATERIAL REQUEST INFORMATION */
+
+  if(machineRequests.length){
 
     html+=`
 
       <div style="
-        background:#2a2508;
-        border:1px dashed #eab308;
+        background:#191503;
+        border:1px solid #5a4a0a;
         padding:14px;
         border-radius:10px;
-        font-size:13px;
-        line-height:1.8;
         margin-bottom:12px">
 
         <div style="
           color:#eab308;
           font-size:14px;
-          font-weight:900;
-          margin-bottom:6px">
+          font-weight:900">
 
-          📦 MATERIAL REQUIREMENT
+          📦 MATERIAL REQUESTS FOR
+          ${escapeHtml(deptSelectedMachine)}
 
         </div>
 
-        <b>Machine:</b>
-        ${deptSelectedMachine}
+        <div style="
+          color:#777;
+          font-size:10px;
+          margin-top:4px">
 
-        <br>
+          Total:
+          ${machineRequests.length}
+          |
+          Pending:
+          ${pendingRequests.length}
 
-        <b>Part No:</b>
-        ${escapeHtml(
-          m.materialDetails.partNo
-        )}
+        </div>
 
-        <br>
+        <div style="
+          margin-top:10px;
+          display:grid;
+          gap:8px">
 
-        <b>Part Name:</b>
-        ${escapeHtml(
-          m.materialDetails.partName
-        )}
+          ${
+            machineRequests
+            .slice(0,10)
+            .map(r=>{
 
-        <br>
+              const color =
+                r.status==="PENDING"
+                ? "#eab308"
+                : r.status==="MATERIAL SHORTAGE"
+                ? "#ef4444"
+                : "#22c55e";
 
-        <b>Quantity:</b>
-        ${escapeHtml(
-          String(
-            m.materialDetails.qty
-          )
-        )}
+              return `
+
+                <div style="
+                  padding:10px;
+                  background:#090909;
+                  border:1px solid #333;
+                  border-radius:8px">
+
+                  <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:7px">
+
+                    <b style="color:#ffd000">
+                      ${escapeHtml(r.requestId)}
+                    </b>
+
+                    <span style="
+                      color:${color};
+                      font-weight:900;
+                      font-size:9px">
+
+                      ${escapeHtml(r.status)}
+
+                    </span>
+
+                  </div>
+
+                  <div style="
+                    font-size:11px;
+                    color:#ccc;
+                    margin-top:5px">
+
+                    Part:
+                    ${escapeHtml(r.partNo)}
+                    —
+                    ${escapeHtml(r.partName)}
+
+                    <br>
+
+                    Quantity:
+                    ${escapeHtml(r.qty)}
+
+                  </div>
+
+                  <div style="
+                    font-size:9px;
+                    color:#666;
+                    margin-top:4px">
+
+                    Requested:
+                    ${escapeHtml(r.createdDate || "-")}
+
+                  </div>
+
+                  ${
+                    r.status!=="PENDING"
+                    ?
+                    `
+                    <div style="
+                      font-size:9px;
+                      color:#777;
+                      margin-top:4px">
+
+                      Action:
+                      ${escapeHtml(r.actionStatus || r.status)}
+                      |
+                      By:
+                      ${escapeHtml(r.actionBy || "-")}
+                      |
+                      ${escapeHtml(r.actionDate || "-")}
+
+                    </div>
+                    `
+                    :
+                    ""
+                  }
+
+                </div>
+
+              `;
+
+            }).join("")
+          }
+
+        </div>
+
+      </div>
+
+    `;
+
+  }else{
+
+    html+=`
+
+      <div class="viewBox">
+
+        <b style="color:#777">
+          NO MATERIAL REQUEST HISTORY
+        </b>
 
       </div>
 
     `;
 
   }
+
 
   if(op){
 
@@ -4522,6 +5555,7 @@ function renderDepartmentSelected(){
 
   }
 
+
   if(
     department==="supervisor"
   ){
@@ -4559,50 +5593,107 @@ function renderDepartmentSelected(){
 
   }
 
+
   html+=`
 
     <div style="
       margin-top:14px;
       font-weight:900">
 
-      ${config.name}
+      ${escapeHtml(config.name)}
       ACTIONS
 
     </div>
 
   `;
 
+
+  /*
+    STORE:
+    Material Request action is handled in the
+    Material Request panel using request ID.
+    It must NOT change based only on machine.
+  */
+
+  if(department==="store"){
+
+    if(pendingRequests.length){
+
+      html+=`
+
+        <div style="
+          margin-top:10px;
+          padding:12px;
+          border:1px dashed #eab308;
+          border-radius:9px;
+          color:#ffd000;
+          font-size:11px;
+          font-weight:800;
+          text-align:center">
+
+          📦 ${pendingRequests.length}
+          PENDING MATERIAL REQUEST
+          ${pendingRequests.length>1?"S":""}
+
+          <br>
+
+          Use the MATERIAL REQUIREMENT panel above
+          to action each unique Request ID.
+
+        </div>
+
+      `;
+
+    }else{
+
+      html+=`
+
+        <div style="
+          margin-top:10px;
+          padding:12px;
+          border:1px dashed #444;
+          border-radius:9px;
+          color:#777;
+          font-size:11px;
+          text-align:center">
+
+          NO PENDING MATERIAL REQUEST
+          FOR THIS MACHINE
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
   config.actions.forEach(action=>{
 
-    const isRed =
-      action.status ===
-      "MATERIAL SHORTAGE";
+    /*
+      Store machine status actions are not used for
+      Material Request history. This prevents one
+      machine action from affecting all requests.
+    */
+
+    if(department==="store"){
+      return;
+    }
 
     const bg =
-      isRed
-      ?
-      "linear-gradient(180deg,#991b1b,#7f1d1d)"
-      :
       "#103817";
 
     const border =
-      isRed
-      ?
-      "#ef4444"
-      :
       "#22c55e";
 
     const color =
-      isRed
-      ?
-      "#fca5a5"
-      :
       "#35ff48";
 
     html+=`
 
       <button
-        onclick="departmentUpdateStatus('${action.status}')"
+        onclick="departmentUpdateStatus('${escapeHtml(action.status)}')"
         style="
           width:100%;
           margin-top:10px;
@@ -4613,7 +5704,7 @@ function renderDepartmentSelected(){
           color:${color};
           font-weight:900">
 
-        ${action.label}
+        ${escapeHtml(action.label)}
 
       </button>
 
@@ -4627,7 +5718,7 @@ function renderDepartmentSelected(){
 
 
 /* =========================================================
-   DEPARTMENT UPDATE
+   DEPARTMENT UPDATE MACHINE STATUS
 ========================================================= */
 
 function departmentUpdateStatus(status){
@@ -4697,12 +5788,10 @@ function departmentUpdateStatus(status){
   machines[id].status =
     status;
 
-  if(status==="RUNNING"){
-
-    machines[id]
-      .materialDetails=null;
-
-  }
+  /*
+    CRITICAL:
+    No materialRequests are changed here.
+  */
 
   saveMachine(id)
 
@@ -4732,18 +5821,14 @@ function departmentUpdateStatus(status){
           encodeURIComponent(status)+
           "*"+
           "%0ADepartment: "+
-          encodeURIComponent(
-            config.name
-          )+
+          encodeURIComponent(config.name)+
           "%0ATime: "+
           encodeURIComponent(
             new Date()
               .toLocaleString("en-IN")
           )+
           "%0A%0AAction Required By: "+
-          encodeURIComponent(
-            route.name
-          );
+          encodeURIComponent(route.name);
 
         lastWa =
           "https://wa.me/"+
@@ -4775,6 +5860,406 @@ function departmentUpdateStatus(status){
       );
 
     });
+
+}
+
+
+/* =========================================================
+   EXCEL REPORT
+========================================================= */
+
+function downloadShiftExcel(){
+
+  try{
+
+    const rows=[];
+
+    /* MACHINE REPORT */
+
+    ALL_MACHINES_LIST.forEach(id=>{
+
+      const m =
+        machines[id]
+        ||
+        getDefaultMachine();
+
+      const op =
+        m.op
+        ||
+        {};
+
+      let deptName="-";
+
+      if(m.status==="BREAKDOWN"){
+
+        deptName="Maintenance";
+
+      }else if(
+        m.status==="CMM NOT OK" ||
+        m.status==="SIGN PENDING"
+      ){
+
+        deptName="Quality";
+
+      }else if(
+        m.status==="FIXTURE NOT OK" ||
+        m.status==="FIXTURE OK"
+      ){
+
+        deptName="Tool Room";
+
+      }else if(
+        m.status==="LOT READY"
+      ){
+
+        deptName="Loading";
+
+      }else if(
+        m.status==="MATERIAL REQUIREMENT" ||
+        m.status==="MATERIAL SHORTAGE"
+      ){
+
+        deptName="Store Department";
+
+      }else if(
+        m.status==="LOT HOLD"
+      ){
+
+        deptName="Supervisor";
+
+      }else{
+
+        deptName="Running";
+
+      }
+
+      rows.push({
+
+        "Record Type":
+          "MACHINE",
+
+        "Request ID":
+          "-",
+
+        "Machine No":
+          id,
+
+        "Status":
+          m.status
+          ||
+          "RUNNING",
+
+        "Operator Name":
+          op.name
+          ||
+          "-",
+
+        "Operator ID":
+          op.id
+          ||
+          "-",
+
+        "Shift":
+          op.shift
+          ||
+          "-",
+
+        "Request Date":
+          "-",
+
+        "Part No":
+          "-",
+
+        "Part Name":
+          "-",
+
+        "Quantity":
+          "-",
+
+        "Request Status":
+          "-",
+
+        "Action By":
+          "-",
+
+        "Action Date":
+          "-",
+
+        "Department Responsible":
+          deptName
+
+      });
+
+    });
+
+
+    /* MATERIAL REQUEST HISTORY */
+
+    getAllMaterialRequestsSorted()
+      .forEach(r=>{
+
+        rows.push({
+
+          "Record Type":
+            "MATERIAL REQUEST",
+
+          "Request ID":
+            r.requestId
+            ||
+            "-",
+
+          "Machine No":
+            r.machine
+            ||
+            "-",
+
+          "Status":
+            machines[r.machine]
+            ?
+            machines[r.machine].status
+            :
+            "-",
+
+          "Operator Name":
+            r.requestedBy
+            ||
+            "-",
+
+          "Operator ID":
+            r.requestedById
+            ||
+            "-",
+
+          "Shift":
+            r.shift
+            ||
+            "-",
+
+          "Request Date":
+            r.createdDate
+            ||
+            "-",
+
+          "Part No":
+            r.partNo
+            ||
+            "-",
+
+          "Part Name":
+            r.partName
+            ||
+            "-",
+
+          "Quantity":
+            r.qty
+            ||
+            "-",
+
+          "Request Status":
+            r.status
+            ||
+            "-",
+
+          "Action By":
+            r.actionBy
+            ||
+            "-",
+
+          "Action Date":
+            r.actionDate
+            ||
+            "-",
+
+          "Department Responsible":
+            r.actionDepartment
+            ||
+            "Store Department"
+
+        });
+
+      });
+
+
+    if(
+      typeof XLSX !== "undefined"
+    ){
+
+      const worksheet =
+        XLSX.utils.json_to_sheet(
+          rows
+        );
+
+      worksheet["!cols"]=[
+
+        {wch:18},
+        {wch:25},
+        {wch:14},
+        {wch:24},
+        {wch:22},
+        {wch:16},
+        {wch:10},
+        {wch:22},
+        {wch:20},
+        {wch:30},
+        {wch:12},
+        {wch:22},
+        {wch:24},
+        {wch:22},
+        {wch:24}
+
+      ];
+
+      const workbook =
+        XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Machine + Material History"
+      );
+
+      const date =
+        new Date()
+          .toISOString()
+          .slice(0,10);
+
+      XLSX.writeFile(
+        workbook,
+        "Brembo_Machine_Material_Report_"+
+        date+
+        ".xlsx"
+      );
+
+      return;
+
+    }
+
+  }catch(err){
+
+    console.error(
+      "Excel Error:",
+      err
+    );
+
+    alert(
+      "Excel download failed. Please try again."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DEPARTMENT LOGIN
+========================================================= */
+
+function departmentLogin(){
+
+  const dep =
+    document.getElementById(
+      "departmentSelect"
+    ).value;
+
+  const pin =
+    document.getElementById(
+      "departmentPin"
+    ).value;
+
+  if(!dep || !pin){
+
+    alert(
+      "Please select department and enter PIN."
+    );
+
+    return;
+
+  }
+
+  const config =
+    DEPARTMENT_CONFIG[dep];
+
+  if(!config){
+
+    alert(
+      "Invalid department."
+    );
+
+    return;
+
+  }
+
+  if(pin!==config.pin){
+
+    alert(
+      "Wrong Department PIN! Access Denied!"
+    );
+
+    return;
+
+  }
+
+  department=dep;
+
+  operator=null;
+
+  materialRequirementMode=false;
+
+  departmentStatusFilter="TOTAL";
+
+  deptSelectedMachine=null;
+
+  materialRequestView="PENDING";
+
+  localStorage.setItem(
+    "brembo_department",
+    dep
+  );
+
+  localStorage.removeItem(
+    "brembo_v7"
+  );
+
+  localStorage.removeItem(
+    "brembo_shift"
+  );
+
+  document.getElementById(
+    "login"
+  ).style.display="none";
+
+  document.getElementById(
+    "operatorDashboard"
+  ).style.display="none";
+
+  document.getElementById(
+    "departmentDashboard"
+  ).style.display="block";
+
+  renderDepartmentDashboard();
+
+}
+
+
+/* =========================================================
+   DEPARTMENT LOGOUT
+========================================================= */
+
+function departmentLogout(){
+
+  if(
+    !confirm(
+      "Logout from department dashboard?"
+    )
+  ) return;
+
+  localStorage.removeItem(
+    "brembo_department"
+  );
+
+  department=null;
+
+  location.reload();
 
 }
 
@@ -4846,7 +6331,9 @@ function renderAllDashboards(){
 
 fillMachineDropdown();
 
-load();
+loadMachines();
+
+loadMaterialRequests();
 
 setInterval(
   checkShiftAutoReset,
@@ -4890,6 +6377,8 @@ if(
   ).style.display="block";
 
   departmentStatusFilter="TOTAL";
+
+  materialRequestView="PENDING";
 
   renderDepartmentDashboard();
 
@@ -4956,4 +6445,4 @@ if(
 </script>
 
 </body>
-</html>
+  </html>
