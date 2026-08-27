@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>  
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
@@ -245,7 +245,7 @@ button:active{
 }  
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(8,1fr);  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px;  
   background:#050505  
@@ -602,7 +602,7 @@ button:active{
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(8,1fr);  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px  
 }  
@@ -692,7 +692,7 @@ button:active{
   border: 1px solid #22c55e;
 }
 @media(max-width:1200px){  
-  .statusCards, .deptStatusCards{ grid-template-columns:repeat(4,1fr) }  
+  .statusCards, .deptStatusCards{ grid-template-columns:repeat(5,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
 }  
@@ -895,7 +895,14 @@ const DEPARTMENT_CONFIG = {
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
   quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
   toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[] },  
+  store:{ 
+    name:"STORE DEPARTMENT", 
+    pin:"2028", 
+    issueStatus:"MATERIAL REQUIREMENT", 
+    actions:[
+      { label:"❌ MATERIAL OUT OF STOCK (मटेरियल उपलब्ध नाही)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }
+    ] 
+  },  
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
@@ -909,6 +916,7 @@ const ROUTE_MAP = {
   "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },  
   "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
   "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173" },  
+  "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173" },  
   "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }  
 };  
 
@@ -924,7 +932,7 @@ const ALL_MACHINES_LIST = (()=>{
   return a;  
 })();  
 
-/* STATUS CONFIG (Shortage removed) */  
+/* STATUS CONFIG */  
 const STATUS_CONFIG = [  
   { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
   { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
@@ -933,7 +941,8 @@ const STATUS_CONFIG = [
   { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
   { key:"LOT READY", title:"LOT READY", icon:"⚙️", accent:"#ff9800" },  
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
-  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" }
+  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" },  
+  { key:"MATERIAL SHORTAGE", title:"SHORTAGE", icon:"⚙️", accent:"#ff1744" }  
 ];  
 
 /* GLOBAL VARIABLES */  
@@ -1125,8 +1134,7 @@ function load(){
 }  
 
 function checkExistingSession(){
-  if(operator || department) return; 
-  
+  if(operator || department) return;  
   const savedOp = localStorage.getItem("brembo_v7");
   const savedDept = localStorage.getItem("brembo_department");
   
@@ -1421,7 +1429,7 @@ function sel(id){
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){
       btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - 0 Req)</span><span>✓</span></button>` + btns;
     }
 
@@ -1445,6 +1453,7 @@ function clearMaterialRequirement(){
   let m = machines[curMachine];
   let issues = getMachineIssues(m);
   delete issues["MATERIAL REQUIREMENT"];
+  delete issues["MATERIAL SHORTAGE"];
   
   m.issues = issues;
   m.materialDetails = null;
@@ -1557,7 +1566,7 @@ function downloadShiftExcel(){
       else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }
       else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }
       else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }
-      else if(hasStatus(m, "MATERIAL REQUIREMENT")){ deptName="Store Department"; }
+      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName="Store Department"; }
       else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }
       else{ deptName="Running"; }  
 
@@ -1732,7 +1741,7 @@ function renderDepartmentSelected(){
     html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
     config.actions.forEach(a=>{
       if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #eab308;border-radius:10px;background:#3a2902;color:#ffcc00;font-weight:900">${a.label}</button>`;
       }
     });
   } else {
@@ -1759,7 +1768,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);
 
   saveMachine(deptSelectedMachine).then(()=>{
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" | Added: "+(addIssue||""), DEPARTMENT_CONFIG[department].name);
     renderDepartmentDashboard();
   }).catch(err=>{
     console.error(err);
@@ -1767,7 +1776,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   });
 }
 
-// Initialize on page load
 window.onload = function(){
   fillMachineDropdown();
   load();
