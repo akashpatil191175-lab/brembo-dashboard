@@ -15,7 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script> 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>  
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>  
-<st\u003C!DOCTYPE html>yle>  
+<style>  
 *{  
   margin:0;  
   padding:0;  
@@ -885,13 +885,12 @@ const firebaseConfig = {
 };  
 firebase.initializeApp(firebaseConfig);  
 const db = firebase.database();
-firebase.auth().signInAnonymously();  
 
 /* PINS */  
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG (STORE DASHBOARD UPDATED FOR OUT OF STOCK ONLY) */  
+/* DEPARTMENTS CONFIG */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
@@ -985,10 +984,6 @@ function setFirebaseStatus(online){
     else{ fb.innerText="OFFLINE - Check Internet"; fb.style.color="#ef4444"; }  
   }  
 }  
-
-db.ref(".info/connected").on("value",snap=>{  
-  setFirebaseStatus(snap.val()===true);  
-});  
 
 function checkShiftAutoReset(){  
   const saved = localStorage.getItem("brembo_shift");  
@@ -1696,7 +1691,6 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* STORE DASHBOARD UPDATED: MATERIAL DETAILS STAY VISIBLE + ONLY OUT OF STOCK ACTION BUTTON */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1726,7 +1720,6 @@ function renderDepartmentSelected(){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
   }  
 
-  // Display Material Details clearly
   if(m.materialDetails){  
     html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
         <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
@@ -1785,11 +1778,24 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   });  
 }  
 
-// Initialize on page load  
+// Initialize on page load with Auth Safety
 window.onload = function(){  
   fillMachineDropdown();  
-  checkExistingSession();  
-  load();  
+
+  firebase.auth().onAuthStateChanged((user) => {  
+    if (user) {  
+      db.ref(".info/connected").on("value", snap => {  
+        setFirebaseStatus(snap.val() === true);  
+      });  
+      checkExistingSession();  
+      load();  
+    } else {  
+      firebase.auth().signInAnonymously().catch(err => {  
+        console.error("Anonymous Auth Failed:", err);  
+        setFirebaseStatus(false);  
+      });  
+    }  
+  });  
 };  
 </script>  
 </body>  
