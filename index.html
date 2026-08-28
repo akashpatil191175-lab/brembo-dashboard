@@ -999,9 +999,7 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
-// -------------------------------------------------------------
-// नवी लॉजिक: ऑटो लॉगआउट (Auto Logout) & स्टेटस कायम ठेवणे (Status Persistence)
-// -------------------------------------------------------------
+// ऑटो लॉगआउट चेक करणारा सुरक्षित फंक्शन
 function checkShiftAutoLogout(){  
   const liveShift = getCurrentShift();  
   const badge = document.getElementById("liveShiftBadge");  
@@ -1009,7 +1007,6 @@ function checkShiftAutoLogout(){
   const txt = document.getElementById("autoShiftTxt");  
   if(txt){ txt.innerText = "Current Running Shift: "+liveShift+" ("+getShiftRange(liveShift)+")"; }  
 
-  // जर ऑपरेटर लॉगइन असेल आणि त्याने निवडलेली शिफ्ट संपली असेल, तर ऑटो लॉगआउट करा
   if(operator && operator.shift){
     if(operator.shift !== liveShift){
       alert("तुमची निवडलेली Shift "+operator.shift+" संपलेली आहे. सिस्टीममधून Auto Logout होत आहे.");
@@ -1023,7 +1020,6 @@ function checkShiftAutoLogout(){
   return false;  
 }  
 
-// १ मिनिटाला सतत बॅकग्राउंडमध्ये चेक करा की निवडलेली शिफ्ट संपली आहे का
 setInterval(checkShiftAutoLogout, 30000);
 
 function getMachineIssues(m){  
@@ -1146,8 +1142,6 @@ function checkExistingSession(){
   if(savedOp){  
     try {  
       operator = JSON.parse(savedOp);  
-      
-      // जुनी सेव्ह केलेली शिफ्ट संपली आहे का ते तपासा
       if(checkShiftAutoLogout()) return false;
 
       curMachine = operator.machine;  
@@ -1528,6 +1522,7 @@ function submitMaterialRequirement(){
   executeStatusUpdate("MATERIAL REQUIREMENT");  
 }  
 
+// पॉपअप ब्लॉकर्स टाळण्यासाठी आणि डेटा सुरक्षेसाठी अपडेट केलेले फंक्शन
 function executeStatusUpdate(s){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
@@ -1561,7 +1556,6 @@ function executeStatusUpdate(s){
     document.getElementById("waBtn").style.display="block";  
     document.getElementById("waBtn").innerText = "◉ SEND WHATSAPP";  
 
-    setTimeout(()=>{ window.open(lastWa, "_blank"); },700);  
     renderAllDashboards();  
   }).catch(err=>{  
     console.error(err); alert("Firebase update failed. Please check Internet connection.");  
