@@ -865,7 +865,7 @@ button:active{
     </div>  
 
     <div class="deptMachineBox">  
-      <b>SELECTED MACHINE</b>  
+      <b>SELECTED MACHINE DETAILS</b>  
       <div id="deptSelected" class="deptSelected">Please select a status and machine.</div>  
     </div>
   </div>  
@@ -889,13 +889,13 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS */  
+/* DEPARTMENTS (FIXED STORE CONFIG) */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
   quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
   toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[] },  
+  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"MATERIAL DELIVERED / ISSUED", clearsIssue:"MATERIAL REQUIREMENT" }] },  
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
@@ -924,7 +924,7 @@ const ALL_MACHINES_LIST = (()=>{
   return a;  
 })();  
 
-/* STATUS CONFIG (Shortage removed) */  
+/* STATUS CONFIG */  
 const STATUS_CONFIG = [  
   { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
   { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
@@ -933,7 +933,7 @@ const STATUS_CONFIG = [
   { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
   { key:"LOT READY", title:"LOT READY", icon:"⚙️", accent:"#ff9800" },  
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
-  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" }
+  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" }  
 ];  
 
 /* GLOBAL VARIABLES */  
@@ -978,7 +978,7 @@ function setFirebaseStatus(online){
   });  
   const fb=document.getElementById("fbStat");  
   if(fb){  
-    if(online){ fb.innerText="LIVE - Firebase Connected"; fb.style.color="#22c55e"; }
+    if(online){ fb.innerText="LIVE - Firebase Connected"; fb.style.color="#22c55e"; }  
     else{ fb.innerText="OFFLINE - Check Internet"; fb.style.color="#ef4444"; }  
   }  
 }  
@@ -1010,32 +1010,32 @@ function checkShiftAutoReset(){
   return false;  
 }  
 
-function getMachineIssues(m){
-  if(!m) return {};
-  if(m.issues && typeof m.issues === 'object') return m.issues;
-  let obj = {};
-  if(m.status && m.status !== "RUNNING"){
-    obj[m.status] = { by: m.op ? m.op.name : "Operator", time: m.op ? m.op.time : "-" };
-  }
-  return obj;
-}
+function getMachineIssues(m){  
+  if(!m) return {};  
+  if(m.issues && typeof m.issues === 'object') return m.issues;  
+  let obj = {};  
+  if(m.status && m.status !== "RUNNING"){  
+    obj[m.status] = { by: m.op ? m.op.name : "Operator", time: m.op ? m.op.time : "-" };  
+  }  
+  return obj;  
+}  
 
-function getMachineStatusString(m){
-  if(!m) return "RUNNING";
-  const issues = getMachineIssues(m);
-  const keys = Object.keys(issues);
-  if(keys.length === 0) return "RUNNING";
-  return keys.join(", ");
-}
+function getMachineStatusString(m){  
+  if(!m) return "RUNNING";  
+  const issues = getMachineIssues(m);  
+  const keys = Object.keys(issues);  
+  if(keys.length === 0) return "RUNNING";  
+  return keys.join(", ");  
+}  
 
-function hasStatus(m, st){
-  if(!m) return false;
-  if(st === "RUNNING"){
-    return Object.keys(getMachineIssues(m)).length === 0;
-  }
-  const issues = getMachineIssues(m);
-  return !!issues[st];
-}
+function hasStatus(m, st){  
+  if(!m) return false;  
+  if(st === "RUNNING"){  
+    return Object.keys(getMachineIssues(m)).length === 0;  
+  }  
+  const issues = getMachineIssues(m);  
+  return !!issues[st];  
+}  
 
 function getDefaultMachine(){  
   return { status:"RUNNING", issues:{}, op:null, materialDetails:null };  
@@ -1049,26 +1049,26 @@ function getAllMachines(){
 
 function saveMachine(id){  
   if(!id || !machines[id]){ return Promise.reject(new Error("Invalid machine")); }  
-  machines[id].status = getMachineStatusString(machines[id]);
+  machines[id].status = getMachineStatusString(machines[id]);  
   return db.ref("machines/"+id).set(machines[id]);  
 }  
 
 function resetAllMachinesFirebase(){  
   const updates={};  
-  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", issues:{}, op:null }; });  
+  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", issues:{}, op:null, materialDetails:null }; });  
   return db.ref().update(updates);  
 }  
 
-function logStatusAction(mc, action, detail, user){
-  db.ref("statusLogs").push({
-    machine: mc,
-    action: action,
-    detail: detail,
-    user: user || "System",
-    timestamp: Date.now(),
-    timeStr: new Date().toLocaleString("en-IN")
-  });
-}
+function logStatusAction(mc, action, detail, user){  
+  db.ref("statusLogs").push({  
+    machine: mc,  
+    action: action,  
+    detail: detail,  
+    user: user || "System",  
+    timestamp: Date.now(),  
+    timeStr: new Date().toLocaleString("en-IN")  
+  });  
+}  
 
 function load(){  
   db.ref("machines").on("value",snap=>{  
@@ -1084,11 +1084,11 @@ function load(){
     machines={};  
     const missing=[];  
     ALL_MACHINES_LIST.forEach(id=>{  
-      if(d[id]){ 
-        machines[id]=d[id]; 
-        machines[id].issues = getMachineIssues(d[id]);
-      } else{ 
-        machines[id]=getDefaultMachine(); missing.push(id); 
+      if(d[id]){   
+        machines[id]=d[id];   
+        machines[id].issues = getMachineIssues(d[id]);  
+      } else{   
+        machines[id]=getDefaultMachine(); missing.push(id);   
       }  
     });  
 
@@ -1099,11 +1099,11 @@ function load(){
     }  
 
     for(let id of ALL_MACHINES_LIST){  
-      const stNow = getMachineStatusString(machines[id]);
-      const stPrev = getMachineStatusString(prev[id]);
+      const stNow = getMachineStatusString(machines[id]);  
+      const stPrev = getMachineStatusString(prev[id]);  
       if(prev[id] && stPrev !== stNow){  
         const who = machines[id].op ? machines[id].op.name : "Someone";  
-        const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";
+        const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";  
         const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
         loudPopup(id, stNow, who, route);  
       }  
@@ -1123,46 +1123,45 @@ function load(){
   });  
 }  
 
-function checkExistingSession(){
-  const savedOp = localStorage.getItem("brembo_v7");
-  const savedDept = localStorage.getItem("brembo_department");
+function checkExistingSession(){  
+  const savedOp = localStorage.getItem("brembo_v7");  
+  const savedDept = localStorage.getItem("brembo_department");  
   
-  if(savedOp){
-    try {
-      operator = JSON.parse(savedOp);
-      curMachine = operator.machine;
-      document.getElementById("login").style.display="none";
-      document.getElementById("operatorDashboard").style.display="block";
-      document.getElementById("departmentDashboard").style.display="none";
-      applyOperator(true);
-      return true;
-    } catch(e){
-      localStorage.removeItem("brembo_v7");
-    }
-  } else if(savedDept){
-    department = savedDept;
-    document.getElementById("login").style.display="none";
-    document.getElementById("operatorDashboard").style.display="none";
-    document.getElementById("departmentDashboard").style.display="block";
-    renderDepartmentDashboard();
-    return true;
-  }
+  if(savedOp){  
+    try {  
+      operator = JSON.parse(savedOp);  
+      curMachine = operator.machine;  
+      document.getElementById("login").style.display="none";  
+      document.getElementById("operatorDashboard").style.display="block";  
+      document.getElementById("departmentDashboard").style.display="none";  
+      applyOperator(true);  
+      return true;  
+    } catch(e){  
+      localStorage.removeItem("brembo_v7");  
+    }  
+  } else if(savedDept){  
+    department = savedDept;  
+    document.getElementById("login").style.display="none";  
+    document.getElementById("operatorDashboard").style.display="none";  
+    document.getElementById("departmentDashboard").style.display="block";  
+    renderDepartmentDashboard();  
+    return true;  
+  }  
   
-  // If no session exists, display login
-  document.getElementById("login").style.display="flex";
-  return false;
-}
+  document.getElementById("login").style.display="flex";  
+  return false;  
+}  
 
-function renderAllDashboards(){
-  if(operator){
-    renderOperatorStatusCards();
-    renderOperatorMachineList();
-    if(curMachine) sel(curMachine);
-  }
-  if(department){
-    renderDepartmentDashboard();
-  }
-}
+function renderAllDashboards(){  
+  if(operator){  
+    renderOperatorStatusCards();  
+    renderOperatorMachineList();  
+    if(curMachine) sel(curMachine);  
+  }  
+  if(department){  
+    renderDepartmentDashboard();  
+  }  
+}  
 
 function showLoginMode(mode){  
   const op = document.getElementById("operatorLogin");  
@@ -1197,12 +1196,12 @@ function doLogin(){
   if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
   if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
-  const targetMc = machines[mc];
-  if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){
-    if(!confirm("Machine "+mc+" is already logged in by "+targetMc.op.name+" ("+targetMc.op.id+"). Overwrite login?")){
-      return;
-    }
-  }
+  const targetMc = machines[mc];  
+  if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
+    if(!confirm("Machine "+mc+" is already logged in by "+targetMc.op.name+" ("+targetMc.op.id+"). Overwrite login?")){  
+      return;  
+    }  
+  }  
 
   operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };  
   department=null;  
@@ -1223,7 +1222,7 @@ function applyOperator(isReload = false){
   document.getElementById("shiftRangeTop").innerText = getShiftRange(operator.shift);  
   curMachine = operator.machine;  
 
-  if(!isReload){
+  if(!isReload){  
     if(!machines[operator.machine]){ machines[operator.machine]=getDefaultMachine(); }  
     machines[operator.machine].op={  
       name:operator.name, id:operator.id, time: new Date().toLocaleTimeString("en-IN"),  
@@ -1232,7 +1231,7 @@ function applyOperator(isReload = false){
     saveMachine(operator.machine).catch(err=>{  
       console.error(err); alert("Firebase save failed. Please check Internet.");  
     });  
-  }
+  }  
   renderAllDashboards();  
 }  
 
@@ -1252,7 +1251,7 @@ function resetAll(){
 
   resetAllMachinesFirebase().then(()=>{  
     machines=getAllMachines();  
-    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN");
+    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN");  
     alert("All 69 machines are RUNNING!");  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1335,7 +1334,7 @@ function renderOperatorMachineList(){
   grid.innerHTML = filtered.map(id=>{  
     const m = machines[id] || getDefaultMachine();  
     const selected = curMachine===id ? "selected" : "";  
-    const stStr = getMachineStatusString(m);
+    const stStr = getMachineStatusString(m);  
     return `<div class="machineResult ${selected}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
 }  
@@ -1353,23 +1352,23 @@ function sel(id){
   curMachine=id;  
   const m = machines[id];  
   const op = m.op;  
-  const issues = getMachineIssues(m);
-  const mainIssue = Object.keys(issues)[0] || "RUNNING";
+  const issues = getMachineIssues(m);  
+  const mainIssue = Object.keys(issues)[0] || "RUNNING";  
   const route = ROUTE_MAP[mainIssue] || ROUTE_MAP.RUNNING;  
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:10px;font-size:12px;margin-top:8px;line-height:1.5">  
+    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin-top:10px;line-height:1.6">  
         <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
-        Part No: ${escapeHtml(m.materialDetails.partNo)}<br>  
-        Part Name: ${escapeHtml(m.materialDetails.partName)}<br>  
-        Qty: ${escapeHtml(String(m.materialDetails.qty))}  
+        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
+        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
+        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
       </div>`;  
   }  
 
-  const statusStr = getMachineStatusString(m);
+  const statusStr = getMachineStatusString(m);  
   let badgeBg="#a30b11";  
-  if(statusStr==="RUNNING"){ badgeBg="#087f23"; }
+  if(statusStr==="RUNNING"){ badgeBg="#087f23"; }  
 
   const isOwnMachine = operator && id===operator.machine;  
   document.getElementById("machineDetail").innerHTML=`  
@@ -1393,7 +1392,7 @@ function sel(id){
     ${matHtml}`;  
 
   if(operator){  
-    if(isOwnMachine){
+    if(isOwnMachine){  
       document.getElementById("operatorBox").innerHTML=`  
         <div class="infoBox">  
           <div class="infoTitle">YOUR DETAILS</div>  
@@ -1405,7 +1404,7 @@ function sel(id){
             <div class="label">Login Time</div><div class="value">${op ? op.time : operator.time}</div><div></div>  
           </div>  
         </div>`;  
-    } else {
+    } else {  
       document.getElementById("operatorBox").innerHTML=`  
         <div class="infoBox">  
           <div class="infoTitle" style="color:#777">ASSIGNED OPERATOR DETAILS</div>  
@@ -1415,18 +1414,18 @@ function sel(id){
             <div class="label">Machine</div><div class="value">${id}</div><div></div>  
             <div class="label">Shift</div><div class="value">${op ? escapeHtml(op.shift) : "-"}</div><div></div>  
           </div>  
-        </div>`;
-    }
+        </div>`;  
+    }  
   }  
 
   const statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING","MATERIAL REQUIREMENT"];  
 
   if(operator && isOwnMachine){  
-    let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");
+    let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");  
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - 0 Req)</span><span>✓</span></button>` + btns;
-    }
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - 0 Req)</span><span>✓</span></button>` + btns;  
+    }  
 
     document.getElementById("statusList").innerHTML=`  
       <div class="statusHeading">UPDATE MACHINE STATUS</div>  
@@ -1440,29 +1439,29 @@ function sel(id){
   }  
 }  
 
-function clearMaterialRequirement(){
-  if(!operator){ alert("Operator login required."); return; }
-  if(curMachine!==operator.machine){ alert("Access denied."); return; }
-  if(!confirm("Confirm material received for "+curMachine+"? Requirements will reset to 0.")) return;
+function clearMaterialRequirement(){  
+  if(!operator){ alert("Operator login required."); return; }  
+  if(curMachine!==operator.machine){ alert("Access denied."); return; }  
+  if(!confirm("Confirm material received for "+curMachine+"? Requirements will reset to 0.")) return;  
 
-  let m = machines[curMachine];
-  let issues = getMachineIssues(m);
-  delete issues["MATERIAL REQUIREMENT"];
+  let m = machines[curMachine];  
+  let issues = getMachineIssues(m);  
+  delete issues["MATERIAL REQUIREMENT"];  
   
-  m.issues = issues;
-  m.materialDetails = null;
-  m.status = getMachineStatusString(m);
+  m.issues = issues;  
+  m.materialDetails = null;  
+  m.status = getMachineStatusString(m);  
 
-  saveMachine(curMachine).then(()=>{
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement", operator.name);
-    alert("Material received! Material requirement cleared.");
-    sel(curMachine);
-    renderAllDashboards();
-  }).catch(err=>{
-    console.error(err);
-    alert("Failed to update Firebase.");
-  });
-}
+  saveMachine(curMachine).then(()=>{  
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement", operator.name);  
+    alert("Material received! Material requirement cleared.");  
+    sel(curMachine);  
+    renderAllDashboards();  
+  }).catch(err=>{  
+    console.error(err);  
+    alert("Failed to update Firebase.");  
+  });  
+}  
 
 function upd(s){  
   if(!operator){ document.getElementById("login").style.display="flex"; return; }  
@@ -1483,36 +1482,36 @@ function closeMaterialModal(){
   document.getElementById("materialModal").style.display="none";  
 }  
 
-function submitMaterialRequirement(){
-  const partNo=document.getElementById("matPartNo").value.trim();
-  const partName=document.getElementById("matPartName").value.trim();
-  const qty=document.getElementById("matQty").value.trim();
+function submitMaterialRequirement(){  
+  const partNo=document.getElementById("matPartNo").value.trim();  
+  const partName=document.getElementById("matPartName").value.trim();  
+  const qty=document.getElementById("matQty").value.trim();  
 
-  if(!partNo || !partName || !qty){ alert("Please fill Part No, Part Name, and Quantity!"); return; }
-  if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }
-  if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();
+  if(!partNo || !partName || !qty){ alert("Please fill Part No, Part Name, and Quantity!"); return; }  
+  if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
+  if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
 
-  machines[curMachine].materialDetails={partNo,partName,qty};
-  closeMaterialModal();
+  machines[curMachine].materialDetails={partNo,partName,qty};  
+  closeMaterialModal();  
 
-  executeStatusUpdate("MATERIAL REQUIREMENT");
-}
+  executeStatusUpdate("MATERIAL REQUIREMENT");  
+}  
 
 function executeStatusUpdate(s){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
   if(!machines[curMachine]){ machines[curMachine]=getDefaultMachine(); }  
 
-  let issues = getMachineIssues(machines[curMachine]);
-  if(s === "RUNNING"){
-    issues = {};
-  } else {
-    issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };
-  }
-  machines[curMachine].issues = issues;
+  let issues = getMachineIssues(machines[curMachine]);  
+  if(s === "RUNNING"){  
+    issues = {};  
+  } else {  
+    issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };  
+  }  
+  machines[curMachine].issues = issues;  
 
   return saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name);
+    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name);  
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     loudPopup(curMachine, s, operator.name, route);  
 
@@ -1553,15 +1552,15 @@ function downloadShiftExcel(){
       const m = machines[id] || getDefaultMachine();  
       const op = m.op || {};  
       const mat = m.materialDetails || {};  
-      const stStr = getMachineStatusString(m);
+      const stStr = getMachineStatusString(m);  
 
       let deptName="-";  
-      if(hasStatus(m, "BREAKDOWN")){ deptName="Maintenance"; }
-      else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }
-      else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }
-      else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }
-      else if(hasStatus(m, "MATERIAL REQUIREMENT")){ deptName="Store Department"; }
-      else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }
+      if(hasStatus(m, "BREAKDOWN")){ deptName="Maintenance"; }  
+      else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }  
+      else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }  
+      else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }  
+      else if(hasStatus(m, "MATERIAL REQUIREMENT")){ deptName="Store Department"; }  
+      else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }  
       else{ deptName="Running"; }  
 
       rows.push({  
@@ -1625,7 +1624,7 @@ function departmentLogout(){
 
 function setDepartmentStatusFilter(status){  
   departmentStatusFilter=status;  
-  deptSelectedMachine=null;
+  deptSelectedMachine=null;  
   renderDepartmentDashboard();  
 }  
 
@@ -1660,7 +1659,7 @@ function renderDepartmentMachineGrid(){
   const title = document.getElementById("deptGridTitle");  
   const count = document.getElementById("deptGridCount");  
 
-  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES"; }
+  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES"; }  
   else{ title.innerText = "⚙️ "+getStatusDisplayName(departmentStatusFilter)+" MACHINES"; }  
 
   count.innerText = filtered.length+" MACHINES";  
@@ -1677,7 +1676,7 @@ function renderDepartmentMachineGrid(){
   grid.innerHTML = filtered.map(id=>{  
     const m = machines[id] || getDefaultMachine();  
     const selected = deptSelectedMachine===id ? "selected" : "";  
-    const stStr = getMachineStatusString(m);
+    const stStr = getMachineStatusString(m);  
 
     let color="#ef4444";  
     if(stStr==="RUNNING"){ color="#22c55e"; }  
@@ -1693,6 +1692,7 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
+/* FIXED DEPARTMENT SELECTION RENDERER (SHOWS MATERIAL DETAILS TO STORE) */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1710,72 +1710,88 @@ function renderDepartmentSelected(){
 
   const op = m.op;  
   const config = DEPARTMENT_CONFIG[department];  
-  const stStr = getMachineStatusString(m);
+  const stStr = getMachineStatusString(m);  
 
   let statusColor="#ef4444";  
   if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
-  let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>
-  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${stStr}</b></div>`;
+  let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
+  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${stStr}</b></div>`;  
 
-  if(op){
-    html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;
+  if(op){  
+    html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
+  }  
+
+  // Dynamic Material Details Display (Special for Store / General View)
+  if(m.materialDetails){
+    html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
+        <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
+        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
+        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
+        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
+      </div>`;
   }
 
-  let hasDeptIssue = false;
-  if(config && config.actions && config.actions.length > 0){
-    config.actions.forEach(a=>{
-      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-        hasDeptIssue = true;
-      }
-    });
+  let hasDeptIssue = false;  
+  if(config && config.actions && config.actions.length > 0){  
+    config.actions.forEach(a=>{  
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+        hasDeptIssue = true;  
+      }  
+    });  
+  }  
+
+  if(hasDeptIssue){  
+    html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
+    config.actions.forEach(a=>{  
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
+      }  
+    });  
+  } else {  
+    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">No specific pending action required for your department on this machine.</span></div>`;  
+  }  
+
+  box.innerHTML = html;  
+}  
+
+function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
+  if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
+  if(!confirm("Confirm action on "+deptSelectedMachine+"?")) return;  
+
+  let m = machines[deptSelectedMachine];  
+  let issues = getMachineIssues(m);  
+
+  if(clearIssue1) delete issues[clearIssue1];  
+  if(clearIssue2) delete issues[clearIssue2];  
+  
+  // Clean material details if Store Action is completed
+  if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue2 === "MATERIAL REQUIREMENT"){
+    m.materialDetails = null;
   }
 
-  if(hasDeptIssue){
-    html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;
-    config.actions.forEach(a=>{
-      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900">${a.label}</button>`;
-      }
-    });
-  } else {
-    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">No specific pending action required for your department on this machine.</span></div>`;
-  }
+  if(addIssue){  
+    issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };  
+  }  
 
-  box.innerHTML = html;
-}
+  m.issues = issues;  
+  m.status = getMachineStatusString(m);  
 
-function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
-  if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;
-  if(!confirm("Confirm action on "+deptSelectedMachine+"?")) return;
+  saveMachine(deptSelectedMachine).then(()=>{  
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);  
+    renderDepartmentDashboard();  
+  }).catch(err=>{  
+    console.error(err);  
+    alert("Update failed. Please check internet connection.");  
+  });  
+}  
 
-  let m = machines[deptSelectedMachine];
-  let issues = getMachineIssues(m);
-
-  if(clearIssue1) delete issues[clearIssue1];
-  if(clearIssue2) delete issues[clearIssue2];
-  if(addIssue){
-    issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };
-  }
-
-  m.issues = issues;
-  m.status = getMachineStatusString(m);
-
-  saveMachine(deptSelectedMachine).then(()=>{
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);
-    renderDepartmentDashboard();
-  }).catch(err=>{
-    console.error(err);
-    alert("Update failed. Please check internet connection.");
-  });
-}
-
-// Initialize on page load
-window.onload = function(){
-  fillMachineDropdown();
-  checkExistingSession(); // Instantly check session to prevent flash
-  load();
-};
+// Initialize on page load  
+window.onload = function(){  
+  fillMachineDropdown();  
+  checkExistingSession(); // Instantly check session to prevent flash  
+  load();  
+};  
 </script>  
 </body>  
 </html>
