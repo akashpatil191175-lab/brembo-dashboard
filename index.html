@@ -505,12 +505,12 @@ button:active{
 }  
 .blinkAlert {
   animation: blinkAnim 1s infinite alternate;
-  color: #ff3333 !important;
-  font-weight: 900;
+  border-color: #ff3333 !important;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.6) !important;
 }
 @keyframes blinkAnim {
   0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.3; transform: scale(0.98); }
+  100% { opacity: 0.4; transform: scale(0.98); }
 }
 .routeInfo{  
   margin-top:16px;  
@@ -909,6 +909,17 @@ const DEPARTMENT_CONFIG = {
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
+/* ISSUE TO DEPARTMENT TARGET MAP (ROLE-BASED ALERT TARGETS) */
+const ISSUE_TARGET_DEPT_MAP = {
+  "BREAKDOWN": "maintenance",
+  "FIXTURE NOT OK": "toolroom",
+  "CMM NOT OK": "quality",
+  "LOT HOLD": "supervisor",
+  "LOT READY": "loading",
+  "MATERIAL REQUIREMENT": "store",
+  "MATERIAL OUT OF STOCK": "store"
+};
+
 /* WHATSAPP ROUTING */  
 const ROUTE_MAP = {  
   "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776" },  
@@ -973,6 +984,18 @@ function getShiftRange(s){
   return "12:00 AM - 7:45 AM";  
 }  
 
+/* ROLE BASED ALERT FILTER (फक्त संबंधित डिपार्टमेंट/ऑपरेटरला अलर्ट) */
+function isAlertTargetUser(issueKey, targetMachineId) {
+  if (operator) {
+    return targetMachineId === operator.machine;
+  }
+  if (department) {
+    const targetDeptKey = ISSUE_TARGET_DEPT_MAP[issueKey];
+    return targetDeptKey === department;
+  }
+  return false;
+}
+
 function setFirebaseStatus(online){  
   const ids=["firebaseTopStatus","firebaseDeptStatus"];  
   ids.forEach(id=>{  
@@ -999,7 +1022,6 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
-// ऑटो लॉगआउट चेक करणारा सुरक्षित फंक्शन
 function checkShiftAutoLogout(){  
   const liveShift = getCurrentShift();  
   const badge = document.getElementById("liveShiftBadge");  
@@ -1117,7 +1139,11 @@ function load(){
         const who = machines[id].op ? machines[id].op.name : "Someone";  
         const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";  
         const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
-        loudPopup(id, stNow, who, route);  
+        
+        // Target filtering: Display Popup alert ONLY to target user
+        if(isAlertTargetUser(firstIssue, id)){
+          loudPopup(id, stNow, who, route);  
+        }
       }  
     }  
 
@@ -1302,7 +1328,12 @@ function renderStatusCards(containerId, activeStatus, clickFunction){
   container.innerHTML = STATUS_CONFIG.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
-    const blinkClass = item.key === "MATERIAL OUT OF STOCK" && count > 0 ? "blinkAlert" : "";
+    
+    // Only blink card if user belongs to targeted department for that issue
+    const isTargetDept = department && ISSUE_TARGET_DEPT_MAP[item.key] === department;
+    const isTargetOp = operator && item.key === "MATERIAL OUT OF STOCK";
+    const blinkClass = (isTargetDept || isTargetOp) && count > 0 ? "blinkAlert" : "";
+
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
@@ -1358,7 +1389,8 @@ function renderOperatorMachineList(){
     const m = machines[id] || getDefaultMachine();  
     const selected = curMachine===id ? "selected" : "";  
     const stStr = getMachineStatusString(m);  
-    const isShortage = hasStatus(m, "MATERIAL OUT OF STOCK") ? "blinkAlert" : "";
+    // Only blink operator's assigned machine if it has a material shortage
+    const isShortage = (operator && id === operator.machine && hasStatus(m, "MATERIAL OUT OF STOCK")) ? "blinkAlert" : "";
     return `<div class="machineResult ${selected} ${isShortage}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
 }  
@@ -1522,7 +1554,6 @@ function submitMaterialRequirement(){
   executeStatusUpdate("MATERIAL REQUIREMENT");  
 }  
 
-// पॉपअप ब्लॉकर्स टाळण्यासाठी आणि डेटा सुरक्षेसाठी अपडेट केलेले फंक्शन
 function executeStatusUpdate(s){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
@@ -1539,7 +1570,10 @@ function executeStatusUpdate(s){
   return saveMachine(curMachine).then(()=>{  
     logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name);  
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
-    loudPopup(curMachine, s, operator.name, route);  
+    
+    if(isAlertTargetUser(s, curMachine)){
+      loudPopup(curMachine, s, operator.name, route);  
+    }
 
     let date = new Date().toLocaleString("en-IN");  
     let matInfo="";  
@@ -1706,7 +1740,12 @@ function renderDepartmentMachineGrid(){
     let color="#ef4444";  
     if(stStr==="RUNNING"){ color="#22c55e"; }  
 
-    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
+    // Role-based blinking logic: Only blink if issue belongs to this logged-in department
+    const issues = Object.keys(getMachineIssues(m));
+    const hasDeptIssue = issues.some(issue => ISSUE_TARGET_DEPT_MAP[issue] === department);
+    const blinkClass = hasDeptIssue ? "blinkAlert" : "";
+
+    return `<div class="deptMachine ${selected} ${blinkClass}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
   renderDepartmentSelected();  
 }  
@@ -1740,7 +1779,7 @@ function renderDepartmentSelected(){
   if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
   let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
-  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${getStatusDisplayName(stStr)}</b></div>`;  
+  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${getStatusDisplayName(statusStr)}</b></div>`;  
 
   if(op){  
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
