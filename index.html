@@ -12,9 +12,10 @@
 <title>Brembo - 69 Machines</title>  
 <script src="https://cdn.tailwindcss.com"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>  
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>  
-<style>  
+<st\u003C!DOCTYPE html>yle>  
 *{  
   margin:0;  
   padding:0;  
@@ -883,7 +884,8 @@ const firebaseConfig = {
   appId:"1:935783960863:web:115a5380ab005c50da602a"  
 };  
 firebase.initializeApp(firebaseConfig);  
-const db = firebase.database();  
+const db = firebase.database();
+firebase.auth().signInAnonymously();  
 
 /* PINS */  
 const ADMIN_PIN = "191197";  
