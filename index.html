@@ -245,7 +245,7 @@ button:active{
 }  
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(8,1fr);  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px;  
   background:#050505  
@@ -494,14 +494,29 @@ button:active{
   border-color:#555;  
   background:#141414  
 }  
+
+/* Material Received Special Button */
 .matRecvBtn{  
   background:linear-gradient(180deg,#15803d,#166534) !important;  
   border-color:#22c55e !important;  
   color:#fff !important;  
   grid-column: 1 / -1;  
   font-size:14px !important;  
-  padding:14px !important  
+  padding:14px !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }  
+
+/* Blinking Alert for Out of Stock */
+.blinkAlert {
+  animation: blinkAnim 1s infinite alternate;
+  color: #ff3333 !important;
+  font-weight: 900;
+}
+@keyframes blinkAnim {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.3; transform: scale(0.98); }
+}
+
 .routeInfo{  
   margin-top:16px;  
   padding:14px;  
@@ -602,7 +617,7 @@ button:active{
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(8,1fr);  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px  
 }  
@@ -732,11 +747,11 @@ button:active{
 <!-- ================= MATERIAL MODAL ================= -->  
 <div id="materialModal">    
   <div class="modalContent">  
-    <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT</h2>  
+    <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
     <input id="matPartNo" class="loginInput" placeholder="PART NO">  
     <input id="matPartName" class="loginInput" placeholder="PART NAME">  
     <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
-    <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUIREMENT & NOTIFY STORE</button>  
+    <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
     <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
   </div>  
 </div>  
@@ -889,13 +904,13 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG (STORE DASHBOARD UPDATED FOR OUT OF STOCK ONLY) */  
+/* DEPARTMENTS CONFIG */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
   quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
   toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }] },  
+  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"⚠️ MARK MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }] },  
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
@@ -934,7 +949,8 @@ const STATUS_CONFIG = [
   { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
   { key:"LOT READY", title:"LOT READY", icon:"⚙️", accent:"#ff9800" },  
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
-  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"⚙️", accent:"#ffd000" }  
+  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"📦", accent:"#ffd000" },
+  { key:"MATERIAL OUT OF STOCK", title:"MAT SHORTAGE", icon:"⚠️", accent:"#ff0000" }  
 ];  
 
 /* GLOBAL VARIABLES */  
@@ -1282,7 +1298,8 @@ function renderStatusCards(containerId, activeStatus, clickFunction){
   container.innerHTML = STATUS_CONFIG.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
-    return `<div class="statusCard ${active}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
+    const blinkClass = item.key === "MATERIAL OUT OF STOCK" && count > 0 ? "blinkAlert" : "";
+    return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
         <div class="statusCardHint">CLICK TO VIEW MACHINES</div>  
@@ -1291,7 +1308,8 @@ function renderStatusCards(containerId, activeStatus, clickFunction){
 }  
 
 function getStatusDisplayName(status){  
-  if(status==="MATERIAL REQUIREMENT"){ return "MAT REQ"; }  
+  if(status==="MATERIAL REQUIREMENT"){ return "📦 MAT REQ"; }  
+  if(status==="MATERIAL OUT OF STOCK"){ return "⚠️ MAT SHORTAGE"; }  
   return status;  
 }  
 
@@ -1336,7 +1354,8 @@ function renderOperatorMachineList(){
     const m = machines[id] || getDefaultMachine();  
     const selected = curMachine===id ? "selected" : "";  
     const stStr = getMachineStatusString(m);  
-    return `<div class="machineResult ${selected}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
+    const isShortage = hasStatus(m, "MATERIAL OUT OF STOCK") ? "blinkAlert" : "";
+    return `<div class="machineResult ${selected} ${isShortage}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
 }  
 
@@ -1380,7 +1399,7 @@ function sel(id){
           ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:12px;font-weight:800;margin-left:10px">VIEW ONLY</span>`}  
         </div>  
         <div class="statusLine">  
-          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${statusStr}</b>  
+          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${getStatusDisplayName(statusStr)}</b>  
           ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
         </div>  
       </div>  
@@ -1422,10 +1441,11 @@ function sel(id){
   const statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING","MATERIAL REQUIREMENT"];  
 
   if(operator && isOwnMachine){  
-    let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");  
+    let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - Clear Req)</span><span>✓</span></button>` + btns;  
+    // Add Material Received Button if Requirement or Shortage exists
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL OUT OF STOCK") || m.materialDetails){  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -1443,7 +1463,7 @@ function sel(id){
 function clearMaterialRequirement(){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied."); return; }  
-  if(!confirm("Confirm material received for "+curMachine+"? Requirements will reset.")) return;  
+  if(!confirm("Confirm material received for "+curMachine+"? Machine status will change to RUNNING.")) return;  
 
   let m = machines[curMachine];  
   let issues = getMachineIssues(m);  
@@ -1455,8 +1475,8 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement", operator.name);  
-    alert("Material received! Material requirement cleared.");  
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name);  
+    alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1694,7 +1714,7 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* STORE DASHBOARD UPDATED: MATERIAL DETAILS STAY VISIBLE + ONLY OUT OF STOCK ACTION BUTTON */
+/* STORE DASHBOARD UPDATED: MATERIAL DETAILS STAY VISIBLE + OUT OF STOCK ACTION BUTTON */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1718,7 +1738,7 @@ function renderDepartmentSelected(){
   if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
   let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
-  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${stStr}</b></div>`;  
+  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${getStatusDisplayName(stStr)}</b></div>`;  
 
   if(op){  
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
