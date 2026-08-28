@@ -49,7 +49,7 @@ button:active{
   inset:0;  
   background:#050505;  
   z-index:9999;  
-  display:none; /* FLICKER FIX: Initially hidden until auth state is determined */
+  display:none;
   align-items:center;  
   justify-content:center;  
   padding:20px  
@@ -889,13 +889,13 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS (FIXED STORE CONFIG) */  
+/* DEPARTMENTS CONFIG (STORE DASHBOARD UPDATED FOR OUT OF STOCK ONLY) */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
   loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
   quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
   toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"MATERIAL DELIVERED / ISSUED", clearsIssue:"MATERIAL REQUIREMENT" }] },  
+  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }] },  
   supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
@@ -909,6 +909,7 @@ const ROUTE_MAP = {
   "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },  
   "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
   "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173" },  
+  "MATERIAL OUT OF STOCK":{ name:"Sameer Sir (Store)", no:"918605802173" },  
   "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }  
 };  
 
@@ -1424,7 +1425,7 @@ function sel(id){
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 MATERIAL REQUIREMENT (मागणी)":s}</span><span>›</span></button>`).join("");  
     
     if(hasStatus(m, "MATERIAL REQUIREMENT") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - 0 Req)</span><span>✓</span></button>` + btns;  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>📦 MATERIAL RECEIVED (मटेरियल मिळाले - Clear Req)</span><span>✓</span></button>` + btns;  
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -1442,11 +1443,12 @@ function sel(id){
 function clearMaterialRequirement(){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied."); return; }  
-  if(!confirm("Confirm material received for "+curMachine+"? Requirements will reset to 0.")) return;  
+  if(!confirm("Confirm material received for "+curMachine+"? Requirements will reset.")) return;  
 
   let m = machines[curMachine];  
   let issues = getMachineIssues(m);  
   delete issues["MATERIAL REQUIREMENT"];  
+  delete issues["MATERIAL OUT OF STOCK"];  
   
   m.issues = issues;  
   m.materialDetails = null;  
@@ -1559,7 +1561,7 @@ function downloadShiftExcel(){
       else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }  
       else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }  
       else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }  
-      else if(hasStatus(m, "MATERIAL REQUIREMENT")){ deptName="Store Department"; }  
+      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL OUT OF STOCK")){ deptName="Store Department"; }  
       else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }  
       else{ deptName="Running"; }  
 
@@ -1692,7 +1694,7 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* FIXED DEPARTMENT SELECTION RENDERER (SHOWS MATERIAL DETAILS TO STORE) */
+/* STORE DASHBOARD UPDATED: MATERIAL DETAILS STAY VISIBLE + ONLY OUT OF STOCK ACTION BUTTON */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1722,15 +1724,15 @@ function renderDepartmentSelected(){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
   }  
 
-  // Dynamic Material Details Display (Special for Store / General View)
-  if(m.materialDetails){
+  // Display Material Details clearly
+  if(m.materialDetails){  
     html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
         <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
         <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
         <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
         <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
-      </div>`;
-  }
+      </div>`;  
+  }  
 
   let hasDeptIssue = false;  
   if(config && config.actions && config.actions.length > 0){  
@@ -1745,11 +1747,11 @@ function renderDepartmentSelected(){
     html += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
     config.actions.forEach(a=>{  
       if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
-        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #22c55e;border-radius:10px;background:#103817;color:#35ff48;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
+        html += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #ef4444;border-radius:10px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
       }  
     });  
   } else {  
-    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">No specific pending action required for your department on this machine.</span></div>`;  
+    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">Only viewing details for Store / Department. No further action available.</span></div>`;  
   }  
 
   box.innerHTML = html;  
@@ -1764,11 +1766,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
 
   if(clearIssue1) delete issues[clearIssue1];  
   if(clearIssue2) delete issues[clearIssue2];  
-  
-  // Clean material details if Store Action is completed
-  if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue2 === "MATERIAL REQUIREMENT"){
-    m.materialDetails = null;
-  }
 
   if(addIssue){  
     issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };  
@@ -1778,7 +1775,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);  
 
   saveMachine(deptSelectedMachine).then(()=>{  
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Cleared: "+clearIssue1+" "+(clearIssue2||""), DEPARTMENT_CONFIG[department].name);  
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Action: "+(addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name);  
     renderDepartmentDashboard();  
   }).catch(err=>{  
     console.error(err);  
@@ -1789,7 +1786,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
 // Initialize on page load  
 window.onload = function(){  
   fillMachineDropdown();  
-  checkExistingSession(); // Instantly check session to prevent flash  
+  checkExistingSession();  
   load();  
 };  
 </script>  
