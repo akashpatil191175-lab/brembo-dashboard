@@ -245,7 +245,7 @@ button:active{
 }  
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(9,1fr);  
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
   gap:9px;  
   padding:16px 26px 10px;  
   background:#050505  
@@ -615,7 +615,7 @@ button:active{
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(9,1fr);  
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
   gap:9px;  
   padding:16px 26px 10px  
 }  
@@ -728,12 +728,10 @@ button:active{
   cursor: pointer;
 }
 @media(max-width:1200px){  
-  .statusCards, .deptStatusCards{ grid-template-columns:repeat(4,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
 }  
 @media(max-width:800px){  
-  .statusCards, .deptStatusCards{ grid-template-columns:repeat(3,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(3,1fr) }  
   .detailTop{ grid-template-columns:1fr }  
   .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
@@ -925,14 +923,49 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG */  
+/* DEPARTMENTS CONFIG & ALLOWED ICONS */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
-  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
-  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
-  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
-  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"⚠️ MARK MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }] },  
-  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
+  maintenance:{ 
+    name:"MAINTENANCE", 
+    pin:"2026", 
+    issueStatus:"BREAKDOWN", 
+    actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }],
+    allowedIcons: ["TOTAL", "RUNNING", "BREAKDOWN"] 
+  },  
+  loading:{ 
+    name:"LOADING", 
+    pin:"2024", 
+    issueStatus:"LOT READY", 
+    actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }],
+    allowedIcons: ["TOTAL", "RUNNING", "LOT READY"] 
+  },  
+  quality:{ 
+    name:"QUALITY", 
+    pin:"2025", 
+    issueStatus:"CMM NOT OK", 
+    actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }],
+    allowedIcons: ["TOTAL", "RUNNING", "CMM NOT OK"] 
+  },  
+  toolroom:{ 
+    name:"TOOL ROOM", 
+    pin:"2027", 
+    issueStatus:"FIXTURE NOT OK", 
+    actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }],
+    allowedIcons: ["TOTAL", "RUNNING", "FIXTURE NOT OK"] 
+  },  
+  store:{ 
+    name:"STORE DEPARTMENT", 
+    pin:"2028", 
+    issueStatus:"MATERIAL REQUIREMENT", 
+    actions:[{ label:"⚠️ MARK MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }],
+    allowedIcons: ["TOTAL", "RUNNING", "MATERIAL REQUIREMENT", "MATERIAL OUT OF STOCK"] 
+  },  
+  supervisor:{ 
+    name:"SUPERVISOR", 
+    pin:"Ampa123", 
+    actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }],
+    allowedIcons: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "MATERIAL REQUIREMENT", "MATERIAL OUT OF STOCK"] 
+  }  
 };  
 
 /* WHATSAPP ROUTING */  
@@ -1313,10 +1346,21 @@ function getStatusCount(status){
   }).length;  
 }  
 
-function renderStatusCards(containerId, activeStatus, clickFunction){  
+function renderStatusCards(containerId, activeStatus, clickFunction, filterDeptKey = null){  
   const container = document.getElementById(containerId);  
   if(!container) return;  
-  container.innerHTML = STATUS_CONFIG.map(item=>{  
+
+  let allowedIcons = null;
+  if (filterDeptKey && DEPARTMENT_CONFIG[filterDeptKey]) {
+    allowedIcons = DEPARTMENT_CONFIG[filterDeptKey].allowedIcons;
+  }
+
+  const itemsToRender = STATUS_CONFIG.filter(item => {
+    if (!allowedIcons) return true; // Supervisor / Operator gets all icons
+    return allowedIcons.includes(item.key);
+  });
+
+  container.innerHTML = itemsToRender.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
     const blinkClass = item.key === "MATERIAL OUT OF STOCK" && count > 0 ? "blinkAlert" : "";
@@ -1574,7 +1618,6 @@ function executeStatusUpdate(s){
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
 
-    // जर ऑपरेटरने 'Urgent' वर टिक केले असेल तरच WhatsApp उघडेल
     if(isUrgent){
       document.getElementById("routeInfo").style.display="block";  
       document.getElementById("routeInfo").innerHTML=`<b style="color:#ffd000">ROUTE INFO</b><br>Route To: ${route.name}<br>☎ +${route.no}`;  
@@ -1686,7 +1729,7 @@ function setDepartmentStatusFilter(status){
 }  
 
 function renderDepartmentStatusCards(){  
-  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter");  
+  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", department);  
 }  
 
 function getDepartmentFilteredMachines(){  
