@@ -495,7 +495,6 @@ button:active{
   background:#141414  
 }  
 
-/* Material Received Special Button */
 .matRecvBtn{  
   background:linear-gradient(180deg,#15803d,#166534) !important;  
   border-color:#22c55e !important;  
@@ -506,7 +505,6 @@ button:active{
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }  
 
-/* Blinking Alert for Out of Stock */
 .blinkAlert {
   animation: blinkAnim 1s infinite alternate;
   color: #ff3333 !important;
@@ -677,7 +675,7 @@ button:active{
   align-items:center;  
   gap:6px;  
   padding:7px 10px;  
-  border-radius:9px;  
+  border-radius:99px;  
   font-size:10px;  
   font-weight:900;  
   border:1px solid #292929;  
@@ -705,6 +703,29 @@ button:active{
   font-size: 11px;
   font-weight: 800;
   border: 1px solid #22c55e;
+}
+.urgentBox {
+  margin-top: 15px;
+  background: #1f0406;
+  border: 1px solid #e50914;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.urgentBox input {
+  width: 18px;
+  height: 18px;
+  accent-color: #e50914;
+  cursor: pointer;
+}
+.urgentBox label {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ff4d4d;
+  cursor: pointer;
 }
 @media(max-width:1200px){  
   .statusCards, .deptStatusCards{ grid-template-columns:repeat(4,1fr) }  
@@ -1443,7 +1464,6 @@ function sel(id){
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
-    // Add Material Received Button if Requirement or Shortage exists
     if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL OUT OF STOCK") || m.materialDetails){  
       btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
@@ -1452,6 +1472,10 @@ function sel(id){
       <div class="statusHeading">UPDATE MACHINE STATUS</div>  
       <div class="statusGrid">  
         ${btns}  
+      </div>  
+      <div class="urgentBox">  
+        <input type="checkbox" id="urgentWaCheck">  
+        <label for="urgentWaCheck">🚨 URGENT? SEND WHATSAPP ALERT (इमर्जन्सी असल्यास व्हॉट्सॲप मेसेज पाठवा)</label>  
       </div>`;  
     document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
   }else{  
@@ -1524,6 +1548,8 @@ function executeStatusUpdate(s){
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
   if(!machines[curMachine]){ machines[curMachine]=getDefaultMachine(); }  
 
+  const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;
+
   let issues = getMachineIssues(machines[curMachine]);  
   if(s === "RUNNING"){  
     issues = {};  
@@ -1544,15 +1570,24 @@ function executeStatusUpdate(s){
       matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty);  
     }  
 
-    const msg = "*🚨 BREMBO ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(getMachineStatusString(machines[curMachine]))+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
+    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(getMachineStatusString(machines[curMachine]))+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
-    document.getElementById("routeInfo").style.display="block";  
-    document.getElementById("routeInfo").innerHTML=`<b style="color:#ffd000">ROUTE INFO</b><br>Route To: ${route.name}<br>☎ +${route.no}`;  
-    document.getElementById("waBtn").style.display="block";  
-    document.getElementById("waBtn").innerText = "◉ SEND WHATSAPP";  
 
-    setTimeout(()=>{ window.open(lastWa, "_blank"); },700);  
+    // जर ऑपरेटरने 'Urgent' वर टिक केले असेल तरच WhatsApp उघडेल
+    if(isUrgent){
+      document.getElementById("routeInfo").style.display="block";  
+      document.getElementById("routeInfo").innerHTML=`<b style="color:#ffd000">ROUTE INFO</b><br>Route To: ${route.name}<br>☎ +${route.no}`;  
+      document.getElementById("waBtn").style.display="block";  
+      document.getElementById("waBtn").innerText = "◉ SEND WHATSAPP";  
+
+      setTimeout(()=>{ window.open(lastWa, "_blank"); },700);  
+    } else {
+      document.getElementById("routeInfo").style.display="none";  
+      document.getElementById("waBtn").style.display="none";  
+      alert("Status updated on Dashboard successfully! (No WhatsApp message sent)");
+    }
+
     renderAllDashboards();  
   }).catch(err=>{  
     console.error(err); alert("Firebase update failed. Please check Internet connection.");  
@@ -1714,7 +1749,6 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* STORE DASHBOARD UPDATED: MATERIAL DETAILS STAY VISIBLE + OUT OF STOCK ACTION BUTTON */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1744,7 +1778,6 @@ function renderDepartmentSelected(){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
   }  
 
-  // Display Material Details clearly
   if(m.materialDetails){  
     html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
         <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
@@ -1803,7 +1836,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   });  
 }  
 
-// Initialize on page load  
 window.onload = function(){  
   fillMachineDropdown();  
   checkExistingSession();  
@@ -1811,4 +1843,4 @@ window.onload = function(){
 };  
 </script>  
 </body>  
-        </html>
+</html>
