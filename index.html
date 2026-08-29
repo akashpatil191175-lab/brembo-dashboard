@@ -24,8 +24,19 @@
 body{  
   background:#050505;  
   color:#f4f4f5;  
-  min-height:100vh  
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }  
+
+#appWrapper {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+}
+
 button{  
   cursor:pointer;  
   transition:.18s ease  
@@ -150,10 +161,12 @@ button:active{
   margin-top:10px;  
   line-height:1.5  
 }  
+
 .topBar{  
   min-height:96px;  
   padding:16px 28px;  
-  background:#050505;  
+  background:rgba(5, 5, 5, 0.95);  
+  backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
   display:flex;  
   align-items:center;  
@@ -161,7 +174,7 @@ button:active{
   gap:15px;  
   position:sticky;  
   top:0;  
-  z-index:100  
+  z-index:1000  
 }  
 .topLeft{  
   display:flex;  
@@ -243,17 +256,18 @@ button:active{
   color:#fff;  
   background:#141414  
 }  
+
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(10,1fr);  
-  gap:9px;  
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
+  gap:10px;  
   padding:16px 26px 10px;  
   background:#050505  
 }  
 .statusCard{  
   min-height:118px;  
   background:linear-gradient(180deg,#111,#080808);  
-  border:1px solid #292929;  
+  border:1px solid #e50914;  
   border-radius:13px;  
   padding:14px 13px 12px;  
   cursor:pointer;  
@@ -266,13 +280,14 @@ button:active{
 }  
 .statusCard:hover{  
   transform:translateY(-2px);  
-  border-color:#555  
+  border-color:#ff3340;
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.3);
 }  
 .statusCard.active{  
-  border-color:var(--accent);  
+  border-color:#ff3340;  
   box-shadow:  
-    0 0 20px color-mix(in srgb,var(--accent) 20%,transparent),  
-    inset 0 0 18px color-mix(in srgb,var(--accent) 7%,transparent)  
+    0 0 20px color-mix(in srgb,var(--accent) 30%,#e50914),  
+    inset 0 0 18px color-mix(in srgb,var(--accent) 10%,transparent)  
 }  
 .statusCard::after{  
   content:"";  
@@ -307,7 +322,7 @@ button:active{
 }  
 .statusCardHint{  
   font-size:8px;  
-  color:#666;  
+  color:#888;  
   font-weight:700;  
   margin-top:7px  
 }  
@@ -341,7 +356,7 @@ button:active{
 .machineResultGrid{  
   padding:12px;  
   display:grid;  
-  grid-template-columns:repeat(6,1fr);  
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
   gap:8px;  
   max-height:310px;  
   overflow:auto  
@@ -586,7 +601,8 @@ button:active{
 }  
 .deptHeader{  
   padding:18px 26px;  
-  background:#050505;  
+  background:rgba(5, 5, 5, 0.95);  
+  backdrop-filter: blur(12px);
   border-bottom:1px solid #252525;  
   display:flex;  
   justify-content:space-between;  
@@ -594,7 +610,7 @@ button:active{
   gap:10px;  
   position:sticky;  
   top:0;  
-  z-index:100  
+  z-index:1000  
 }  
 .deptTitle{  
   font-size:23px;  
@@ -628,7 +644,7 @@ button:active{
 }  
 .deptMachineGrid{  
   display:grid;  
-  grid-template-columns:repeat(6,1fr);  
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
   gap:9px;  
   max-height:430px;  
   overflow:auto;  
@@ -729,12 +745,10 @@ button:active{
 }
 @media(max-width:1200px){  
   .statusCards{ grid-template-columns:repeat(5,1fr) }  
-  .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
 }  
 @media(max-width:800px){  
   .statusCards{ grid-template-columns:repeat(3,1fr) }  
-  .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(3,1fr) }  
   .detailTop{ grid-template-columns:1fr }  
   .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
 }  
@@ -749,14 +763,12 @@ button:active{
   .statusCardCount{ font-size:30px }  
   .statusIcon{ font-size:15px }  
   .statusMachineArea{ padding:6px 10px 12px }  
-  .machineResultGrid{ grid-template-columns:repeat(3,1fr) }  
   .mainBox{ padding:6px 10px 20px }  
   .detailPanel{ padding:14px }  
   .statusGrid{ grid-template-columns:1fr }  
   .deptHeader{ padding:12px }  
   .deptContent{ padding:0 0 15px }  
   .deptMachineBox{ margin:8px 10px 12px }  
-  .deptMachineGrid{ grid-template-columns:repeat(3,1fr) }  
   .deptTitle{ font-size:18px }  
   .infoGrid{ grid-template-columns:80px 1fr }  
 }  
@@ -765,150 +777,151 @@ button:active{
 <body>  
 <div id="notifBig"></div>  
 
-<!-- ================= MATERIAL MODAL ================= -->  
-<div id="materialModal">    
-  <div class="modalContent">  
-    <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
-    <input id="matPartNo" class="loginInput" placeholder="PART NO">  
-    <input id="matPartName" class="loginInput" placeholder="PART NAME">  
-    <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
-    <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
-    <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
+<div id="appWrapper">
+
+  <!-- MATERIAL MODAL -->  
+  <div id="materialModal">    
+    <div class="modalContent">  
+      <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
+      <input id="matPartNo" class="loginInput" placeholder="PART NO">  
+      <input id="matPartName" class="loginInput" placeholder="PART NAME">  
+      <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
+      <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
+      <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
+    </div>  
   </div>  
-</div>  
 
-<!-- ================= LOGIN ================= -->  
-<div id="login">    
-  <div class="loginBox">  
-    <img src="icon-512.png" class="brandLogo" alt="Brembo">  
-    <div class="loginSub">OFFICIAL HIGH PERFORMANCE</div>  
-    <div class="redLine"></div>  
-    <div class="modeBar">  
-      <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>  
-      <button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>  
-    </div>  
-
-    <!-- OPERATOR -->  
-    <div id="operatorLogin">  
-      <input id="opId" class="loginInput" placeholder="EMPLOYEE ID">  
-      <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">  
-      <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
-      <select id="opMachine" class="loginSelect"></select>  
-      <select id="opShift" class="loginSelect">  
-        <option value="A">Shift A (7:45 AM - 4:15 PM)</option>  
-        <option value="B">Shift B (4:15 PM - 12:00 AM)</option>  
-        <option value="C">Shift C (12:00 AM - 7:45 AM)</option>  
-      </select>  
-      <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>  
-      <button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>  
-    </div>  
-
-    <!-- DEPARTMENT -->  
-    <div id="departmentLogin" style="display:none">  
-      <select id="departmentSelect" class="loginSelect">  
-        <option value="">-- SELECT DEPARTMENT --</option>  
-        <option value="maintenance">Maintenance</option>  
-        <option value="loading">Loading</option>  
-        <option value="quality">Quality</option>  
-        <option value="toolroom">Tool Room</option>  
-        <option value="store">Store Department</option>  
-        <option value="supervisor">Supervisor</option>  
-      </select>  
-      <input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">  
-      <button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>  
-      <div class="smallNote">Authorized department access only.</div>  
-    </div>  
-    <p id="fbStat" style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">Connecting LIVE...</p>
-  </div>  
-</div>  
-
-<!-- ================= OPERATOR DASHBOARD ================= -->  
-<div id="operatorDashboard" style="display:none">    
-  <div class="topBar">  
-    <div class="topLeft">  
-      <img src="icon-512.png" class="topLogo" alt="Brembo">  
-      <div class="topDivider"></div>  
-      <div id="wel" class="userName"></div>  
-      <div id="welMc" class="machineBadge"></div>  
-      <div class="shiftInfo">  
-        <div id="welShift" class="shiftMain">Shift A</div>  
-        <div id="shiftRangeTop" class="shiftRange">7:45 AM - 4:15 PM</div>  
+  <!-- LOGIN -->  
+  <div id="login">    
+    <div class="loginBox">  
+      <img src="icon-512.png" class="brandLogo" alt="Brembo">  
+      <div class="loginSub">OFFICIAL HIGH PERFORMANCE</div>  
+      <div class="redLine"></div>  
+      <div class="modeBar">  
+        <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>  
+        <button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>  
       </div>  
+
+      <div id="operatorLogin">  
+        <input id="opId" class="loginInput" placeholder="EMPLOYEE ID">  
+        <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">  
+        <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
+        <select id="opMachine" class="loginSelect"></select>  
+        <select id="opShift" class="loginSelect">  
+          <option value="A">Shift A (7:45 AM - 4:15 PM)</option>  
+          <option value="B">Shift B (4:15 PM - 12:00 AM)</option>  
+          <option value="C">Shift C (12:00 AM - 7:45 AM)</option>  
+        </select>  
+        <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>  
+        <button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>  
+      </div>  
+
+      <div id="departmentLogin" style="display:none">  
+        <select id="departmentSelect" class="loginSelect">  
+          <option value="">-- SELECT DEPARTMENT --</option>  
+          <option value="maintenance">Maintenance</option>  
+          <option value="loading">Loading</option>  
+          <option value="quality">Quality</option>  
+          <option value="toolroom">Tool Room</option>  
+          <option value="store">Store Department</option>  
+          <option value="supervisor">Supervisor</option>  
+        </select>  
+        <input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">  
+        <button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>  
+        <div class="smallNote">Authorized department access only.</div>  
+      </div>  
+      <p id="fbStat" style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">Connecting LIVE...</p>
     </div>  
-    <div class="topActions">  
-      <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
-      <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
-      <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
-      <button onclick="resetAll()" class="pill resetBtn">⟳ RESET ALL</button>  
-      <button onclick="doLogout()" class="pill logoutBtn">⇥ LOGOUT</button>  
-    </div>
-  </div>    
+  </div>  
 
-  <div id="operatorStatusCards" class="statusCards"></div>    
-
-  <div class="statusMachineArea">  
-    <div class="statusMachinePanel">  
-      <div class="statusMachineHeader">  
-        <div>  
-          <div id="operatorStatusMachineTitle" class="statusMachineTitle">⚙️ SELECT STATUS</div>  
-          <div id="operatorStatusMachineSub" class="statusMachineSub">Click a status card to view machines.</div>  
+  <!-- OPERATOR DASHBOARD -->  
+  <div id="operatorDashboard" style="display:none">    
+    <div class="topBar">  
+      <div class="topLeft">  
+        <img src="icon-512.png" class="topLogo" alt="Brembo">  
+        <div class="topDivider"></div>  
+        <div id="wel" class="userName"></div>  
+        <div id="welMc" class="machineBadge"></div>  
+        <div class="shiftInfo">  
+          <div id="welShift" class="shiftMain">Shift A</div>  
+          <div id="shiftRangeTop" class="shiftRange">7:45 AM - 4:15 PM</div>  
         </div>  
-        <div id="operatorStatusMachineCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
       </div>  
-      <div id="operatorMachineResultGrid" class="machineResultGrid"></div>  
-    </div>
-  </div>    
+      <div class="topActions">  
+        <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
+        <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
+        <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
+        <button onclick="resetAll()" class="pill resetBtn">⟳ RESET ALL</button>  
+        <button onclick="doLogout()" class="pill logoutBtn">⇥ LOGOUT</button>  
+      </div>
+    </div>    
 
-  <div class="mainBox">  
-    <div class="panel detailPanel">  
-      <div id="machineDetail"></div>  
-      <div id="operatorBox"></div>  
-      <div id="statusList"></div>  
-      <div id="lockMsg" style="font-size:11px;color:#777;margin-top:8px"></div>  
-      <div id="routeInfo" class="routeInfo" style="display:none"></div>  
-      <button id="waBtn" class="waBtn" onclick="openWA()" style="display:none">SEND WHATSAPP</button>  
-    </div>
-  </div>  
-</div>  
+    <div id="operatorStatusCards" class="statusCards"></div>    
 
-<!-- ================= DEPARTMENT DASHBOARD ================= -->  
-<div id="departmentDashboard" style="display:none">    
-  <div class="deptHeader">  
-    <div>  
-      <div class="deptTitle" id="deptTitle">DEPARTMENT</div>  
-      <div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>  
-    </div>  
-    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
-      <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
-      <button onclick="downloadShiftExcel()" class="excelSmallBtn">📥 EXCEL</button>  
-      <span class="deptBadge" id="deptBadge"></span>  
-      <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
-    </div>
-  </div>    
-
-  <div class="deptContent">  
-    <div id="departmentStatusCards" class="deptStatusCards"></div>  
-
-    <div class="deptMachineBox">  
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
-        <div>  
-          <b id="deptGridTitle">SELECT STATUS</b>  
-          <div style="font-size:11px;color:#777;margin-top:4px">Click any status icon above to view machines.</div>  
+    <div class="statusMachineArea" id="operatorFocusArea">  
+      <div class="statusMachinePanel">  
+        <div class="statusMachineHeader">  
+          <div>  
+            <div id="operatorStatusMachineTitle" class="statusMachineTitle">⚙️ SELECT STATUS</div>  
+            <div id="operatorStatusMachineSub" class="statusMachineSub">Click a status card to view machines.</div>  
+          </div>  
+          <div id="operatorStatusMachineCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
-        <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
-      </div>  
-      <div id="deptMachineGrid" class="deptMachineGrid"></div>  
-    </div>  
+        <div id="operatorMachineResultGrid" class="machineResultGrid"></div>  
+      </div>
+    </div>    
 
-    <div class="deptMachineBox">  
-      <b>SELECTED MACHINE DETAILS</b>  
-      <div id="deptSelected" class="deptSelected">Please select a status and machine.</div>  
-    </div>
+    <div class="mainBox">  
+      <div class="panel detailPanel">  
+        <div id="machineDetail"></div>  
+        <div id="operatorBox"></div>  
+        <div id="statusList"></div>  
+        <div id="lockMsg" style="font-size:11px;color:#777;margin-top:8px"></div>  
+        <div id="routeInfo" class="routeInfo" style="display:none"></div>  
+        <button id="waBtn" class="waBtn" onclick="openWA()" style="display:none">SEND WHATSAPP</button>  
+      </div>
+    </div>  
   </div>  
-</div>  
+
+  <!-- DEPARTMENT DASHBOARD -->  
+  <div id="departmentDashboard" style="display:none">    
+    <div class="deptHeader">  
+      <div>  
+        <div class="deptTitle" id="deptTitle">DEPARTMENT</div>  
+        <div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>  
+      </div>  
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
+        <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
+        <button onclick="downloadShiftExcel()" class="excelSmallBtn">📥 EXCEL</button>  
+        <span class="deptBadge" id="deptBadge"></span>  
+        <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
+      </div>
+    </div>    
+
+    <div class="deptContent">  
+      <div id="departmentStatusCards" class="deptStatusCards"></div>  
+
+      <div class="deptMachineBox" id="deptFocusArea">  
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
+          <div>  
+            <b id="deptGridTitle">SELECT STATUS</b>  
+            <div style="font-size:11px;color:#777;margin-top:4px">Click any status icon above to view machines.</div>  
+          </div>  
+          <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
+        </div>  
+        <div id="deptMachineGrid" class="deptMachineGrid"></div>  
+      </div>  
+
+      <div class="deptMachineBox">  
+        <b>SELECTED MACHINE DETAILS</b>  
+        <div id="deptSelected" class="deptSelected">Please select a status and machine.</div>  
+      </div>
+    </div>  
+  </div>  
+
+</div>
 
 <script>  
-/* FIREBASE CONFIG */  
 const firebaseConfig = {  
   apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",  
   authDomain:"brembo-dashboard.firebaseapp.com",  
@@ -921,11 +934,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);  
 const db = firebase.database();  
 
-/* PINS */  
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG (UPDATED ACCESS & ACTIONS) */  
+/* DEPARTMENTS CONFIG (STORE मध्ये फक्त REQ आणि SHORTAGE कार्ड्स ठेवले आहेत) */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ 
     name:"MAINTENANCE", 
@@ -958,13 +970,13 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL OUT OF STOCK"],
-    actions:[{ label:"⚠️ MARK OUT OF STOCK (SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
     name:"SUPERVISOR", 
     pin:"Ampa123", 
-    allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL OUT OF STOCK"],
+    allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[  
       { label:"CLEAR HOLD", clearsIssue:"LOT HOLD" },  
       { label:"CLEAR BREAKDOWN", clearsIssue:"BREAKDOWN" },  
@@ -973,13 +985,11 @@ const DEPARTMENT_CONFIG = {
       { label:"CLEAR LOT READY", clearsIssue:"LOT READY" },  
       { label:"CLEAR MATERIAL REQUIREMENT", clearsIssue:"MATERIAL REQUIREMENT" },  
       { label:"CLEAR MATERIAL SHORTAGE", clearsIssue:"MATERIAL SHORTAGE" },  
-      { label:"CLEAR MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL OUT OF STOCK" },  
       { label:"RESET MACHINE TO RUNNING", clearsIssue:"ALL" }  
     ] 
   }  
 };  
 
-/* WHATSAPP ROUTING */  
 const ROUTE_MAP = {  
   "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776" },  
   "FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },  
@@ -990,11 +1000,9 @@ const ROUTE_MAP = {
   "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
   "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173" },  
   "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173" },  
-  "MATERIAL OUT OF STOCK":{ name:"Sameer Sir (Store)", no:"918605802173" },  
   "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }  
 };  
 
-/* MACHINE LIST - 69 */  
 const ALL_MACHINES_LIST = (()=>{  
   let a=[];  
   for(let i=1;i<=35;i++){ a.push("EN"+i); }  
@@ -1006,7 +1014,6 @@ const ALL_MACHINES_LIST = (()=>{
   return a;  
 })();  
 
-/* ALL MASTER STATUS CONFIG */  
 const MASTER_STATUS_CONFIG = [  
   { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
   { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
@@ -1017,11 +1024,9 @@ const MASTER_STATUS_CONFIG = [
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
   { key:"SIGN PENDING", title:"SIGN PENDING", icon:"📝", accent:"#38bdf8" },
   { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"📦", accent:"#ffd000" },
-  { key:"MATERIAL SHORTAGE", title:"MAT SHORTAGE", icon:"⚠️", accent:"#ff0000" },
-  { key:"MATERIAL OUT OF STOCK", title:"OUT OF STOCK", icon:"🚨", accent:"#d97706" }  
+  { key:"MATERIAL SHORTAGE", title:"MAT SHORTAGE", icon:"⚠️", accent:"#ff0000" }  
 ];  
 
-/* GLOBAL VARIABLES */  
 let machines = {};  
 let operator = null;  
 let department = null;  
@@ -1297,6 +1302,9 @@ function doLogin(){
   document.getElementById("login").style.display="none";  
   document.getElementById("operatorDashboard").style.display="block";  
   applyOperator();  
+
+  const focusEl = document.getElementById("operatorFocusArea");
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
 }  
 
 function applyOperator(isReload = false){  
@@ -1372,7 +1380,7 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
   container.innerHTML = cardsToDisplay.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
-    const blinkClass = (item.key === "MATERIAL SHORTAGE" || item.key === "MATERIAL OUT OF STOCK") && count > 0 ? "blinkAlert" : "";
+    const blinkClass = (item.key === "MATERIAL SHORTAGE") && count > 0 ? "blinkAlert" : "";
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
@@ -1384,7 +1392,6 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
 function getStatusDisplayName(status){  
   if(status==="MATERIAL REQUIREMENT"){ return "📦 MAT REQ"; }  
   if(status==="MATERIAL SHORTAGE"){ return "⚠️ MAT SHORTAGE"; }  
-  if(status==="MATERIAL OUT OF STOCK"){ return "🚨 OUT OF STOCK"; }  
   return status;  
 }  
 
@@ -1429,7 +1436,7 @@ function renderOperatorMachineList(){
     const m = machines[id] || getDefaultMachine();  
     const selected = curMachine===id ? "selected" : "";  
     const stStr = getMachineStatusString(m);  
-    const isShortage = (hasStatus(m, "MATERIAL SHORTAGE") || hasStatus(m, "MATERIAL OUT OF STOCK")) ? "blinkAlert" : "";
+    const isShortage = hasStatus(m, "MATERIAL SHORTAGE") ? "blinkAlert" : "";
     return `<div class="machineResult ${selected} ${isShortage}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
 }  
@@ -1518,7 +1525,7 @@ function sel(id){
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || hasStatus(m, "MATERIAL OUT OF STOCK") || m.materialDetails){  
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
       btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
 
@@ -1547,7 +1554,6 @@ function clearMaterialRequirement(){
   let issues = getMachineIssues(m);  
   delete issues["MATERIAL REQUIREMENT"];  
   delete issues["MATERIAL SHORTAGE"];  
-  delete issues["MATERIAL OUT OF STOCK"];  
   
   m.issues = issues;  
   m.materialDetails = null;  
@@ -1670,7 +1676,7 @@ function downloadShiftExcel(){
       else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }  
       else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }  
       else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }  
-      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || hasStatus(m, "MATERIAL OUT OF STOCK")){ deptName="Store Department"; }  
+      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName="Store Department"; }  
       else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }  
       else{ deptName="Running"; }  
 
@@ -1724,6 +1730,9 @@ function departmentLogin(){
   document.getElementById("operatorDashboard").style.display="none";  
   document.getElementById("departmentDashboard").style.display="block";  
   renderDepartmentDashboard();  
+
+  const focusEl = document.getElementById("deptFocusArea");
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
 }  
 
 function departmentLogout(){  
@@ -1898,7 +1907,277 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
-    if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE" || clearIssue1 === "MATERIAL OUT OF STOCK"){  
+    if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE"){  
+      if(!addIssue) m.materialDetails = null;  
+    }  
+  }  
+
+  if(addIssue){  
+    issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };  
+  }  
+
+  m.issues = issues;  
+  m.status = getMachineStatusString(m);  
+
+  saveMachine(deptSelectedMachine).then(()=>{  
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Action: "+(addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name);  
+    renderDepartmentDashboard();  
+  }).catch(err=>{  
+    console.error(err);  
+    alert("Update failed. Please check internet connection.");  
+  });  
+}  
+
+function openWA(){  
+  if(lastWa){ window.open(lastWa, "_blank"); }  
+}  
+
+function downloadShiftExcel(){  
+  try{  
+    const rows=[];  
+    ALL_MACHINES_LIST.forEach(id=>{  
+      const m = machines[id] || getDefaultMachine();  
+      const op = m.op || {};  
+      const mat = m.materialDetails || {};  
+      const stStr = getMachineStatusString(m);  
+
+      let deptName="-";  
+      if(hasStatus(m, "BREAKDOWN")){ deptName="Maintenance"; }  
+      else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName="Quality"; }  
+      else if(hasStatus(m, "FIXTURE NOT OK")){ deptName="Tool Room"; }  
+      else if(hasStatus(m, "LOT READY")){ deptName="Loading"; }  
+      else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName="Store Department"; }  
+      else if(hasStatus(m, "LOT HOLD")){ deptName="Supervisor"; }  
+      else{ deptName="Running"; }  
+
+      rows.push({  
+        "Machine No":id,  
+        "Status": stStr,  
+        "Operator Name": op.name || "-",  
+        "Operator ID": op.id || "-",  
+        "Shift": op.shift || "-",  
+        "Login Time": op.time || "-",  
+        "Material Part No": mat.partNo || "-",  
+        "Material Part Name": mat.partName || "-",  
+        "Quantity": mat.qty || "-",  
+        "Department Responsible": deptName  
+      });  
+    });  
+
+    if(typeof XLSX !== "undefined"){  
+      const worksheet = XLSX.utils.json_to_sheet(rows);  
+      worksheet["!cols"]=[{wch:14},{wch:24},{wch:22},{wch:16},{wch:10},{wch:16},{wch:20},{wch:30},{wch:12},{wch:24}];  
+      const workbook = XLSX.utils.book_new();  
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");  
+      const date = new Date().toISOString().slice(0,10);  
+      XLSX.writeFile(workbook, "Brembo_Shift_Report_"+date+".xlsx");  
+      return;  
+    }  
+  }catch(err){  
+    console.error("Excel Error:", err); alert("Excel download failed. Please try again.");  
+  }  
+}  
+
+function departmentLogin(){  
+  const dep = document.getElementById("departmentSelect").value;  
+  const pin = document.getElementById("departmentPin").value;  
+
+  if(!dep || !pin){ alert("Please select department and enter PIN."); return; }  
+  const config = DEPARTMENT_CONFIG[dep];  
+  if(!config){ alert("Invalid department."); return; }  
+  if(pin!==config.pin){ alert("Wrong Department PIN! Access Denied!"); return; }  
+
+  department=dep;  
+  operator=null;  
+  departmentStatusFilter = config.allowedStatuses[0] || "TOTAL";  
+  deptSelectedMachine=null;  
+
+  localStorage.setItem("brembo_department", dep);  
+  localStorage.removeItem("brembo_v7");  
+  localStorage.removeItem("brembo_shift");  
+
+  document.getElementById("login").style.display="none";  
+  document.getElementById("operatorDashboard").style.display="none";  
+  document.getElementById("departmentDashboard").style.display="block";  
+  renderDepartmentDashboard();  
+
+  const focusEl = document.getElementById("deptFocusArea");
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
+}  
+
+function departmentLogout(){  
+  if(!confirm("Logout from department dashboard?")) return;  
+  localStorage.removeItem("brembo_department");  
+  department=null;  
+  location.reload();  
+}  
+
+function setDepartmentStatusFilter(status){  
+  departmentStatusFilter=status;  
+  deptSelectedMachine=null;  
+  renderDepartmentDashboard();  
+}  
+
+function renderDepartmentStatusCards(){  
+  if(!department) return;
+  const config = DEPARTMENT_CONFIG[department];
+  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", config.allowedStatuses);  
+}  
+
+function getDepartmentFilteredMachines(){  
+  if(!department){ return []; }  
+  if(departmentStatusFilter==="TOTAL"){ return ALL_MACHINES_LIST.slice(); }  
+  return ALL_MACHINES_LIST.filter(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    return hasStatus(m, departmentStatusFilter);  
+  });  
+}  
+
+function renderDepartmentDashboard(){  
+  if(!department) return;  
+  const config = DEPARTMENT_CONFIG[department];  
+  if(!config) return;  
+
+  document.getElementById("deptTitle").innerText = config.name+" DASHBOARD";  
+  document.getElementById("deptBadge").innerText = config.name;  
+  
+  if(!config.allowedStatuses.includes(departmentStatusFilter)){
+    departmentStatusFilter = config.allowedStatuses[0];
+  }
+
+  renderDepartmentStatusCards();  
+  renderDepartmentMachineGrid();  
+}  
+
+function renderDepartmentMachineGrid(){  
+  const grid = document.getElementById("deptMachineGrid");  
+  if(!grid) return;  
+  const filtered = getDepartmentFilteredMachines();  
+  const title = document.getElementById("deptGridTitle");  
+  const count = document.getElementById("deptGridCount");  
+
+  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES"; }  
+  else{ title.innerText = "⚙️ "+getStatusDisplayName(departmentStatusFilter)+" MACHINES"; }  
+
+  count.innerText = filtered.length+" MACHINES";  
+
+  if(filtered.length===0){  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:25px;color:#777;font-size:12px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
+    deptSelectedMachine=null;  
+    renderDepartmentSelected();  
+    return;  
+  }  
+
+  if(!filtered.includes(deptSelectedMachine)){ deptSelectedMachine = filtered[0]; }  
+
+  grid.innerHTML = filtered.map(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    const selected = deptSelectedMachine===id ? "selected" : "";  
+    const stStr = getMachineStatusString(m);  
+
+    let color="#ef4444";  
+    if(stStr==="RUNNING"){ color="#22c55e"; }  
+
+    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
+  }).join("");  
+  renderDepartmentSelected();  
+}  
+
+function selectDepartmentMachine(id){  
+  if(!machines[id]) return;  
+  deptSelectedMachine=id;  
+  renderDepartmentMachineGrid();  
+}  
+
+function renderDepartmentSelected(){  
+  const box = document.getElementById("deptSelected");  
+  if(!box) return;  
+
+  if(!deptSelectedMachine){  
+    box.innerHTML=`<div style="text-align:center;color:#777;padding:20px">Select a status and machine.</div>`;  
+    return;  
+  }  
+
+  const m = machines[deptSelectedMachine];  
+  if(!m){  
+    box.innerHTML = "Please select machine.";  
+    return;  
+  }  
+
+  const op = m.op;  
+  const config = DEPARTMENT_CONFIG[department];  
+  const stStr = getMachineStatusString(m);  
+
+  let statusColor="#ef4444";  
+  if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
+
+  let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
+  <div style="margin:8px 0;font-size:13px">Status: <b style="color:${statusColor}">${getStatusDisplayName(stStr)}</b></div>`;  
+
+  if(op){  
+    html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
+  }  
+
+  if(m.materialDetails){  
+    html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
+        <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
+        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
+        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
+        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
+      </div>`;  
+  }  
+
+  let actionButtonsHtml = "";
+
+  if(department === "supervisor"){  
+    const currentIssues = Object.keys(getMachineIssues(m));  
+    if(currentIssues.length > 0){  
+      actionButtonsHtml += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
+      currentIssues.forEach(iss => {  
+        actionButtonsHtml += `<button onclick="updateDepartmentMachineStatus('${iss}', '', '')" style="width:100%;margin-top:10px;padding:12px;border:1px solid #e50914;border-radius:10px;background:#5a1116;color:#ffffff;font-weight:900;font-size:13px;cursor:pointer">CLEAR ${iss}</button>`;  
+      });  
+      actionButtonsHtml += `<button onclick="updateDepartmentMachineStatus('ALL', '', '')" style="width:100%;margin-top:10px;padding:14px;border:1px solid #22c55e;border-radius:10px;background:#15803d;color:#ffffff;font-weight:900;font-size:14px;cursor:pointer">✅ RESET MACHINE TO RUNNING</button>`;  
+    }  
+  } else if(config && config.actions && config.actions.length > 0){  
+    let hasDeptIssue = false;  
+    config.actions.forEach(a=>{  
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+        hasDeptIssue = true;  
+      }  
+    });  
+    if(hasDeptIssue){  
+      actionButtonsHtml += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
+      config.actions.forEach(a=>{  
+        if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+          actionButtonsHtml += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #ef4444;border-radius:10px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
+        }  
+      });  
+    }  
+  }  
+
+  if(actionButtonsHtml){  
+    html += actionButtonsHtml;  
+  } else {  
+    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">Machine is currently RUNNING or no actions available for this department.</span></div>`;  
+  }  
+
+  box.innerHTML = html;  
+}  
+
+function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
+  if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
+  if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
+
+  let m = machines[deptSelectedMachine];  
+  let issues = getMachineIssues(m);  
+
+  if(clearIssue1 === "ALL"){  
+    issues = {};  
+    m.materialDetails = null;  
+  } else {  
+    if(clearIssue1) delete issues[clearIssue1];  
+    if(clearIssue2) delete issues[clearIssue2];  
+    if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE"){  
       if(!addIssue) m.materialDetails = null;  
     }  
   }  
