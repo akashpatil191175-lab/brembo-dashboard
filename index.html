@@ -245,7 +245,7 @@ button:active{
 }  
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px;  
   background:#050505  
@@ -507,12 +507,12 @@ button:active{
 
 .blinkAlert {
   animation: blinkAnim 1s infinite alternate;
-  color: #ff3333 !important;
-  font-weight: 900;
+  border-color: #ff0000 !important;
+  background: rgba(229, 9, 20, 0.2) !important;
 }
 @keyframes blinkAnim {
   0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.3; transform: scale(0.98); }
+  100% { opacity: 0.4; transform: scale(0.98); }
 }
 
 .routeInfo{  
@@ -615,7 +615,7 @@ button:active{
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
+  grid-template-columns:repeat(9,1fr);  
   gap:9px;  
   padding:16px 26px 10px  
 }  
@@ -728,10 +728,12 @@ button:active{
   cursor: pointer;
 }
 @media(max-width:1200px){  
+  .statusCards, .deptStatusCards{ grid-template-columns:repeat(4,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
 }  
 @media(max-width:800px){  
+  .statusCards, .deptStatusCards{ grid-template-columns:repeat(3,1fr) }  
   .machineResultGrid, .deptMachineGrid{ grid-template-columns:repeat(3,1fr) }  
   .detailTop{ grid-template-columns:1fr }  
   .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
@@ -923,49 +925,14 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG & ALLOWED ICONS */  
+/* DEPARTMENTS CONFIG */  
 const DEPARTMENT_CONFIG = {  
-  maintenance:{ 
-    name:"MAINTENANCE", 
-    pin:"2026", 
-    issueStatus:"BREAKDOWN", 
-    actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }],
-    allowedIcons: ["TOTAL", "RUNNING", "BREAKDOWN"] 
-  },  
-  loading:{ 
-    name:"LOADING", 
-    pin:"2024", 
-    issueStatus:"LOT READY", 
-    actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }],
-    allowedIcons: ["TOTAL", "RUNNING", "LOT READY"] 
-  },  
-  quality:{ 
-    name:"QUALITY", 
-    pin:"2025", 
-    issueStatus:"CMM NOT OK", 
-    actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }],
-    allowedIcons: ["TOTAL", "RUNNING", "CMM NOT OK"] 
-  },  
-  toolroom:{ 
-    name:"TOOL ROOM", 
-    pin:"2027", 
-    issueStatus:"FIXTURE NOT OK", 
-    actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }],
-    allowedIcons: ["TOTAL", "RUNNING", "FIXTURE NOT OK"] 
-  },  
-  store:{ 
-    name:"STORE DEPARTMENT", 
-    pin:"2028", 
-    issueStatus:"MATERIAL REQUIREMENT", 
-    actions:[{ label:"⚠️ MARK MATERIAL OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }],
-    allowedIcons: ["TOTAL", "RUNNING", "MATERIAL REQUIREMENT", "MATERIAL OUT OF STOCK"] 
-  },  
-  supervisor:{ 
-    name:"SUPERVISOR", 
-    pin:"Ampa123", 
-    actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }],
-    allowedIcons: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "MATERIAL REQUIREMENT", "MATERIAL OUT OF STOCK"] 
-  }  
+  maintenance:{ name:"MAINTENANCE", pin:"2026", issueStatus:"BREAKDOWN", actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] },  
+  loading:{ name:"LOADING", pin:"2024", issueStatus:"LOT READY", actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] },  
+  quality:{ name:"QUALITY", pin:"2025", issueStatus:"CMM NOT OK", actions:[{ label:"OK", clearsIssue:"CMM NOT OK" }] },  
+  toolroom:{ name:"TOOL ROOM", pin:"2027", issueStatus:"FIXTURE NOT OK", actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] },  
+  store:{ name:"STORE DEPARTMENT", pin:"2028", issueStatus:"MATERIAL REQUIREMENT", actions:[{ label:"⚠️ MARK OUT OF STOCK (शॉर्टेज ट्रान्सफर)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL OUT OF STOCK" }] },  
+  supervisor:{ name:"SUPERVISOR", pin:"Ampa123", actions:[{ label:"CLEAR HOLD", clearsIssue:"LOT HOLD" }] }  
 };  
 
 /* WHATSAPP ROUTING */  
@@ -1346,21 +1313,10 @@ function getStatusCount(status){
   }).length;  
 }  
 
-function renderStatusCards(containerId, activeStatus, clickFunction, filterDeptKey = null){  
+function renderStatusCards(containerId, activeStatus, clickFunction){  
   const container = document.getElementById(containerId);  
   if(!container) return;  
-
-  let allowedIcons = null;
-  if (filterDeptKey && DEPARTMENT_CONFIG[filterDeptKey]) {
-    allowedIcons = DEPARTMENT_CONFIG[filterDeptKey].allowedIcons;
-  }
-
-  const itemsToRender = STATUS_CONFIG.filter(item => {
-    if (!allowedIcons) return true; // Supervisor / Operator gets all icons
-    return allowedIcons.includes(item.key);
-  });
-
-  container.innerHTML = itemsToRender.map(item=>{  
+  container.innerHTML = STATUS_CONFIG.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
     const blinkClass = item.key === "MATERIAL OUT OF STOCK" && count > 0 ? "blinkAlert" : "";
@@ -1628,7 +1584,7 @@ function executeStatusUpdate(s){
     } else {
       document.getElementById("routeInfo").style.display="none";  
       document.getElementById("waBtn").style.display="none";  
-      alert("Status updated on Dashboard successfully! (No WhatsApp message sent)");
+      alert("Status updated on Dashboard successfully!");
     }
 
     renderAllDashboards();  
@@ -1729,7 +1685,7 @@ function setDepartmentStatusFilter(status){
 }  
 
 function renderDepartmentStatusCards(){  
-  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", department);  
+  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter");  
 }  
 
 function getDepartmentFilteredMachines(){  
@@ -1855,7 +1811,7 @@ function renderDepartmentSelected(){
 
 function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
   if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
-  if(!confirm("Confirm action on "+deptSelectedMachine+"?")) return;  
+  if(!confirm("Confirm Out of Stock action for "+deptSelectedMachine+"? This will move the material to Shortage.")) return;  
 
   let m = machines[deptSelectedMachine];  
   let issues = getMachineIssues(m);  
