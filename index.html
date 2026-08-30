@@ -1694,6 +1694,7 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
+/* STRICT FILTER FOR STORE DEPARTMENT ENTRIES ONLY */
 function getFilteredLogsForDepartment(logsData, currentDept) {
   let filtered = [];
   if (!logsData) return filtered;
@@ -1704,8 +1705,12 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
     const os = l.oldStatus || "";
     const act = l.action || "";
 
-    // Strictly check for store department material entries only
-    if(ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL")){
+    // Strictly check for Store Department related entries: Material Requirement, Shortage, Received
+    const isMatReq = ns.includes("MATERIAL REQUIREMENT") || os.includes("MATERIAL REQUIREMENT") || act.includes("MATERIAL REQUIREMENT");
+    const isMatShortage = ns.includes("MATERIAL SHORTAGE") || os.includes("MATERIAL SHORTAGE") || act.includes("MATERIAL SHORTAGE");
+    const isMatReceived = act.includes("MATERIAL RECEIVED") || detailMatchesMatRecv(l.detail);
+
+    if (isMatReq || isMatShortage || isMatReceived) {
       filtered.unshift({
         "Date & Time": l.timeStr || "-",
         "Machine No": l.machine || "-",
@@ -1723,6 +1728,11 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
   return filtered;
 }
 
+function detailMatchesMatRecv(detail){
+  if(!detail) return false;
+  return detail.includes("MATERIAL RECEIVED") || detail.includes("Cleared material requirement");
+}
+
 function downloadDepartmentExcel(){  
   try{  
     if(typeof XLSX === "undefined"){ 
@@ -1737,7 +1747,6 @@ function downloadDepartmentExcel(){
     db.ref("statusLogs").once("value").then(snapshot => {
       const logsData = snapshot.val() || {};
       const workbook = XLSX.utils.book_new();  
-      const currentDeptConfig = DEPARTMENT_CONFIG[department];
       const sheetName = "Store Entry Logs";
 
       let rows = getFilteredLogsForDepartment(logsData, "store");
@@ -1765,7 +1774,7 @@ function downloadDepartmentExcel(){
       }
 
       if(rows.length === 0){
-        alert("Store Entry ची कोणतीही माहिती उपलब्ध नाही.");
+        alert("Store Entry (Material Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
         return;
       }
 
