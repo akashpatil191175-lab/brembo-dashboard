@@ -946,7 +946,7 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG FIXED */  
+/* DEPARTMENTS CONFIG */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ 
     name:"MAINTENANCE", 
@@ -979,7 +979,7 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "TOTAL"],
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
@@ -1553,7 +1553,7 @@ function sel(id){
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
     if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मतेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -1585,11 +1585,11 @@ function clearMaterialRequirement(){
   delete issues["MATERIAL SHORTAGE"];  
   
   m.issues = issues;  
+  m.materialDetails = null;  
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name, oldSt, "MATERIAL RECEIVED / RUNNING");  
-    m.materialDetails = null;
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
     renderAllDashboards();  
@@ -1603,11 +1603,7 @@ function upd(s){
   if(!operator){ document.getElementById("login").style.display="flex"; return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine: "+operator.machine); return; }  
   if(s==="MATERIAL REQUIREMENT"){ openMaterialModal(); return; }  
-  
-  // जर मटेरियल रिक्वायरमेंट चालू असेल आणि ऑपरेटरने दुसरी सिस्टीम/ब्रेकडाउन निवडले, तर मटेरियल डिटेल्स लगेच काढून टाकू नका.
-  if(s === "RUNNING") {
-    machines[curMachine].materialDetails=null;  
-  }
+  machines[curMachine].materialDetails=null;  
   executeStatusUpdate(s);  
 }  
 
@@ -1698,7 +1694,7 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* FIXED: STORE DEPARTMENT EXCEL FILTER LOGIC */
+/* STRICT FILTER FOR STORE DEPARTMENT ENTRIES ONLY */
 function getFilteredLogsForDepartment(logsData, currentDept) {
   let filtered = [];
   if (!logsData) return filtered;
@@ -1710,13 +1706,12 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    // स्टोरच्या सर्व प्रकारच्या एंट्रीज (Requirement, Shortage, Received किंवा पार्ट डिटेल्स असलेल्या नोंदी)
+    // EXCLUSIVE STORE ONLY CHECK (इतर सर्व विभागाच्या एंट्री पूर्णपणे ब्लॉक केल्या आहेत)
     const isStoreRelated = 
       ns.includes("MATERIAL") || 
       os.includes("MATERIAL") || 
       act.includes("MATERIAL") || 
       det.includes("MATERIAL") ||
-      (l.partNo && l.partNo !== "-") ||
       l.user === "STORE DEPARTMENT";
 
     if (isStoreRelated) {
@@ -1759,7 +1754,7 @@ function downloadDepartmentExcel(){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
           const stStr = getMachineStatusString(m);
-          if(stStr.includes("MATERIAL") || m.materialDetails){
+          if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
               "Date & Time": new Date().toLocaleString("en-IN"),
