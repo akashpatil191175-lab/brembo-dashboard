@@ -45,7 +45,6 @@ button:active{
   transform:scale(.98)  
 }  
 
-/* Disabled View-Only Style for Supervisor Buttons */
 button:disabled {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
@@ -1695,7 +1694,6 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* Get filtered logs for logged in department */
 function getFilteredLogsForDepartment(logsData, currentDept) {
   let filtered = [];
   if (!logsData) return filtered;
@@ -1705,12 +1703,13 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
     let logDept = "Other";
     const ns = l.newStatus || "";
     const os = l.oldStatus || "";
+    const act = l.action || "";
 
     if(ns.includes("BREAKDOWN") || os.includes("BREAKDOWN")) logDept = "maintenance";
     else if(ns.includes("CMM") || ns.includes("SIGN") || ns.includes("HOLD") || os.includes("CMM") || os.includes("SIGN") || os.includes("HOLD")) logDept = "quality";
     else if(ns.includes("FIXTURE") || os.includes("FIXTURE")) logDept = "toolroom";
-    else if(ns.includes("MATERIAL REQUIREMENT") || ns.includes("MATERIAL SHORTAGE") || os.includes("MATERIAL REQUIREMENT") || os.includes("MATERIAL SHORTAGE")) logDept = "store";
-    else if(ns.includes("LOT READY") || os.includes("LOT READY")) logDept = "loading";
+    else if(ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL")) logDept = "store";
+    else if(ns.includes("LOT READY") || os.includes("LOT READY") || act.includes("LOT TAKEN")) logDept = "loading";
 
     if(currentDept === "supervisor" || currentDept === logDept){
       filtered.unshift({
@@ -1730,7 +1729,6 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
   return filtered;
 }
 
-/* Exports Excel for current logged-in Department */
 function downloadDepartmentExcel(){  
   try{  
     if(typeof XLSX === "undefined"){ 
@@ -1750,7 +1748,6 @@ function downloadDepartmentExcel(){
 
       let rows = getFilteredLogsForDepartment(logsData, department);
 
-      // If no historical logs exist, populate current live status for all machines
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
@@ -1995,8 +1992,9 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
-    if(clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE"){  
-      if(!addIssue) m.materialDetails = null;  
+    // retain materialDetails if transferring to MATERIAL SHORTAGE so detail stays saved
+    if((clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE") && !addIssue){  
+      m.materialDetails = null;  
     }  
   }  
 
