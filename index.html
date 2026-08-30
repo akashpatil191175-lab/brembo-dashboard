@@ -952,7 +952,7 @@ const DEPARTMENT_CONFIG = {
   maintenance:{ 
     name:"MAINTENANCE", 
     pin:"2026", 
-    allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN"],
+    allowedStatuses: ["BREAKDOWN"],
     actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] 
   },  
   loading:{ 
@@ -964,7 +964,7 @@ const DEPARTMENT_CONFIG = {
   quality:{ 
     name:"QUALITY", 
     pin:"2025", 
-    allowedStatuses: ["TOTAL", "RUNNING", "CMM NOT OK", "LOT HOLD", "SIGN PENDING"],
+    allowedStatuses: ["CMM NOT OK", "LOT HOLD", "SIGN PENDING"],
     actions:[
       { label:"CMM OK", clearsIssue:"CMM NOT OK" },
       { label:"SIGN DONE", clearsIssue:"SIGN PENDING" },
@@ -980,7 +980,7 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["TOTAL", "RUNNING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
@@ -1088,7 +1088,6 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
-/* 1. Shift Carry Forward: Carry forward machine status and state without resetting */
 function handleShiftChange(newShift){  
   if(operator){  
     operator.shift = newShift;  
@@ -1555,7 +1554,7 @@ function sel(id){
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
     if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मतेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -1696,25 +1695,29 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* 3. Store Dept Support: Get filtered logs for logged in department */
+/* Get filtered logs for logged in department */
 function getFilteredLogsForDepartment(logsData, currentDept) {
   let filtered = [];
+  if (!logsData) return filtered;
+
   Object.keys(logsData).forEach(logKey => {
     const l = logsData[logKey];
     let logDept = "Other";
-    if(l.newStatus && l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
-    else if(l.newStatus && (l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD"))) logDept = "quality";
-    else if(l.newStatus && l.newStatus.includes("FIXTURE")) logDept = "toolroom";
-    else if(l.newStatus && (l.newStatus.includes("MATERIAL REQUIREMENT") || l.newStatus.includes("MATERIAL SHORTAGE"))) logDept = "store";
-    else if(l.newStatus && l.newStatus.includes("LOT READY")) logDept = "loading";
+    const ns = l.newStatus || "";
+    const os = l.oldStatus || "";
+
+    if(ns.includes("BREAKDOWN") || os.includes("BREAKDOWN")) logDept = "maintenance";
+    else if(ns.includes("CMM") || ns.includes("SIGN") || ns.includes("HOLD") || os.includes("CMM") || os.includes("SIGN") || os.includes("HOLD")) logDept = "quality";
+    else if(ns.includes("FIXTURE") || os.includes("FIXTURE")) logDept = "toolroom";
+    else if(ns.includes("MATERIAL REQUIREMENT") || ns.includes("MATERIAL SHORTAGE") || os.includes("MATERIAL REQUIREMENT") || os.includes("MATERIAL SHORTAGE")) logDept = "store";
+    else if(ns.includes("LOT READY") || os.includes("LOT READY")) logDept = "loading";
 
     if(currentDept === "supervisor" || currentDept === logDept){
-      /* 2. Top-Level Sorting: unshift() ensures the latest record is placed at Row 1 */
       filtered.unshift({
         "Date & Time": l.timeStr || "-",
         "Machine No": l.machine || "-",
-        "Old Status": l.oldStatus || "-",
-        "New Status": l.newStatus || "-",
+        "Old Status": l.oldStatus || "RUNNING",
+        "New Status": l.newStatus || "RUNNING",
         "Action Taken": l.action || "-",
         "Updated By": l.user || "-",
         "Shift": l.shift || "-",
@@ -1727,7 +1730,7 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
   return filtered;
 }
 
-/* 4. Single-Sheet Export: Exports Excel only for current logged-in Department */
+/* Exports Excel for current logged-in Department */
 function downloadDepartmentExcel(){  
   try{  
     if(typeof XLSX === "undefined"){ 
@@ -1747,6 +1750,7 @@ function downloadDepartmentExcel(){
 
       let rows = getFilteredLogsForDepartment(logsData, department);
 
+      // If no historical logs exist, populate current live status for all machines
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
