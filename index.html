@@ -902,7 +902,7 @@ button:disabled {
       </div>  
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
-        <button onclick="downloadShiftExcel()" class="excelSmallBtn">📥 EXCEL REPORT</button>  
+        <button onclick="downloadDepartmentExcel()" class="excelSmallBtn">📥 EXCEL REPORT</button>  
         <span class="deptBadge" id="deptBadge"></span>  
         <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
       </div>
@@ -980,7 +980,7 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    allowedStatuses: ["TOTAL", "RUNNING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
@@ -1088,6 +1088,16 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
+/* 1. Shift Carry Forward: Carry forward machine status and state without resetting */
+function handleShiftChange(newShift){  
+  if(operator){  
+    operator.shift = newShift;  
+    localStorage.setItem("brembo_shift", newShift);  
+    localStorage.setItem("brembo_v7", JSON.stringify(operator));  
+  }  
+  renderAllDashboards();  
+}  
+
 function checkShiftAutoReset(){  
   const saved = localStorage.getItem("brembo_shift");  
   const live = getCurrentShift();  
@@ -1097,14 +1107,8 @@ function checkShiftAutoReset(){
   if(txt){ txt.innerText = "Current Running Shift: "+live+" ("+getShiftRange(live)+")"; }  
 
   if(saved && saved!==live){  
-    alert("Shift "+saved+" ended! Logging out user. Machine status carries forward to Shift "+live+".");  
-    localStorage.removeItem("brembo_v7");  
-    localStorage.removeItem("brembo_shift");  
-    localStorage.removeItem("brembo_department");  
-    location.reload();  
-    return true;  
+    handleShiftChange(live);  
   }  
-  return false;  
 }  
 
 function getMachineIssues(m){  
@@ -1576,9 +1580,9 @@ function clearMaterialRequirement(){
   if(!confirm("Confirm material received for "+curMachine+"? Machine status will change to RUNNING.")) return;  
 
   let m = machines[curMachine];  
-  const oldSt = getMachineStatusString(m);
+  const oldSt = getMachineStatusString(m);  
   let issues = getMachineIssues(m);  
-  m.oldStatus = oldSt;
+  m.oldStatus = oldSt;  
   delete issues["MATERIAL REQUIREMENT"];  
   delete issues["MATERIAL SHORTAGE"];  
   
@@ -1638,8 +1642,8 @@ function executeStatusUpdate(s){
 
   const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;
 
-  const oldSt = getMachineStatusString(machines[curMachine]);
-  machines[curMachine].oldStatus = oldSt;
+  const oldSt = getMachineStatusString(machines[curMachine]);  
+  machines[curMachine].oldStatus = oldSt;  
 
   let issues = getMachineIssues(machines[curMachine]);  
   if(s === "RUNNING"){  
@@ -1650,7 +1654,7 @@ function executeStatusUpdate(s){
   machines[curMachine].issues = issues;  
 
   return saveMachine(curMachine).then(()=>{  
-    const newSt = getMachineStatusString(machines[curMachine]);
+    const newSt = getMachineStatusString(machines[curMachine]);  
     logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     
@@ -1665,18 +1669,18 @@ function executeStatusUpdate(s){
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
 
-    if(isUrgent){
+    if(isUrgent){  
       document.getElementById("routeInfo").style.display="block";  
       document.getElementById("routeInfo").innerHTML=`<b style="color:#ffd000">ROUTE INFO</b><br>Route To: ${route.name}<br>☎ +${route.no}`;  
       document.getElementById("waBtn").style.display="block";  
       document.getElementById("waBtn").innerText = "◉ SEND WHATSAPP";  
 
       setTimeout(()=>{ window.open(lastWa, "_blank"); },700);  
-    } else {
+    } else {  
       document.getElementById("routeInfo").style.display="none";  
       document.getElementById("waBtn").style.display="none";  
-      alert("Status updated on Dashboard successfully!");
-    }
+      alert("Status updated on Dashboard successfully!");  
+    }  
 
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1692,84 +1696,84 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* EXCEL REPORT GENERATION (CORRECTED & IMPROVED) */
-function downloadShiftExcel(){  
+/* 3. Store Dept Support: Get filtered logs for logged in department */
+function getFilteredLogsForDepartment(logsData, currentDept) {
+  let filtered = [];
+  Object.keys(logsData).forEach(logKey => {
+    const l = logsData[logKey];
+    let logDept = "Other";
+    if(l.newStatus && l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
+    else if(l.newStatus && (l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD"))) logDept = "quality";
+    else if(l.newStatus && l.newStatus.includes("FIXTURE")) logDept = "toolroom";
+    else if(l.newStatus && (l.newStatus.includes("MATERIAL REQUIREMENT") || l.newStatus.includes("MATERIAL SHORTAGE"))) logDept = "store";
+    else if(l.newStatus && l.newStatus.includes("LOT READY")) logDept = "loading";
+
+    if(currentDept === "supervisor" || currentDept === logDept){
+      /* 2. Top-Level Sorting: unshift() ensures the latest record is placed at Row 1 */
+      filtered.unshift({
+        "Date & Time": l.timeStr || "-",
+        "Machine No": l.machine || "-",
+        "Old Status": l.oldStatus || "-",
+        "New Status": l.newStatus || "-",
+        "Action Taken": l.action || "-",
+        "Updated By": l.user || "-",
+        "Shift": l.shift || "-",
+        "Part No": l.partNo || "-",
+        "Part Name": l.partName || "-",
+        "Qty": l.qty || "-"
+      });
+    }
+  });
+  return filtered;
+}
+
+/* 4. Single-Sheet Export: Exports Excel only for current logged-in Department */
+function downloadDepartmentExcel(){  
   try{  
     if(typeof XLSX === "undefined"){ 
       alert("Excel library not loaded. Please refresh the page and try again."); 
       return; 
     }
+    if(!department){
+      alert("No active department session found.");
+      return;
+    }
 
     db.ref("statusLogs").once("value").then(snapshot => {
       const logsData = snapshot.val() || {};
       const workbook = XLSX.utils.book_new();  
-      
-      const deptList = [
-        { key: "all", name: "All Logs" },
-        { key: "maintenance", name: "Maintenance" },
-        { key: "quality", name: "Quality" },
-        { key: "toolroom", name: "Tool Room" },
-        { key: "store", name: "Store" },
-        { key: "loading", name: "Loading" }
-      ];
+      const currentDeptConfig = DEPARTMENT_CONFIG[department];
+      const sheetName = currentDeptConfig ? currentDeptConfig.name : "Department Logs";
 
-      deptList.forEach(dept => {
-        const rows = [];
-        
-        Object.keys(logsData).forEach(logKey => {
-          const l = logsData[logKey];
+      let rows = getFilteredLogsForDepartment(logsData, department);
+
+      if(rows.length === 0){
+        ALL_MACHINES_LIST.forEach(mcId => {
+          const m = machines[mcId] || {};
+          const stStr = getMachineStatusString(m);
+          const mat = m.materialDetails || {};
           
-          let logDept = "Other";
-          if(l.newStatus && l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
-          else if(l.newStatus && (l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD"))) logDept = "quality";
-          else if(l.newStatus && l.newStatus.includes("FIXTURE")) logDept = "toolroom";
-          else if(l.newStatus && l.newStatus.includes("MATERIAL")) logDept = "store";
-          else if(l.newStatus && l.newStatus.includes("LOT READY")) logDept = "loading";
-
-          if(dept.key === "all" || dept.key === logDept){
-            rows.push({
-              "Date & Time": l.timeStr || "-",
-              "Machine No": l.machine || "-",
-              "Old Status": l.oldStatus || "-",
-              "New Status": l.newStatus || "-",
-              "Action Taken": l.action || "-",
-              "Updated By": l.user || "-",
-              "Shift": l.shift || "-",
-              "Part No": l.partNo || "-",
-              "Part Name": l.partName || "-",
-              "Qty": l.qty || "-"
-            });
-          }
-        });
-
-        if(rows.length === 0){
-          ALL_MACHINES_LIST.forEach(mcId => {
-            const m = machines[mcId] || {};
-            const stStr = getMachineStatusString(m);
-            const mat = m.materialDetails || {};
-            
-            rows.push({
-              "Date & Time": new Date().toLocaleString("en-IN"),
-              "Machine No": mcId,
-              "Old Status": m.oldStatus || "RUNNING",
-              "New Status": stStr,
-              "Action Taken": "CURRENT LIVE STATUS",
-              "Updated By": m.op ? m.op.name : "System",
-              "Shift": getCurrentShift(),
-              "Part No": mat.partNo || "-",
-              "Part Name": mat.partName || "-",
-              "Qty": mat.qty || "-"
-            });
+          rows.push({
+            "Date & Time": new Date().toLocaleString("en-IN"),
+            "Machine No": mcId,
+            "Old Status": m.oldStatus || "RUNNING",
+            "New Status": stStr,
+            "Action Taken": "CURRENT LIVE STATUS",
+            "Updated By": m.op ? m.op.name : "System",
+            "Shift": getCurrentShift(),
+            "Part No": mat.partNo || "-",
+            "Part Name": mat.partName || "-",
+            "Qty": mat.qty || "-"
           });
-        }
+        });
+      }
 
-        const worksheet = XLSX.utils.json_to_sheet(rows);  
-        worksheet["!cols"] = [{wch:20},{wch:12},{wch:20},{wch:22},{wch:20},{wch:16},{wch:8},{wch:15},{wch:20},{wch:10}];  
-        XLSX.utils.book_append_sheet(workbook, worksheet, dept.name);  
-      });
+      const worksheet = XLSX.utils.json_to_sheet(rows);  
+      worksheet["!cols"] = [{wch:20},{wch:12},{wch:20},{wch:22},{wch:20},{wch:16},{wch:8},{wch:15},{wch:20},{wch:10}];  
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
-      XLSX.writeFile(workbook, "Brembo_Shift_Report_"+date+".xlsx");  
+      XLSX.writeFile(workbook, sheetName.replace(/\s+/g, '_') + "_Report_" + date + ".xlsx");  
     }).catch(err => {
       console.error("Firebase Read Error:", err);
       alert("Error fetching logs from database.");
