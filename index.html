@@ -13,7 +13,7 @@
 <script src="https://cdn.tailwindcss.com"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  
 <style>  
 *{  
   margin:0;  
@@ -1088,7 +1088,6 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
-/* 1 & 5) SHIFT AUTO LOGOUT (NO RESET - STATUS CARRY FORWARD) */
 function checkShiftAutoReset(){  
   const saved = localStorage.getItem("brembo_shift");  
   const live = getCurrentShift();  
@@ -1157,7 +1156,6 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-/* 3) PERSISTENT DATA RETENTION (LOGS SAVED TO FIREBASE) */
 function logStatusAction(mc, action, detail, user, oldSt, newSt){  
   const m = machines[mc] || {};  
   const mat = m.materialDetails || {};  
@@ -1207,7 +1205,6 @@ function load(){
       db.ref().update(updates);  
     }  
 
-    /* 2) TARGETED DEPARTMENT POP-UP NOTIFICATION */
     for(let id of ALL_MACHINES_LIST){  
       const stNow = getMachineStatusString(machines[id]);  
       const stPrev = getMachineStatusString(prev[id]);  
@@ -1216,7 +1213,6 @@ function load(){
         const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";  
         const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
         
-        // Show popup only if user belongs to targeted department or is Supervisor
         if(department && (department === route.dept || department === "supervisor")){
           loudPopup(id, stNow, who, route);  
         } else if(!department && operator && operator.machine === id){
@@ -1302,7 +1298,6 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
-/* 5) SINGLE ACTIVE LOGIN LOGIC */
 function doLogin(){  
   const id = document.getElementById("opId").value.trim();  
   const nm = document.getElementById("opName").value.trim();  
@@ -1697,10 +1692,13 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* 4) CLEAN EXCEL REPORT WITH ALL LOGS + 5 DEPARTMENTS ONLY (69 TABS REMOVED) */
+/* EXCEL REPORT GENERATION (CORRECTED & IMPROVED) */
 function downloadShiftExcel(){  
   try{  
-    if(typeof XLSX === "undefined"){ alert("Excel library not loaded."); return; }
+    if(typeof XLSX === "undefined"){ 
+      alert("Excel library not loaded. Please refresh the page and try again."); 
+      return; 
+    }
 
     db.ref("statusLogs").once("value").then(snapshot => {
       const logsData = snapshot.val() || {};
@@ -1722,11 +1720,11 @@ function downloadShiftExcel(){
           const l = logsData[logKey];
           
           let logDept = "Other";
-          if(l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
-          else if(l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD")) logDept = "quality";
-          else if(l.newStatus.includes("FIXTURE")) logDept = "toolroom";
-          else if(l.newStatus.includes("MATERIAL")) logDept = "store";
-          else if(l.newStatus.includes("LOT READY")) logDept = "loading";
+          if(l.newStatus && l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
+          else if(l.newStatus && (l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD"))) logDept = "quality";
+          else if(l.newStatus && l.newStatus.includes("FIXTURE")) logDept = "toolroom";
+          else if(l.newStatus && l.newStatus.includes("MATERIAL")) logDept = "store";
+          else if(l.newStatus && l.newStatus.includes("LOT READY")) logDept = "loading";
 
           if(dept.key === "all" || dept.key === logDept){
             rows.push({
@@ -1745,7 +1743,24 @@ function downloadShiftExcel(){
         });
 
         if(rows.length === 0){
-          rows.push({ "Date & Time": "No history recorded", "Machine No": "-", "Old Status": "-", "New Status": "-" });
+          ALL_MACHINES_LIST.forEach(mcId => {
+            const m = machines[mcId] || {};
+            const stStr = getMachineStatusString(m);
+            const mat = m.materialDetails || {};
+            
+            rows.push({
+              "Date & Time": new Date().toLocaleString("en-IN"),
+              "Machine No": mcId,
+              "Old Status": m.oldStatus || "RUNNING",
+              "New Status": stStr,
+              "Action Taken": "CURRENT LIVE STATUS",
+              "Updated By": m.op ? m.op.name : "System",
+              "Shift": getCurrentShift(),
+              "Part No": mat.partNo || "-",
+              "Part Name": mat.partName || "-",
+              "Qty": mat.qty || "-"
+            });
+          });
         }
 
         const worksheet = XLSX.utils.json_to_sheet(rows);  
@@ -1754,11 +1769,15 @@ function downloadShiftExcel(){
       });
 
       const date = new Date().toISOString().slice(0,10);  
-      XLSX.writeFile(workbook, "Brembo_Persistent_History_Report_"+date+".xlsx");  
+      XLSX.writeFile(workbook, "Brembo_Shift_Report_"+date+".xlsx");  
+    }).catch(err => {
+      console.error("Firebase Read Error:", err);
+      alert("Error fetching logs from database.");
     });
 
   } catch(err){  
-    console.error("Excel Error:", err); alert("Excel download failed.");  
+    console.error("Excel Error:", err); 
+    alert("Excel download failed: " + err.message);  
   }  
 }  
 
