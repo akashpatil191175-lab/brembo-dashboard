@@ -901,7 +901,7 @@ button:disabled {
       </div>  
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
-        <button onclick="downloadDepartmentExcel()" class="excelSmallBtn">📥 EXCEL REPORT</button>  
+        <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <span class="deptBadge" id="deptBadge"></span>  
         <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
       </div>
@@ -1700,18 +1700,12 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
 
   Object.keys(logsData).forEach(logKey => {
     const l = logsData[logKey];
-    let logDept = "Other";
     const ns = l.newStatus || "";
     const os = l.oldStatus || "";
     const act = l.action || "";
 
-    if(ns.includes("BREAKDOWN") || os.includes("BREAKDOWN")) logDept = "maintenance";
-    else if(ns.includes("CMM") || ns.includes("SIGN") || ns.includes("HOLD") || os.includes("CMM") || os.includes("SIGN") || os.includes("HOLD")) logDept = "quality";
-    else if(ns.includes("FIXTURE") || os.includes("FIXTURE")) logDept = "toolroom";
-    else if(ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL")) logDept = "store";
-    else if(ns.includes("LOT READY") || os.includes("LOT READY") || act.includes("LOT TAKEN")) logDept = "loading";
-
-    if(currentDept === "supervisor" || currentDept === logDept){
+    // Strictly check for store department material entries only
+    if(ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL")){
       filtered.unshift({
         "Date & Time": l.timeStr || "-",
         "Machine No": l.machine || "-",
@@ -1735,8 +1729,8 @@ function downloadDepartmentExcel(){
       alert("Excel library not loaded. Please refresh the page and try again."); 
       return; 
     }
-    if(!department){
-      alert("No active department session found.");
+    if(department !== "store" && department !== "supervisor"){
+      alert("Excel Report is available for Store Department & Supervisor only.");
       return;
     }
 
@@ -1744,29 +1738,35 @@ function downloadDepartmentExcel(){
       const logsData = snapshot.val() || {};
       const workbook = XLSX.utils.book_new();  
       const currentDeptConfig = DEPARTMENT_CONFIG[department];
-      const sheetName = currentDeptConfig ? currentDeptConfig.name : "Department Logs";
+      const sheetName = "Store Entry Logs";
 
-      let rows = getFilteredLogsForDepartment(logsData, department);
+      let rows = getFilteredLogsForDepartment(logsData, "store");
 
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
           const stStr = getMachineStatusString(m);
-          const mat = m.materialDetails || {};
-          
-          rows.push({
-            "Date & Time": new Date().toLocaleString("en-IN"),
-            "Machine No": mcId,
-            "Old Status": m.oldStatus || "RUNNING",
-            "New Status": stStr,
-            "Action Taken": "CURRENT LIVE STATUS",
-            "Updated By": m.op ? m.op.name : "System",
-            "Shift": getCurrentShift(),
-            "Part No": mat.partNo || "-",
-            "Part Name": mat.partName || "-",
-            "Qty": mat.qty || "-"
-          });
+          if(stStr.includes("MATERIAL")){
+            const mat = m.materialDetails || {};
+            rows.push({
+              "Date & Time": new Date().toLocaleString("en-IN"),
+              "Machine No": mcId,
+              "Old Status": m.oldStatus || "RUNNING",
+              "New Status": stStr,
+              "Action Taken": "CURRENT LIVE STATUS",
+              "Updated By": m.op ? m.op.name : "System",
+              "Shift": getCurrentShift(),
+              "Part No": mat.partNo || "-",
+              "Part Name": mat.partName || "-",
+              "Qty": mat.qty || "-"
+            });
+          }
         });
+      }
+
+      if(rows.length === 0){
+        alert("Store Entry ची कोणतीही माहिती उपलब्ध नाही.");
+        return;
       }
 
       const worksheet = XLSX.utils.json_to_sheet(rows);  
@@ -1774,7 +1774,8 @@ function downloadDepartmentExcel(){
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
-      XLSX.writeFile(workbook, sheetName.replace(/\s+/g, '_') + "_Report_" + date + ".xlsx");  
+      const fileName = (department === "supervisor" ? "Supervisor_Store_Report_" : "Store_Department_Report_") + date + ".xlsx";
+      XLSX.writeFile(workbook, fileName);  
     }).catch(err => {
       console.error("Firebase Read Error:", err);
       alert("Error fetching logs from database.");
@@ -1848,7 +1849,13 @@ function renderDepartmentDashboard(){
 
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD" + (config.isViewOnly ? " (VIEW ONLY)" : "");  
   document.getElementById("deptBadge").innerText = config.name + (config.isViewOnly ? " [VIEW ONLY]" : "");  
-  
+
+  // Show excel report button for Store department AND Supervisor
+  const excelBtn = document.getElementById("deptExcelBtn");
+  if(excelBtn){
+    excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
+  }
+
   if(!config.allowedStatuses.includes(departmentStatusFilter)){
     departmentStatusFilter = config.allowedStatuses[0];
   }
@@ -1992,7 +1999,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
-    // retain materialDetails if transferring to MATERIAL SHORTAGE so detail stays saved
     if((clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE") && !addIssue){  
       m.materialDetails = null;  
     }  
