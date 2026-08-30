@@ -986,7 +986,7 @@ const DEPARTMENT_CONFIG = {
   supervisor:{ 
     name:"SUPERVISOR", 
     pin:"Ampa123", 
-    isViewOnly: true, // Supervisor View-Only Mode Status Flag
+    isViewOnly: true, 
     allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[  
       { label:"CLEAR HOLD", clearsIssue:"LOT HOLD" },  
@@ -1002,16 +1002,16 @@ const DEPARTMENT_CONFIG = {
 };  
 
 const ROUTE_MAP = {  
-  "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776" },  
-  "FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },  
-  "FIXTURE OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376" },  
-  "CMM NOT OK":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
-  "LOT HOLD":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" },  
-  "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322" },  
-  "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590" },  
-  "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173" },  
-  "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173" },  
-  "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236" }  
+  "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776", dept:"maintenance" },  
+  "FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376", dept:"toolroom" },  
+  "FIXTURE OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376", dept:"toolroom" },  
+  "CMM NOT OK":{ name:"Santosh Shipurkar (Quality)", no:"919921862590", dept:"quality" },  
+  "LOT HOLD":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236", dept:"quality" },  
+  "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322", dept:"loading" },  
+  "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590", dept:"quality" },  
+  "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173", dept:"store" },  
+  "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173", dept:"store" },  
+  "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236", dept:"supervisor" }  
 };  
 
 const ALL_MACHINES_LIST = (()=>{  
@@ -1088,6 +1088,7 @@ db.ref(".info/connected").on("value",snap=>{
   setFirebaseStatus(snap.val()===true);  
 });  
 
+/* 1 & 5) SHIFT AUTO LOGOUT (NO RESET - STATUS CARRY FORWARD) */
 function checkShiftAutoReset(){  
   const saved = localStorage.getItem("brembo_shift");  
   const live = getCurrentShift();  
@@ -1097,15 +1098,11 @@ function checkShiftAutoReset(){
   if(txt){ txt.innerText = "Current Running Shift: "+live+" ("+getShiftRange(live)+")"; }  
 
   if(saved && saved!==live){  
-    alert("Shift "+saved+" Ended! Shift "+live+" Started. Auto Resetting System.");  
-    resetAllMachinesFirebase().then(()=>{  
-      localStorage.removeItem("brembo_v7");  
-      localStorage.removeItem("brembo_shift");  
-      location.reload();  
-    }).catch(err=>{  
-      console.error(err);  
-      alert("Shift reset failed. Please check Firebase / Internet.");  
-    });  
+    alert("Shift "+saved+" ended! Logging out user. Machine status carries forward to Shift "+live+".");  
+    localStorage.removeItem("brembo_v7");  
+    localStorage.removeItem("brembo_shift");  
+    localStorage.removeItem("brembo_department");  
+    location.reload();  
     return true;  
   }  
   return false;  
@@ -1160,12 +1157,22 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-function logStatusAction(mc, action, detail, user){  
+/* 3) PERSISTENT DATA RETENTION (LOGS SAVED TO FIREBASE) */
+function logStatusAction(mc, action, detail, user, oldSt, newSt){  
+  const m = machines[mc] || {};  
+  const mat = m.materialDetails || {};  
+  
   db.ref("statusLogs").push({  
     machine: mc,  
+    oldStatus: oldSt || m.oldStatus || "RUNNING",  
+    newStatus: newSt || getMachineStatusString(m),  
     action: action,  
     detail: detail,  
     user: user || "System",  
+    shift: getCurrentShift(),  
+    partNo: mat.partNo || "-",  
+    partName: mat.partName || "-",  
+    qty: mat.qty || "-",  
     timestamp: Date.now(),  
     timeStr: new Date().toLocaleString("en-IN")  
   });  
@@ -1200,6 +1207,7 @@ function load(){
       db.ref().update(updates);  
     }  
 
+    /* 2) TARGETED DEPARTMENT POP-UP NOTIFICATION */
     for(let id of ALL_MACHINES_LIST){  
       const stNow = getMachineStatusString(machines[id]);  
       const stPrev = getMachineStatusString(prev[id]);  
@@ -1207,7 +1215,13 @@ function load(){
         const who = machines[id].op ? machines[id].op.name : "Someone";  
         const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";  
         const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
-        loudPopup(id, stNow, who, route);  
+        
+        // Show popup only if user belongs to targeted department or is Supervisor
+        if(department && (department === route.dept || department === "supervisor")){
+          loudPopup(id, stNow, who, route);  
+        } else if(!department && operator && operator.machine === id){
+          loudPopup(id, stNow, who, route);  
+        }
       }  
     }  
 
@@ -1288,6 +1302,7 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
+/* 5) SINGLE ACTIVE LOGIN LOGIC */
 function doLogin(){  
   const id = document.getElementById("opId").value.trim();  
   const nm = document.getElementById("opName").value.trim();  
@@ -1300,9 +1315,8 @@ function doLogin(){
 
   const targetMc = machines[mc];  
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
-    if(!confirm("Machine "+mc+" is already logged in by "+targetMc.op.name+" ("+targetMc.op.id+"). Overwrite login?")){  
-      return;  
-    }  
+    alert("⛔ ACCESS DENIED: Machine "+mc+" currently has an active session by "+targetMc.op.name+" ("+targetMc.op.id+"). Multiple logins not allowed!");  
+    return;  
   }  
 
   operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };  
@@ -1342,6 +1356,10 @@ function applyOperator(isReload = false){
 
 function doLogout(){  
   if(!confirm("Logout?")) return;  
+  if(operator && machines[operator.machine]){
+    machines[operator.machine].op = null;
+    saveMachine(operator.machine);
+  }
   localStorage.removeItem("brembo_v7");  
   localStorage.removeItem("brembo_shift");  
   operator=null;  
@@ -1356,7 +1374,7 @@ function resetAll(){
 
   resetAllMachinesFirebase().then(()=>{  
     machines=getAllMachines();  
-    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN");  
+    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN", "VARIOUS", "RUNNING");  
     alert("All 69 machines are RUNNING!");  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1563,8 +1581,9 @@ function clearMaterialRequirement(){
   if(!confirm("Confirm material received for "+curMachine+"? Machine status will change to RUNNING.")) return;  
 
   let m = machines[curMachine];  
+  const oldSt = getMachineStatusString(m);
   let issues = getMachineIssues(m);  
-  m.oldStatus = getMachineStatusString(m);
+  m.oldStatus = oldSt;
   delete issues["MATERIAL REQUIREMENT"];  
   delete issues["MATERIAL SHORTAGE"];  
   
@@ -1573,7 +1592,7 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name);  
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
     renderAllDashboards();  
@@ -1624,7 +1643,8 @@ function executeStatusUpdate(s){
 
   const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;
 
-  machines[curMachine].oldStatus = getMachineStatusString(machines[curMachine]); // Save Old Status
+  const oldSt = getMachineStatusString(machines[curMachine]);
+  machines[curMachine].oldStatus = oldSt;
 
   let issues = getMachineIssues(machines[curMachine]);  
   if(s === "RUNNING"){  
@@ -1635,10 +1655,10 @@ function executeStatusUpdate(s){
   machines[curMachine].issues = issues;  
 
   return saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name);  
+    const newSt = getMachineStatusString(machines[curMachine]);
+    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
-    loudPopup(curMachine, s, operator.name, route);  
-
+    
     let date = new Date().toLocaleString("en-IN");  
     let matInfo="";  
     if(machines[curMachine].materialDetails){  
@@ -1646,7 +1666,7 @@ function executeStatusUpdate(s){
       matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty);  
     }  
 
-    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(getMachineStatusString(machines[curMachine]))+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
+    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(newSt)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
 
@@ -1677,76 +1697,65 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* 1 & 3) EXCEL WITH TABS (DEPARTMENT SHEETS & OLD + NEW STATUS) */
+/* 4) CLEAN EXCEL REPORT WITH ALL LOGS + 5 DEPARTMENTS ONLY (69 TABS REMOVED) */
 function downloadShiftExcel(){  
   try{  
     if(typeof XLSX === "undefined"){ alert("Excel library not loaded."); return; }
 
-    const workbook = XLSX.utils.book_new();  
-    
-    // Departments to create Tabs/Sheets for
-    const deptList = [
-      { key: "all", name: "All Machines" },
-      { key: "maintenance", name: "Maintenance" },
-      { key: "loading", name: "Loading" },
-      { key: "toolroom", name: "Tool Room" },
-      { key: "quality", name: "Quality" },
-      { key: "store", name: "Store Department" }
-    ];
+    db.ref("statusLogs").once("value").then(snapshot => {
+      const logsData = snapshot.val() || {};
+      const workbook = XLSX.utils.book_new();  
+      
+      const deptList = [
+        { key: "all", name: "All Logs" },
+        { key: "maintenance", name: "Maintenance" },
+        { key: "quality", name: "Quality" },
+        { key: "toolroom", name: "Tool Room" },
+        { key: "store", name: "Store" },
+        { key: "loading", name: "Loading" }
+      ];
 
-    deptList.forEach(dept => {
-      const rows = [];
-      ALL_MACHINES_LIST.forEach(id => {  
-        const m = machines[id] || getDefaultMachine();  
-        const op = m.op || {};  
-        const mat = m.materialDetails || {};  
-        const currentStatus = getMachineStatusString(m);  
-        const oldStatus = m.oldStatus || "RUNNING";
+      deptList.forEach(dept => {
+        const rows = [];
+        
+        Object.keys(logsData).forEach(logKey => {
+          const l = logsData[logKey];
+          
+          let logDept = "Other";
+          if(l.newStatus.includes("BREAKDOWN")) logDept = "maintenance";
+          else if(l.newStatus.includes("CMM") || l.newStatus.includes("SIGN") || l.newStatus.includes("HOLD")) logDept = "quality";
+          else if(l.newStatus.includes("FIXTURE")) logDept = "toolroom";
+          else if(l.newStatus.includes("MATERIAL")) logDept = "store";
+          else if(l.newStatus.includes("LOT READY")) logDept = "loading";
 
-        let deptName = "Running";  
-        if(hasStatus(m, "BREAKDOWN")){ deptName = "Maintenance"; }  
-        else if(hasStatus(m, "CMM NOT OK") || hasStatus(m, "SIGN PENDING")){ deptName = "Quality"; }  
-        else if(hasStatus(m, "FIXTURE NOT OK")){ deptName = "Tool Room"; }  
-        else if(hasStatus(m, "LOT READY")){ deptName = "Loading"; }  
-        else if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){ deptName = "Store Department"; }  
-        else if(hasStatus(m, "LOT HOLD")){ deptName = "Supervisor"; }  
+          if(dept.key === "all" || dept.key === logDept){
+            rows.push({
+              "Date & Time": l.timeStr || "-",
+              "Machine No": l.machine || "-",
+              "Old Status": l.oldStatus || "-",
+              "New Status": l.newStatus || "-",
+              "Action Taken": l.action || "-",
+              "Updated By": l.user || "-",
+              "Shift": l.shift || "-",
+              "Part No": l.partNo || "-",
+              "Part Name": l.partName || "-",
+              "Qty": l.qty || "-"
+            });
+          }
+        });
 
-        // Filter rows based on department tab
-        if(dept.key !== "all") {
-          if(dept.key === "maintenance" && !hasStatus(m, "BREAKDOWN")) return;
-          if(dept.key === "loading" && !hasStatus(m, "LOT READY")) return;
-          if(dept.key === "toolroom" && !hasStatus(m, "FIXTURE NOT OK")) return;
-          if(dept.key === "quality" && (!hasStatus(m, "CMM NOT OK") && !hasStatus(m, "SIGN PENDING") && !hasStatus(m, "LOT HOLD"))) return;
-          if(dept.key === "store" && (!hasStatus(m, "MATERIAL REQUIREMENT") && !hasStatus(m, "MATERIAL SHORTAGE"))) return;
+        if(rows.length === 0){
+          rows.push({ "Date & Time": "No history recorded", "Machine No": "-", "Old Status": "-", "New Status": "-" });
         }
 
-        rows.push({  
-          "Machine No": id,  
-          "Old Status (जुना स्टेटस)": oldStatus,
-          "Current Status (नवीन स्टेटस)": currentStatus,  
-          "Operator Name": op.name || "-",  
-          "Operator ID": op.id || "-",  
-          "Shift": op.shift || "-",  
-          "Login Time": op.time || "-",  
-          "Material Part No": mat.partNo || "-",  
-          "Material Part Name": mat.partName || "-",  
-          "Quantity": mat.qty || "-",  
-          "Department Responsible": deptName  
-        });  
-      });  
+        const worksheet = XLSX.utils.json_to_sheet(rows);  
+        worksheet["!cols"] = [{wch:20},{wch:12},{wch:20},{wch:22},{wch:20},{wch:16},{wch:8},{wch:15},{wch:20},{wch:10}];  
+        XLSX.utils.book_append_sheet(workbook, worksheet, dept.name);  
+      });
 
-      // If no data found for a specific tab, add a blank indicator row
-      if(rows.length === 0){
-        rows.push({ "Machine No": "No active issues", "Old Status (जुना स्टेटस)": "-", "Current Status (नवीन स्टेटस)": "ALL RUNNING" });
-      }
-
-      const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:12},{wch:22},{wch:24},{wch:18},{wch:14},{wch:8},{wch:14},{wch:18},{wch:22},{wch:10},{wch:22}];  
-      XLSX.utils.book_append_sheet(workbook, worksheet, dept.name);  
+      const date = new Date().toISOString().slice(0,10);  
+      XLSX.writeFile(workbook, "Brembo_Persistent_History_Report_"+date+".xlsx");  
     });
-
-    const date = new Date().toISOString().slice(0,10);  
-    XLSX.writeFile(workbook, "Brembo_Department_Report_"+date+".xlsx");  
 
   } catch(err){  
     console.error("Excel Error:", err); alert("Excel download failed.");  
@@ -1864,7 +1873,6 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* 2) SUPERVISOR VIEW ONLY MODE LOGIC IN RENDER */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1906,7 +1914,6 @@ function renderDepartmentSelected(){
 
   let actionButtonsHtml = "";
 
-  // 2) SUPERVISOR MODE: SHOW ALL BUTTONS BUT DISABLE THEM (VIEW ONLY MODE)
   if(department === "supervisor"){  
     const currentIssues = Object.keys(getMachineIssues(m));  
     actionButtonsHtml += `<div style="margin-top:14px;font-weight:900;color:#eab308">🔒 SUPERVISOR MODE (VIEW ONLY - ACTIONS DISABLED)</div>`;  
@@ -1942,8 +1949,6 @@ function renderDepartmentSelected(){
 }  
 
 function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
-
-  // Supervisor Action Prevention Safety Check
   if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){
     alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");
     return;
@@ -1953,7 +1958,8 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
 
   let m = machines[deptSelectedMachine];  
-  m.oldStatus = getMachineStatusString(m); // Save Old Status before updating
+  const oldSt = getMachineStatusString(m);
+  m.oldStatus = oldSt; 
   let issues = getMachineIssues(m);  
 
   if(clearIssue1 === "ALL"){  
@@ -1975,7 +1981,8 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);  
 
   saveMachine(deptSelectedMachine).then(()=>{  
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Action: "+(addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name);  
+    const newSt = getMachineStatusString(m);
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Action: "+(addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     renderDepartmentDashboard();  
   }).catch(err=>{  
     console.error(err);  
