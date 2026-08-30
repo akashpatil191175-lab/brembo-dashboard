@@ -1701,16 +1701,20 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
 
   Object.keys(logsData).forEach(logKey => {
     const l = logsData[logKey];
-    const ns = l.newStatus || "";
-    const os = l.oldStatus || "";
-    const act = l.action || "";
+    const ns = String(l.newStatus || "").toUpperCase();
+    const os = String(l.oldStatus || "").toUpperCase();
+    const act = String(l.action || "").toUpperCase();
+    const det = String(l.detail || "").toUpperCase();
 
-    // Strictly check for Store Department related entries: Material Requirement, Shortage, Received
-    const isMatReq = ns.includes("MATERIAL REQUIREMENT") || os.includes("MATERIAL REQUIREMENT") || act.includes("MATERIAL REQUIREMENT");
-    const isMatShortage = ns.includes("MATERIAL SHORTAGE") || os.includes("MATERIAL SHORTAGE") || act.includes("MATERIAL SHORTAGE");
-    const isMatReceived = act.includes("MATERIAL RECEIVED") || detailMatchesMatRecv(l.detail);
+    // EXCLUSIVE STORE ONLY CHECK (इतर सर्व विभागाच्या एंट्री पूर्णपणे ब्लॉक केल्या आहेत)
+    const isStoreRelated = 
+      ns.includes("MATERIAL") || 
+      os.includes("MATERIAL") || 
+      act.includes("MATERIAL") || 
+      det.includes("MATERIAL") ||
+      l.user === "STORE DEPARTMENT";
 
-    if (isMatReq || isMatShortage || isMatReceived) {
+    if (isStoreRelated) {
       filtered.unshift({
         "Date & Time": l.timeStr || "-",
         "Machine No": l.machine || "-",
@@ -1726,11 +1730,6 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
     }
   });
   return filtered;
-}
-
-function detailMatchesMatRecv(detail){
-  if(!detail) return false;
-  return detail.includes("MATERIAL RECEIVED") || detail.includes("Cleared material requirement");
 }
 
 function downloadDepartmentExcel(){  
@@ -1783,7 +1782,7 @@ function downloadDepartmentExcel(){
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
-      const fileName = (department === "supervisor" ? "Supervisor_Store_Report_" : "Store_Department_Report_") + date + ".xlsx";
+      const fileName = "Store_Department_Report_" + date + ".xlsx";
       XLSX.writeFile(workbook, fileName);  
     }).catch(err => {
       console.error("Firebase Read Error:", err);
@@ -1859,7 +1858,6 @@ function renderDepartmentDashboard(){
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD" + (config.isViewOnly ? " (VIEW ONLY)" : "");  
   document.getElementById("deptBadge").innerText = config.name + (config.isViewOnly ? " [VIEW ONLY]" : "");  
 
-  // Show excel report button for Store department AND Supervisor
   const excelBtn = document.getElementById("deptExcelBtn");
   if(excelBtn){
     excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
