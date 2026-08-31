@@ -1179,7 +1179,7 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
   const mat = m.materialDetails || {};  
   
   db.ref("statusLogs").push({  
-    reqId: mat.reqId || "-",
+    reqId: mat.reqId || generateReqId(),
     machine: mc,  
     oldStatus: oldSt || m.oldStatus || "RUNNING",  
     newStatus: newSt || getMachineStatusString(m),  
@@ -1589,7 +1589,6 @@ function sel(id){
   }  
 }  
 
-/* रिसिव्ह्ड जोडले (RECEIVED) -> Excel Download for Machine_Received_Material.xlsx */
 function clearMaterialRequirement(){  
   if(!operator){ alert("Operator login required."); return; }  
   if(curMachine!==operator.machine){ alert("Access denied."); return; }  
@@ -1598,31 +1597,19 @@ function clearMaterialRequirement(){
   let m = machines[curMachine];  
   const oldSt = getMachineStatusString(m);  
   let issues = getMachineIssues(m);  
-  const mat = m.materialDetails || {};
-
-  // रिसिव्ह्ड डेटा एक्सेल डाऊनलोड करा
-  downloadReceivedExcel({
-    reqId: mat.reqId || generateReqId(),
-    machine: curMachine,
-    partName: mat.partName || "-",
-    partNo: mat.partNo || "-",
-    qty: mat.qty || "-",
-    shift: operator.shift,
-    operatorName: operator.name,
-    timeStr: new Date().toLocaleString("en-IN")
-  });
 
   m.oldStatus = oldSt;  
   delete issues["MATERIAL REQUIREMENT"];  
   delete issues["MATERIAL SHORTAGE"];  
   
   m.issues = issues;  
-  m.materialDetails = null;  
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");  
-    alert("Material received! Machine status set to RUNNING and Machine_Received_Material.xlsx saved.");  
+    // लॉग नोंदवणे जेणेकरून Excel मध्ये Received दिसेल
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "MATERIAL RECEIVED", operator.name, oldSt, "RUNNING");  
+    m.materialDetails = null;
+    alert("Material received! Machine status set to RUNNING and recorded in Excel database.");  
     sel(curMachine);  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1659,7 +1646,6 @@ function submitMaterialRequirement(){
   if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
   if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
 
-  // Req ID तयार करून सेव करा
   const reqId = generateReqId();
   machines[curMachine].materialDetails={reqId, partNo, partName, qty};  
   closeMaterialModal();  
@@ -1688,7 +1674,8 @@ function executeStatusUpdate(s){
   return saveMachine(curMachine).then(()=>{  
     const newSt = getMachineStatusString(machines[curMachine]);  
     
-    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE" || s === "MATERIAL RECEIVED") {
+    // मटेरियल डेटा ट्रॅक करून लॉगमध्ये सेव्ह करणे
+    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE") {
       logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
     }  
     
@@ -1732,63 +1719,10 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* EXCEL DOWNLOAER FUNCTIONS FOR SHORTAGE & RECEIVED */
-function downloadShortageExcel(data){
-  try {
-    const workbook = XLSX.utils.book_new();  
-    const row = [{
-      "Req ID": data.reqId,
-      "Date & Time": data.timeStr,
-      "Machine Name": data.machine,
-      "Status": "SHORTAGE / OUT OF STOCK",
-      "Shift": data.shift,
-      "Part Name": data.partName,
-      "Part Number": data.partNo,
-      "Qty": data.qty,
-      "Action By": data.actionBy
-    }];
-    const worksheet = XLSX.utils.json_to_sheet(row);  
-    worksheet["!cols"] = [{wch:18},{wch:22},{wch:15},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10},{wch:18}];  
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Shortage Record");  
-    XLSX.writeFile(workbook, "Machine_Shortage_Out_of_Stock.xlsx");  
-  } catch(e){
-    console.error("Shortage Excel Error:", e);
-  }
-}
-
-function downloadReceivedExcel(data){
-  try {
-    const workbook = XLSX.utils.book_new();  
-    const row = [{
-      "Req ID": data.reqId,
-      "Date & Time": data.timeStr,
-      "Machine Name": data.machine,
-      "Status": "RECEIVED",
-      "Shift": data.shift,
-      "Part Name": data.partName,
-      "Part Number": data.partNo,
-      "Qty": data.qty,
-      "Operator Name": data.operatorName
-    }];
-    const worksheet = XLSX.utils.json_to_sheet(row);  
-    worksheet["!cols"] = [{wch:18},{wch:22},{wch:15},{wch:15},{wch:10},{wch:20},{wch:16},{wch:10},{wch:18}];  
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Received Record");  
-    XLSX.writeFile(workbook, "Machine_Received_Material.xlsx");  
-  } catch(e){
-    console.error("Received Excel Error:", e);
-  }
-}
-
-/* STRICT EXCEL FILTERING: GENERAL STORE REPORT */
+/* STRICT EXCEL FILTERING & GENERATOR FOR STORE */
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
-
-  const ALLOWED_KEYWORDS = [
-    "MATERIAL REQUIREMENT", 
-    "MATERIAL SHORTAGE", 
-    "MATERIAL RECEIVED"
-  ];
 
   Object.keys(logsData).forEach(logKey => {
     const l = logsData[logKey];
@@ -1797,13 +1731,9 @@ function getFilteredLogsForDepartment(logsData) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    const isMatched = ALLOWED_KEYWORDS.some(kw => 
-      ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
-    );
-
-    if (isMatched) {
+    // Material Requirement, Shortage किंवा Received चा डेटा असल्यास तो रो जोडा
+    if (ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL") || det.includes("MATERIAL")) {
       filtered.unshift({
-        "Req ID": l.reqId || "-",
         "Date and time": l.timeStr || "-",
         "मशिन नाव": l.machine || "-",
         "action taken": l.detail || l.action || "-",
@@ -1835,6 +1765,7 @@ function downloadDepartmentExcel(){
 
       let rows = getFilteredLogsForDepartment(logsData);
 
+      // जर Logs रिकामे असतील तर फक्त चालू Live Material Status जोडा
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
@@ -1842,10 +1773,9 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Req ID": mat.reqId || "-",
               "Date and time": new Date().toLocaleString("en-IN"),
               "मशिन नाव": mcId,
-              "action taken": "CURRENT LIVE STATUS",
+              "action taken": stStr,
               "shift": getCurrentShift(),
               "part name": mat.partName || "-",
               "part number": mat.partNo || "-",
@@ -1856,12 +1786,12 @@ function downloadDepartmentExcel(){
       }
 
       if(rows.length === 0){
-        alert("मटेरियल रेकॉर्ड्स (Material Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
+        alert("मटेरियल रेकॉर्ड्स (Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
         return;
       }
 
       const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:18},{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
@@ -2095,7 +2025,6 @@ function renderDepartmentSelected(){
   box.innerHTML = html;  
 }  
 
-/* शॉर्टेज आणि आउट ऑफ स्टॉक जोडले (MATERIAL SHORTAGE / OUT OF STOCK) -> Download Machine_Shortage_Out_of_Stock.xlsx */
 function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
   if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){
     alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");
@@ -2106,24 +2035,9 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
 
   let m = machines[deptSelectedMachine];  
-  const oldSt = getMachineStatusString(m);
-  const mat = m.materialDetails || {};
+  const oldSt = getMachineStatusString(m);  
   m.oldStatus = oldSt; 
   let issues = getMachineIssues(m);  
-
-  // जर स्टोअर डिपार्टमेंटने Shortage / Out of Stock केले, तर एक्सेल फाइल डाउनलोड करा
-  if(department === "store" && addIssue === "MATERIAL SHORTAGE"){
-    downloadShortageExcel({
-      reqId: mat.reqId || generateReqId(),
-      machine: deptSelectedMachine,
-      partName: mat.partName || "-",
-      partNo: mat.partNo || "-",
-      qty: mat.qty || "-",
-      shift: getCurrentShift(),
-      actionBy: DEPARTMENT_CONFIG[department].name,
-      timeStr: new Date().toLocaleString("en-IN")
-    });
-  }
 
   if(clearIssue1 === "ALL"){  
     issues = {};  
@@ -2146,6 +2060,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);  
     
+    // मटेरियल Shortage/Out of Stock एक्शन लॉगमध्ये सेव्ह करणे
     if(department === "store"){
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     }  
