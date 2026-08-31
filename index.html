@@ -1,5745 +1,2094 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<link rel="icon" type="image/png" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-512.png">
-<link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#050505">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<title>Brembo - 69 Machines</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Segoe UI',Roboto,Arial,sans-serif
-}
-
-body{
-  background:#050505;
-  color:#f4f4f5;
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1">  
+<link rel="icon" type="image/png" href="icon-512.png">  
+<link rel="apple-touch-icon" href="icon-512.png">  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#050505">  
+<meta name="mobile-web-app-capable" content="yes">  
+<meta name="apple-mobile-web-app-capable" content="yes">  
+<title>Brembo - 69 Machines</title>  
+<script src="https://cdn.tailwindcss.com"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  
+<style>  
+*{  
+  margin:0;  
+  padding:0;  
+  box-sizing:border-box;  
+  font-family:'Segoe UI',Roboto,Arial,sans-serif  
+}  
+body{  
+  background:#050505;  
+  color:#f4f4f5;  
   min-height:100vh;
   display:flex;
   flex-direction:column;
-  align-items:center
+  align-items:center;
+}  
+
+#appWrapper {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
 }
 
-#appWrapper{
-  width:100%;
-  max-width:1600px;
-  margin:auto;
-  position:relative
+button{  
+  cursor:pointer;  
+  transition:.18s ease  
+}  
+button:active{  
+  transform:scale(.98)  
+}  
+
+button:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: grayscale(0.6);
 }
 
-button{
-  cursor:pointer;
-  transition:.18s ease
-}
-
-button:active{
-  transform:scale(.98)
-}
-
-button:disabled{
-  opacity:.4!important;
-  cursor:not-allowed!important;
-  transform:none!important;
-  box-shadow:none!important
-}
-
-::-webkit-scrollbar{
-  width:7px;
-  height:7px
-}
-
-::-webkit-scrollbar-track{
-  background:#090909
-}
-
-::-webkit-scrollbar-thumb{
-  background:#333;
-  border-radius:10px
-}
-
-/* LOGIN */
-
-#login{
-  position:fixed;
-  inset:0;
-  background:#050505;
-  z-index:9999;
+::-webkit-scrollbar{  
+  width:7px;  
+  height:7px  
+}  
+::-webkit-scrollbar-track{  
+  background:#090909  
+}  
+::-webkit-scrollbar-thumb{  
+  background:#333;  
+  border-radius:10px  
+}  
+#login{  
+  position:fixed;  
+  inset:0;  
+  background:#050505;  
+  z-index:9999;  
   display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px
-}
+  align-items:center;  
+  justify-content:center;  
+  padding:20px  
+}  
+.loginBox{  
+  width:460px;  
+  max-width:100%;  
+  padding:40px 34px;  
+  background:linear-gradient(145deg,#111,#060606);  
+  border:1px solid #3a3a3a;  
+  border-radius:26px;  
+  box-shadow:0 0 50px rgba(229,9,20,.2)  
+}  
+.brandLogo{  
+  width:250px;  
+  max-width:85%;  
+  display:block;  
+  margin:0 auto 12px  
+}  
+.loginSub{  
+  text-align:center;  
+  color:#888;  
+  font-size:10px;  
+  letter-spacing:3px;  
+  font-weight:800;  
+  margin-bottom:20px  
+}  
+.redLine{  
+  width:90%;  
+  height:2px;  
+  margin:0 auto 24px;  
+  background:linear-gradient(90deg,transparent,#e50914,transparent);  
+  box-shadow:0 0 15px #e50914  
+}  
+.modeBar{  
+  display:grid;  
+  grid-template-columns:1fr 1fr;  
+  gap:6px;  
+  padding:4px;  
+  background:#090909;  
+  border:1px solid #292929;  
+  border-radius:11px;  
+  margin-bottom:16px  
+}  
+.modeBtn{  
+  border:0;  
+  background:transparent;  
+  color:#888;  
+  padding:11px;  
+  border-radius:8px;  
+  font-size:12px;  
+  font-weight:900  
+}  
+.modeBtn.active{  
+  background:#e50914;  
+  color:#fff;  
+  box-shadow:0 0 15px rgba(229,9,20,.4)  
+}  
+.loginInput,  
+.loginSelect{  
+  width:100%;  
+  height:50px;  
+  margin:7px 0;  
+  padding:0 15px;  
+  border-radius:10px;  
+  background:#0b0b0b;  
+  color:#fff;  
+  border:1px solid #292929;  
+  outline:none;  
+  font-size:14px;  
+  font-weight:600  
+}  
+.loginInput:focus,  
+.loginSelect:focus{  
+  border-color:#e50914;  
+  box-shadow:0 0 12px rgba(229,9,20,.3)  
+}  
+.loginSelect option{  
+  background:#111;  
+  color:#fff  
+}  
+.loginBtn{  
+  width:100%;  
+  height:52px;  
+  margin-top:15px;  
+  border:1px solid #ff5252;  
+  border-radius:10px;  
+  background:linear-gradient(180deg,#ed1b24,#a80000);  
+  color:#fff;  
+  font-size:14px;  
+  font-weight:900;  
+  letter-spacing:1px;  
+  box-shadow:0 7px 22px rgba(229,9,20,.25)  
+}  
+.smallNote{  
+  font-size:11px;  
+  color:#777;  
+  margin-top:10px;  
+  line-height:1.5  
+}  
 
-.loginBox{
-  width:460px;
-  max-width:100%;
-  padding:40px 34px;
-  background:linear-gradient(145deg,#111,#060606);
-  border:1px solid #3a3a3a;
-  border-radius:26px;
-  box-shadow:0 0 50px rgba(229,9,20,.2)
-}
+.topBar{  
+  min-height:96px;  
+  padding:16px 28px;  
+  background:rgba(5, 5, 5, 0.95);  
+  backdrop-filter: blur(12px);
+  border-bottom:1px solid #202020;  
+  display:flex;  
+  align-items:center;  
+  justify-content:space-between;  
+  gap:15px;  
+  position:sticky;  
+  top:0;  
+  z-index:1000  
+}  
+.topLeft{  
+  display:flex;  
+  align-items:center;  
+  gap:18px;  
+  min-width:0  
+}  
+.topLogo{  
+  width:235px;  
+  height:62px;  
+  object-fit:contain;  
+  object-position:left center  
+}  
+.topDivider{  
+  width:1px;  
+  height:42px;  
+  background:#333  
+}  
+.userName{  
+  font-size:17px;  
+  font-weight:800;  
+  white-space:nowrap  
+}  
+.machineBadge{  
+  font-size:18px;  
+  font-weight:900;  
+  padding:10px 15px;  
+  border:1px solid #333;  
+  background:#121212;  
+  border-radius:10px;  
+  color:#fff  
+}  
+.shiftInfo{  
+  line-height:1.2  
+}  
+.shiftMain{  
+  font-size:16px;  
+  font-weight:900;  
+  color:#ffd000  
+}  
+.shiftRange{  
+  font-size:11px;  
+  color:#ffd000;  
+  font-weight:700;  
+  margin-top:4px  
+}  
+.topActions{  
+  display:flex;  
+  align-items:center;  
+  gap:8px;  
+  flex-wrap:wrap  
+}  
+.pill{  
+  padding:10px 14px;  
+  border-radius:11px;  
+  font-size:12px;  
+  font-weight:900;  
+  border:1px solid #292929;  
+  background:#0b0b0b  
+}  
+.livePill{  
+  color:#5cff64  
+}  
+.liveDot{  
+  display:inline-block;  
+  width:10px;  
+  height:10px;  
+  background:#25d366;  
+  border-radius:50%;  
+  margin-right:7px;  
+  box-shadow:0 0 10px #25d366  
+}  
+.resetBtn{  
+  color:#ff3340;  
+  border-color:#5a1116;  
+  background:#140506  
+}  
+.logoutBtn{  
+  color:#fff;  
+  background:#141414  
+}  
 
-.brandLogo{
-  width:250px;
-  max-width:85%;
-  display:block;
-  margin:0 auto 12px
-}
-
-.loginSub{
-  text-align:center;
-  color:#888;
-  font-size:10px;
-  letter-spacing:3px;
-  font-weight:800;
-  margin-bottom:20px
-}
-
-.redLine{
-  width:90%;
-  height:2px;
-  margin:0 auto 24px;
-  background:linear-gradient(90deg,transparent,#e50914,transparent);
-  box-shadow:0 0 15px #e50914
-}
-
-.modeBar{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  padding:4px;
-  background:#090909;
-  border:1px solid #292929;
-  border-radius:11px;
-  margin-bottom:16px
-}
-
-.modeBtn{
-  border:0;
-  background:transparent;
-  color:#888;
-  padding:11px;
-  border-radius:8px;
-  font-size:12px;
-  font-weight:900
-}
-
-.modeBtn.active{
-  background:#e50914;
-  color:#fff;
-  box-shadow:0 0 15px rgba(229,9,20,.4)
-}
-
-.loginInput,
-.loginSelect{
-  width:100%;
-  height:50px;
-  margin:7px 0;
-  padding:0 15px;
-  border-radius:10px;
-  background:#0b0b0b;
-  color:#fff;
-  border:1px solid #292929;
-  outline:none;
-  font-size:14px;
-  font-weight:600
-}
-
-.loginInput:focus,
-.loginSelect:focus{
-  border-color:#e50914;
-  box-shadow:0 0 12px rgba(229,9,20,.3)
-}
-
-.loginSelect option{
-  background:#111;
-  color:#fff
-}
-
-.loginBtn{
-  width:100%;
-  height:52px;
-  margin-top:15px;
-  border:1px solid #ff5252;
-  border-radius:10px;
-  background:linear-gradient(180deg,#ed1b24,#a80000);
-  color:#fff;
-  font-size:14px;
-  font-weight:900;
-  letter-spacing:1px
-}
-
-.smallNote{
-  font-size:11px;
-  color:#777;
-  margin-top:10px;
-  line-height:1.5
-}
-
-/* TOP BAR */
-
-.topBar{
-  min-height:96px;
-  padding:16px 28px;
-  background:rgba(5,5,5,.95);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid #202020;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  position:sticky;
-  top:0;
-  z-index:1000
-}
-
-.topLeft{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  min-width:0
-}
-
-.topLogo{
-  width:235px;
-  height:62px;
-  object-fit:contain;
-  object-position:left center
-}
-
-.topDivider{
-  width:1px;
-  height:42px;
-  background:#333
-}
-
-.userName{
-  font-size:17px;
-  font-weight:800;
-  white-space:nowrap
-}
-
-.machineBadge{
-  font-size:18px;
-  font-weight:900;
-  padding:10px 15px;
-  border:1px solid #333;
-  background:#121212;
-  border-radius:10px
-}
-
-.shiftInfo{
-  line-height:1.2
-}
-
-.shiftMain{
-  font-size:16px;
-  font-weight:900;
-  color:#ffd000
-}
-
-.shiftRange{
-  font-size:11px;
-  color:#ffd000;
-  font-weight:700;
-  margin-top:4px
-}
-
-.topActions{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap
-}
-
-.pill{
-  padding:10px 14px;
-  border-radius:11px;
-  font-size:12px;
-  font-weight:900;
-  border:1px solid #292929;
-  background:#0b0b0b
-}
-
-.livePill{
-  color:#5cff64
-}
-
-.liveDot{
-  display:inline-block;
-  width:10px;
-  height:10px;
-  background:#25d366;
-  border-radius:50%;
-  margin-right:7px;
-  box-shadow:0 0 10px #25d366
-}
-
-.resetBtn{
-  color:#ff3340;
-  border-color:#5a1116;
-  background:#140506
-}
-
-.logoutBtn{
-  color:#fff;
-  background:#141414
-}
-
-/* STATUS CARDS */
-
-.statusCards,
-.deptStatusCards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:10px;
-  padding:16px 26px 10px;
-  background:#050505
-}
-
-.statusCard{
-  min-height:118px;
-  background:linear-gradient(180deg,#111,#080808);
-  border:1px solid #e50914;
-  border-radius:13px;
-  padding:14px 13px 12px;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between
-}
-
-.statusCard:hover{
-  transform:translateY(-2px);
+.statusCards{  
+  display:grid;  
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
+  gap:10px;  
+  padding:16px 26px 10px;  
+  background:#050505  
+}  
+.statusCard{  
+  min-height:118px;  
+  background:linear-gradient(180deg,#111,#080808);  
+  border:1px solid #e50914;  
+  border-radius:13px;  
+  padding:14px 13px 12px;  
+  cursor:pointer;  
+  position:relative;  
+  overflow:hidden;  
+  display:flex;  
+  flex-direction:column;  
+  justify-content:space-between;  
+  transition:.2s ease  
+}  
+.statusCard:hover{  
+  transform:translateY(-2px);  
   border-color:#ff3340;
-  box-shadow:0 0 15px rgba(229,9,20,.3)
-}
-
-.statusCard.active{
-  border-color:#ff3340;
-  box-shadow:0 0 20px rgba(229,9,20,.3)
-}
-
-.statusCard::after{
-  content:"";
-  position:absolute;
-  left:12px;
-  right:12px;
-  bottom:0;
-  height:4px;
-  background:var(--accent);
-  border-radius:5px 5px 0 0;
-  box-shadow:0 0 13px var(--accent)
-}
-
-.statusCardTitle{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  color:#bdbdbd;
-  font-size:11px;
-  font-weight:900;
-  line-height:1.2
-}
-
-.statusIcon{
-  font-size:18px
-}
-
-.statusCardCount{
-  font-size:38px;
-  font-weight:900;
-  line-height:1;
-  color:var(--accent);
-  margin-top:12px
-}
-
-.statusCardHint{
-  font-size:8px;
-  color:#888;
-  font-weight:700;
-  margin-top:7px
-}
-
-/* MACHINE LIST */
-
-.statusMachineArea{
-  padding:8px 26px 15px
-}
-
-.statusMachinePanel,
-.panel,
-.deptMachineBox{
-  background:linear-gradient(180deg,#0e0e0e,#070707);
-  border:1px solid #292929;
-  border-radius:14px;
-  overflow:hidden
-}
-
-.statusMachineHeader{
-  padding:14px 18px;
-  border-bottom:1px solid #292929;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap
-}
-
-.statusMachineTitle{
-  font-size:14px;
-  font-weight:900
-}
-
-.statusMachineSub{
-  color:#777;
-  font-size:10px
-}
-
-.machineResultGrid,
-.deptMachineGrid{
-  padding:12px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
-  gap:8px;
-  max-height:430px;
-  overflow:auto
-}
-
-.machineResult,
-.deptMachine{
-  background:#131313;
-  border:1px solid #292929;
-  border-radius:9px;
-  padding:11px 7px;
-  text-align:center;
-  cursor:pointer;
-  font-weight:900;
-  min-height:62px
-}
-
-.machineResult.selected,
-.deptMachine.selected{
-  border-color:#e50914;
-  background:#30090b;
-  box-shadow:0 0 12px rgba(229,9,20,.15)
-}
-
-.machineResultStatus,
-.deptMachineStatus{
-  display:block;
-  font-size:8px;
-  color:#777;
-  margin-top:5px;
-  line-height:1.2
-}
-
-/* DETAILS */
-
-.mainBox{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:18px;
-  padding:6px 26px 24px
-}
-
-.detailPanel{
-  padding:20px
-}
-
-.detailTop{
-  display:grid;
-  grid-template-columns:1fr 310px;
-  gap:15px;
-  padding-bottom:18px;
-  border-bottom:1px solid #222
-}
-
-.machineTitle{
-  font-size:34px;
-  font-weight:900
-}
-
-.yours{
-  color:#e50914;
-  font-size:13px;
-  font-weight:900;
-  margin-left:10px
-}
-
-.statusLine{
-  font-size:13px;
-  margin-top:10px;
-  color:#aaa;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap
-}
-
-.routeTop{
-  border-left:1px solid #222;
-  padding-left:20px
-}
-
-.routeTitle{
-  color:#e50914;
-  font-size:12px;
-  font-weight:900;
-  margin-bottom:8px
-}
-
-.routeLine{
-  font-size:12px;
-  margin:6px 0;
-  color:#ccc
-}
-
-.infoBox{
-  margin-top:16px;
-  background:#090909;
-  border:1px solid #222;
-  border-radius:12px;
-  padding:16px
-}
-
-.infoTitle{
-  color:#22c55e;
-  font-weight:900;
-  font-size:12px;
-  margin-bottom:12px
-}
-
-.infoGrid{
-  display:grid;
-  grid-template-columns:100px 1fr auto;
-  gap:10px;
-  align-items:center;
-  font-size:13px
-}
-
-.label{
-  color:#777
-}
-
-.value{
-  font-weight:700
-}
-
-.statusHeading{
-  margin:18px 0 10px;
-  color:#e50914;
-  font-size:12px;
-  font-weight:900
-}
-
-.statusGrid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px
-}
-
-.statusBtn{
-  min-height:50px;
-  background:#0c0c0c;
-  border:1px solid #222;
-  border-radius:9px;
-  color:#eee;
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  font-weight:800;
-  font-size:12px;
-  text-align:left
-}
-
-.statusBtn:hover{
-  border-color:#555;
-  background:#141414
-}
-
-.matRecvBtn{
-  background:linear-gradient(180deg,#15803d,#166534)!important;
-  border-color:#22c55e!important;
-  color:#fff!important;
-  grid-column:1/-1
-}
-
-/* MATERIAL REQUEST BOX */
-
-.materialRequestBox{
-  margin-top:14px;
-  background:#0d0d0d;
-  border:1px solid #333;
-  border-radius:12px;
-  padding:14px
-}
-
-.materialRequestItem{
-  background:#161616;
-  border:1px solid #333;
-  border-radius:10px;
-  padding:13px;
-  margin-top:10px
-}
-
-.materialRequestItem.pending{
-  border-color:#eab308
-}
-
-.materialRequestItem.shortage{
-  border-color:#ef4444;
-  background:#210707
-}
-
-.materialRequestItem.received{
-  border-color:#22c55e;
-  opacity:.75
-}
-
-.reqTitle{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap
-}
-
-.reqId{
-  color:#22c55e;
-  font-weight:900
-}
-
-.reqStatus{
-  padding:5px 8px;
-  border-radius:6px;
-  font-size:10px;
-  font-weight:900
-}
-
-.reqPending{
-  background:#713f12;
-  color:#fde68a
-}
-
-.reqShortage{
-  background:#7f1d1d;
-  color:#fecaca
-}
-
-.reqReceived{
-  background:#166534;
-  color:#bbf7d0
-}
-
-.reqData{
-  margin-top:9px;
-  line-height:1.7;
-  font-size:12px
-}
-
-.reqAction{
-  width:100%;
-  margin-top:10px;
-  padding:11px;
-  border-radius:8px;
-  border:1px solid #555;
-  font-weight:900
-}
-
-/* URGENT */
-
-.urgentBox{
-  margin-top:15px;
-  background:#1f0406;
-  border:1px solid #e50914;
-  padding:12px 16px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  gap:10px
-}
-
-.urgentBox input{
-  width:18px;
-  height:18px;
-  accent-color:#e50914
-}
-
-.urgentBox label{
-  font-size:13px;
-  font-weight:900;
-  color:#ff4d4d
-}
-
-.routeInfo{
-  margin-top:16px;
-  padding:14px;
-  border:1px dashed #b58a00;
-  background:#141000;
-  border-radius:9px;
-  font-size:13px;
-  line-height:1.6
-}
-
-.waBtn{
-  width:100%;
-  height:50px;
-  border:1px solid #25d366;
-  border-radius:9px;
-  background:linear-gradient(180deg,#168b3c,#0d5f29);
-  color:#fff;
-  font-size:14px;
-  font-weight:900;
-  margin-top:12px
-}
-
-/* POPUP */
-
-#notifBig{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:#c9000b;
-  color:#fff;
-  padding:28px;
-  border-radius:16px;
-  font-weight:900;
-  font-size:20px;
-  display:none;
-  z-index:99999;
-  text-align:center;
-  box-shadow:0 0 60px rgba(229,9,20,.65);
-  border:2px solid #fff;
-  max-width:90%
-}
-
-/* MODAL */
-
-#materialModal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.88);
-  backdrop-filter:blur(8px);
-  z-index:999999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px
-}
-
-.modalContent{
-  background:#111;
-  border:1px solid #eab308;
-  border-radius:18px;
-  padding:24px;
-  width:400px;
-  max-width:100%
-}
-
-/* DEPARTMENT */
-
-#departmentDashboard{
-  display:none
-}
-
-.deptHeader{
-  padding:18px 26px;
-  background:rgba(5,5,5,.95);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid #252525;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  position:sticky;
-  top:0;
-  z-index:1000
-}
-
-.deptTitle{
-  font-size:23px;
-  font-weight:900
-}
-
-.deptBadge{
-  padding:7px 13px;
-  border-radius:20px;
-  background:#e50914;
-  color:#fff;
-  font-size:11px;
-  font-weight:900
-}
-
-.deptContent{
-  padding:0 0 20px;
-  max-width:1450px;
-  margin:auto
-}
-
-.deptMachineBox{
-  padding:16px;
-  margin:10px 26px 14px
-}
-
-.deptSelected{
-  background:#090909;
-  border:1px solid #303030;
-  border-radius:12px;
-  padding:16px;
-  margin-top:12px
-}
-
-.viewOnly{
-  margin-top:14px;
-  background:#121212;
-  border:1px solid #555;
-  border-radius:10px;
-  padding:18px;
-  text-align:center
-}
-
-.firebaseStatus{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:7px 10px;
-  border-radius:99px;
-  font-size:10px;
-  font-weight:900;
-  border:1px solid #292929;
-  background:#0b0b0b
-}
-
-.firebaseDot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#eab308
-}
-
-.firebaseOnline .firebaseDot{
-  background:#22c55e;
-  box-shadow:0 0 8px #22c55e
-}
-
-.firebaseOffline .firebaseDot{
-  background:#ef4444;
-  box-shadow:0 0 8px #ef4444
-}
-
-.excelSmallBtn,
-.excelResetBtn{
-  padding:8px 12px;
-  color:#fff;
-  border-radius:8px;
-  font-size:11px;
-  font-weight:800
-}
-
-.excelSmallBtn{
-  background:#15803d;
-  border:1px solid #22c55e
-}
-
-.excelResetBtn{
-  background:#991b1b;
-  border:1px solid #ef4444
-}
-
-.blinkAlert{
-  animation:blinkAnim 1s infinite alternate;
-  border-color:#ff0000!important
-}
-
-@keyframes blinkAnim{
-  0%{opacity:1}
-  100%{opacity:.45}
-}
-
-@media(max-width:800px){
-
-  .statusCards{
-    grid-template-columns:repeat(3,1fr)
-  }
-
-  .detailTop{
-    grid-template-columns:1fr
-  }
-
-  .routeTop{
-    border-left:0;
-    border-top:1px solid #222;
-    padding:12px 0 0
-  }
-
-}
-
-@media(max-width:700px){
-
-  .topBar{
-    padding:12px
-  }
-
-  .topLogo{
-    width:160px;
-    height:48px
-  }
-
-  .topLeft{
-    flex-wrap:wrap;
-    gap:8px
-  }
-
-  .topActions{
-    width:100%;
-    justify-content:flex-end
-  }
-
-  .statusCards,
-  .deptStatusCards{
-    padding:10px;
-    gap:7px
-  }
-
-  .statusCard{
-    min-height:105px;
-    padding:11px 9px
-  }
-
-  .statusCardTitle{
-    font-size:9px
-  }
-
-  .statusCardCount{
-    font-size:30px
-  }
-
-  .statusIcon{
-    font-size:15px
-  }
-
-  .statusMachineArea{
-    padding:6px 10px 12px
-  }
-
-  .mainBox{
-    padding:6px 10px 20px
-  }
-
-  .detailPanel{
-    padding:14px
-  }
-
-  .statusGrid{
-    grid-template-columns:1fr
-  }
-
-  .deptHeader{
-    padding:12px
-  }
-
-  .deptMachineBox{
-    margin:8px 10px 12px
-  }
-
-  .deptTitle{
-    font-size:18px
-  }
-
-  .infoGrid{
-    grid-template-columns:80px 1fr
-  }
-
-}
-</style>
-</head>
-
-<body>
-
-<div id="notifBig"></div>
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.3);
+}  
+.statusCard.active{  
+  border-color:#ff3340;  
+  box-shadow:  
+    0 0 20px color-mix(in srgb,var(--accent) 30%,#e50914),  
+    inset 0 0 18px color-mix(in srgb,var(--accent) 10%,transparent)  
+}  
+.statusCard::after{  
+  content:"";  
+  position:absolute;  
+  left:12px;  
+  right:12px;  
+  bottom:0;  
+  height:4px;  
+  background:var(--accent);  
+  border-radius:5px 5px 0 0;  
+  box-shadow:0 0 13px var(--accent)  
+}  
+.statusCardTitle{  
+  display:flex;  
+  align-items:center;  
+  gap:7px;  
+  color:#bdbdbd;  
+  font-size:11px;  
+  font-weight:900;  
+  line-height:1.2  
+}  
+.statusIcon{  
+  font-size:18px;  
+  line-height:1  
+}  
+.statusCardCount{  
+  font-size:38px;  
+  font-weight:900;  
+  line-height:1;  
+  color:var(--accent);  
+  margin-top:12px  
+}  
+.statusCardHint{  
+  font-size:8px;  
+  color:#888;  
+  font-weight:700;  
+  margin-top:7px  
+}  
+.statusMachineArea{  
+  padding:8px 26px 15px  
+}  
+.statusMachinePanel{  
+  background:linear-gradient(180deg,#0e0e0e,#070707);  
+  border:1px solid #292929;  
+  border-radius:14px;  
+  overflow:hidden  
+}  
+.statusMachineHeader{  
+  padding:14px 18px;  
+  border-bottom:1px solid #292929;  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:center;  
+  gap:10px;  
+  flex-wrap:wrap  
+}  
+.statusMachineTitle{  
+  font-size:14px;  
+  font-weight:900;  
+  color:#eee  
+}  
+.statusMachineSub{  
+  color:#777;  
+  font-size:10px  
+}  
+.machineResultGrid{  
+  padding:12px;  
+  display:grid;  
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
+  gap:8px;  
+  max-height:310px;  
+  overflow:auto  
+}  
+.machineResult{  
+  background:#131313;  
+  border:1px solid #292929;  
+  border-radius:9px;  
+  padding:11px 7px;  
+  text-align:center;  
+  cursor:pointer;  
+  font-weight:900;  
+  min-height:62px  
+}  
+.machineResult:hover{  
+  border-color:#666;  
+  background:#191919  
+}  
+.machineResult.selected{  
+  border-color:#e50914;  
+  background:#30090b;  
+  box-shadow:0 0 12px rgba(229,9,20,.15)  
+}  
+.machineResultStatus{  
+  display:block;  
+  font-size:8px;  
+  color:#777;  
+  margin-top:5px;  
+  line-height:1.2  
+}  
+.mainBox{  
+  display:grid;  
+  grid-template-columns:1fr;  
+  gap:18px;  
+  padding:6px 26px 24px  
+}  
+.panel{  
+  background:linear-gradient(180deg,#0e0e0e,#070707);  
+  border:1px solid #292929;  
+  border-radius:14px;  
+  overflow:hidden  
+}  
+.panelHeader{  
+  padding:15px 20px;  
+  border-bottom:1px solid #292929;  
+  font-size:14px;  
+  font-weight:900;  
+  color:#888;  
+  letter-spacing:1px  
+}  
+.detailPanel{  
+  padding:20px  
+}  
+.detailTop{  
+  display:grid;  
+  grid-template-columns:1fr 310px;  
+  gap:15px;  
+  padding-bottom:18px;  
+  border-bottom:1px solid #222  
+}  
+.machineTitle{  
+  font-size:34px;  
+  font-weight:900  
+}  
+.yours{  
+  color:#e50914;  
+  font-size:13px;  
+  font-weight:900;  
+  margin-left:10px  
+}  
+.statusLine{  
+  font-size:13px;  
+  margin-top:10px;  
+  color:#aaa;  
+  display:flex;  
+  align-items:center;  
+  gap:8px;  
+  flex-wrap:wrap  
+}  
+.routeTop{  
+  border-left:1px solid #222;  
+  padding-left:20px  
+}  
+.routeTitle{  
+  color:#e50914;  
+  font-size:12px;  
+  font-weight:900;  
+  margin-bottom:8px;  
+  letter-spacing:1px  
+}  
+.routeLine{  
+  font-size:12px;  
+  margin:6px 0;  
+  color:#ccc  
+}  
+.infoBox{  
+  margin-top:16px;  
+  background:#090909;  
+  border:1px solid #222;  
+  border-radius:12px;  
+  padding:16px  
+}  
+.infoTitle{  
+  color:#22c55e;  
+  font-weight:900;  
+  font-size:12px;  
+  margin-bottom:12px;  
+  letter-spacing:1px  
+}  
+.infoGrid{  
+  display:grid;  
+  grid-template-columns:100px 1fr auto;  
+  gap:10px;  
+  align-items:center;  
+  font-size:13px  
+}  
+.label{  
+  color:#777  
+}  
+.value{  
+  font-weight:700  
+}  
+.statusHeading{  
+  margin:18px 0 10px;  
+  color:#e50914;  
+  font-size:12px;  
+  font-weight:900;  
+  letter-spacing:1px  
+}  
+.statusGrid{  
+  display:grid;  
+  grid-template-columns:repeat(3,1fr);  
+  gap:10px  
+}  
+.statusBtn{  
+  min-height:50px;  
+  background:#0c0c0c;  
+  border:1px solid #222;  
+  border-radius:9px;  
+  color:#eee;  
+  padding:10px 14px;  
+  display:flex;  
+  align-items:center;  
+  justify-content:space-between;  
+  font-weight:800;  
+  font-size:12px;  
+  text-align:left  
+}  
+.statusBtn:hover{  
+  border-color:#555;  
+  background:#141414  
+}  
+
+.matRecvBtn{  
+  background:linear-gradient(180deg,#15803d,#166534) !important;  
+  border-color:#22c55e !important;  
+  color:#fff !important;  
+  grid-column: 1 / -1;  
+  font-size:14px !important;  
+  padding:14px !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}  
+
+.blinkAlert {
+  animation: blinkAnim 1s infinite alternate;
+  border-color: #ff0000 !important;
+  background: rgba(229, 9, 20, 0.2) !important;
+}
+@keyframes blinkAnim {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.4; transform: scale(0.98); }
+}
+
+.routeInfo{  
+  margin-top:16px;  
+  padding:14px;  
+  border:1px dashed #b58a00;  
+  background:#141000;  
+  border-radius:9px;  
+  font-size:13px;  
+  line-height:1.6  
+}  
+.waBtn{  
+  width:100%;  
+  height:50px;  
+  border:1px solid #25d366;  
+  border-radius:9px;  
+  background:linear-gradient(180deg,#168b3c,#0d5f29);  
+  color:#fff;  
+  font-size:14px;  
+  font-weight:900;  
+  margin-top:12px;  
+  letter-spacing:.5px  
+}  
+.viewBox{  
+  background:#0d0d0d;  
+  border:1px solid #222;  
+  border-radius:10px;  
+  padding:15px;  
+  margin-top:14px;  
+  line-height:1.7  
+}  
+#notifBig{  
+  position:fixed;  
+  top:50%;  
+  left:50%;  
+  transform:translate(-50%,-50%);  
+  background:#c9000b;  
+  color:#fff;  
+  padding:28px;  
+  border-radius:16px;  
+  font-weight:900;  
+  font-size:20px;  
+  display:none;  
+  z-index:99999;  
+  text-align:center;  
+  box-shadow:0 0 60px rgba(229,9,20,.65);  
+  border:2px solid #fff;  
+  max-width:90%  
+}  
+#materialModal{  
+  position:fixed;  
+  inset:0;  
+  background:rgba(0,0,0,.88);  
+  backdrop-filter:blur(8px);  
+  z-index:999999;  
+  display:none;  
+  align-items:center;  
+  justify-content:center;  
+  padding:20px  
+}  
+.modalContent{  
+  background:#111;  
+  border:1px solid #eab308;  
+  border-radius:18px;  
+  padding:24px;  
+  width:400px;  
+  max-width:100%  
+}  
+#departmentDashboard{  
+  display:none  
+}  
+.deptHeader{  
+  padding:18px 26px;  
+  background:rgba(5, 5, 5, 0.95);  
+  backdrop-filter: blur(12px);
+  border-bottom:1px solid #252525;  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:center;  
+  gap:10px;  
+  position:sticky;  
+  top:0;  
+  z-index:1000  
+}  
+.deptTitle{  
+  font-size:23px;  
+  font-weight:900  
+}  
+.deptBadge{  
+  padding:7px 13px;  
+  border-radius:20px;  
+  background:#e50914;  
+  color:#fff;  
+  font-size:11px;  
+  font-weight:900  
+}  
+.deptContent{  
+  padding:0 0 20px;  
+  max-width:1450px;  
+  margin:auto  
+}  
+.deptStatusCards{  
+  display:grid;  
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
+  gap:9px;  
+  padding:16px 26px 10px  
+}  
+.deptMachineBox{  
+  background:#0d0d0d;  
+  border:1px solid #292929;  
+  border-radius:14px;  
+  padding:16px;  
+  margin:10px 26px 14px  
+}  
+.deptMachineGrid{  
+  display:grid;  
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
+  gap:9px;  
+  max-height:430px;  
+  overflow:auto;  
+  margin-top:12px  
+}  
+.deptMachine{  
+  background:#141414;  
+  border:1px solid #292929;  
+  padding:13px 7px;  
+  border-radius:9px;  
+  text-align:center;  
+  font-weight:900;  
+  cursor:pointer  
+}  
+.deptMachine:hover{  
+  border-color:#666  
+}  
+.deptMachine.selected{  
+  border-color:#e50914;  
+  background:#30090b  
+}  
+.deptMachineStatus{  
+  display:block;  
+  font-size:9px;  
+  margin-top:5px  
+}  
+.deptSelected{  
+  background:#090909;  
+  border:1px solid #303030;  
+  border-radius:12px;  
+  padding:16px;  
+  margin-top:12px  
+}  
+.viewOnly{  
+  margin-top:14px;  
+  background:#121212;  
+  border:1px solid #555;  
+  border-radius:10px;  
+  padding:18px;  
+  text-align:center  
+}  
+.firebaseStatus{  
+  display:inline-flex;  
+  align-items:center;  
+  gap:6px;  
+  padding:7px 10px;  
+  border-radius:99px;  
+  font-size:10px;  
+  font-weight:900;  
+  border:1px solid #292929;  
+  background:#0b0b0b  
+}  
+.firebaseDot{  
+  width:8px;  
+  height:8px;  
+  border-radius:50%;  
+  background:#eab308  
+}  
+.firebaseOnline .firebaseDot{  
+  background:#22c55e;  
+  box-shadow:0 0 8px #22c55e  
+}  
+.firebaseOffline .firebaseDot{  
+  background:#ef4444;  
+  box-shadow:0 0 8px #ef4444  
+}  
+.excelSmallBtn {
+  padding: 8px 12px;
+  background: #15803d;
+  color: white;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #22c55e;
+}
+.excelResetBtn {
+  padding: 8px 12px;
+  background: #991b1b;
+  color: white;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #ef4444;
+}
+.urgentBox {
+  margin-top: 15px;
+  background: #1f0406;
+  border: 1px solid #e50914;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.urgentBox input {
+  width: 18px;
+  height: 18px;
+  accent-color: #e50914;
+  cursor: pointer;
+}
+.urgentBox label {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ff4d4d;
+  cursor: pointer;
+}
+@media(max-width:1200px){  
+  .statusCards{ grid-template-columns:repeat(5,1fr) }  
+  .topBar{ flex-wrap:wrap }  
+}  
+@media(max-width:800px){  
+  .statusCards{ grid-template-columns:repeat(3,1fr) }  
+  .detailTop{ grid-template-columns:1fr }  
+  .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
+}  
+@media(max-width:700px){  
+  .topBar{ padding:12px }  
+  .topLogo{ width:160px; height:48px }  
+  .topLeft{ flex-wrap:wrap; gap:8px }  
+  .topActions{ width:100%; justify-content:flex-end; flex-wrap:wrap }  
+  .statusCards{ padding:10px; gap:7px }  
+  .statusCard{ min-height:105px; padding:11px 9px }  
+  .statusCardTitle{ font-size:9px }  
+  .statusCardCount{ font-size:30px }  
+  .statusIcon{ font-size:15px }  
+  .statusMachineArea{ padding:6px 10px 12px }  
+  .mainBox{ padding:6px 10px 20px }  
+  .detailPanel{ padding:14px }  
+  .statusGrid{ grid-template-columns:1fr }  
+  .deptHeader{ padding:12px }  
+  .deptContent{ padding:0 0 15px }  
+  .deptMachineBox{ margin:8px 10px 12px }  
+  .deptTitle{ font-size:18px }  
+  .infoGrid{ grid-template-columns:80px 1fr }  
+}  
+</style>  
+</head>  
+<body>  
+<div id="notifBig"></div>  
 
 <div id="appWrapper">
 
-<!-- MATERIAL FORM -->
+  <!-- MATERIAL MODAL -->  
+  <div id="materialModal">    
+    <div class="modalContent">  
+      <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
+      <input id="matPartNo" class="loginInput" placeholder="PART NO">  
+      <input id="matPartName" class="loginInput" placeholder="PART NAME">  
+      <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
+      <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
+      <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
+    </div>  
+  </div>  
 
-<div id="materialModal">
-  <div class="modalContent">
+  <!-- LOGIN -->  
+  <div id="login">    
+    <div class="loginBox">  
+      <img src="icon-512.png" class="brandLogo" alt="Brembo">  
+      <div class="loginSub">OFFICIAL HIGH PERFORMANCE</div>  
+      <div class="redLine"></div>  
+      <div class="modeBar">  
+        <button id="operatorModeBtn" class="modeBtn active" onclick="showLoginMode('operator')">OPERATOR</button>  
+        <button id="departmentModeBtn" class="modeBtn" onclick="showLoginMode('department')">DEPARTMENT</button>  
+      </div>  
 
-    <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">
-      MATERIAL REQUIREMENT FORM
-    </h2>
+      <div id="operatorLogin">  
+        <input id="opId" class="loginInput" placeholder="EMPLOYEE ID">  
+        <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">  
+        <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
+        <select id="opMachine" class="loginSelect"></select>  
+        <select id="opShift" class="loginSelect">  
+          <option value="Shift A">Shift A (7:45 AM - 4:15 PM)</option>  
+          <option value="Shift B">Shift B (4:15 PM - 12:00 AM)</option>  
+          <option value="Shift C">Shift C (12:00 AM - 7:45 AM)</option>  
+        </select>  
+        <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>  
+        <button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>  
+      </div>  
 
-    <input id="matPartNo" class="loginInput" placeholder="PART NO">
+      <div id="departmentLogin" style="display:none">  
+        <select id="departmentSelect" class="loginSelect">  
+          <option value="">-- SELECT DEPARTMENT --</option>  
+          <option value="maintenance">Maintenance</option>  
+          <option value="loading">Loading</option>  
+          <option value="quality">Quality</option>  
+          <option value="toolroom">Tool Room</option>  
+          <option value="store">Store Department</option>  
+          <option value="supervisor">Supervisor (View Only Mode)</option>  
+        </select>  
+        <input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">  
+        <button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>  
+        <div class="smallNote">Authorized department access only.</div>  
+      </div>  
+      <p id="fbStat" style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">Connecting LIVE...</p>
+    </div>  
+  </div>  
 
-    <input id="matPartName" class="loginInput" placeholder="PART NAME">
+  <!-- OPERATOR DASHBOARD -->  
+  <div id="operatorDashboard" style="display:none">    
+    <div class="topBar">  
+      <div class="topLeft">  
+        <img src="icon-512.png" class="topLogo" alt="Brembo">  
+        <div class="topDivider"></div>  
+        <div id="wel" class="userName"></div>  
+        <div id="welMc" class="machineBadge"></div>  
+        <div class="shiftInfo">  
+          <div id="welShift" class="shiftMain">Shift A</div>  
+          <div id="shiftRangeTop" class="shiftRange">7:45 AM - 4:15 PM</div>  
+        </div>  
+      </div>  
+      <div class="topActions">  
+        <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
+        <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
+        <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
+        <button onclick="resetAll()" class="pill resetBtn">⟳ RESET ALL</button>  
+        <button onclick="doLogout()" class="pill logoutBtn">⇥ LOGOUT</button>  
+      </div>
+    </div>    
 
-    <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">
+    <div id="operatorStatusCards" class="statusCards"></div>    
 
-    <button onclick="submitMaterialRequirement()"
-      class="loginBtn"
-      style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000">
-      SUBMIT REQUEST & NOTIFY STORE
-    </button>
+    <div class="statusMachineArea" id="operatorFocusArea">  
+      <div class="statusMachinePanel">  
+        <div class="statusMachineHeader">  
+          <div>  
+            <div id="operatorStatusMachineTitle" class="statusMachineTitle">⚙️ SELECT STATUS</div>  
+            <div id="operatorStatusMachineSub" class="statusMachineSub">Click a status card to view machines.</div>  
+          </div>  
+          <div id="operatorStatusMachineCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
+        </div>  
+        <div id="operatorMachineResultGrid" class="machineResultGrid"></div>  
+      </div>
+    </div>    
 
-    <button onclick="closeMaterialModal()"
-      class="loginBtn"
-      style="background:#222;border-color:#444">
-      CANCEL
-    </button>
+    <div class="mainBox">  
+      <div class="panel detailPanel">  
+        <div id="machineDetail"></div>  
+        <div id="operatorBox"></div>  
+        <div id="statusList"></div>  
+        <div id="lockMsg" style="font-size:11px;color:#777;margin-top:8px"></div>  
+        <div id="routeInfo" class="routeInfo" style="display:none"></div>  
+        <button id="waBtn" class="waBtn" onclick="openWA()" style="display:none">SEND WHATSAPP</button>  
+      </div>
+    </div>  
+  </div>  
 
-  </div>
-</div>
+  <!-- DEPARTMENT DASHBOARD -->  
+  <div id="departmentDashboard" style="display:none">    
+    <div class="deptHeader">  
+      <div>  
+        <div class="deptTitle" id="deptTitle">DEPARTMENT</div>  
+        <div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>  
+      </div>  
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
+        <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
+        <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
+        <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
+        <span class="deptBadge" id="deptBadge"></span>  
+        <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
+      </div>
+    </div>    
 
-<!-- LOGIN -->
+    <div class="deptContent">  
+      <div id="departmentStatusCards" class="deptStatusCards"></div>  
 
-<div id="login">
+      <div class="deptMachineBox" id="deptFocusArea">  
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
+          <div>  
+            <b id="deptGridTitle">SELECT STATUS</b>  
+            <div style="font-size:11px;color:#777;margin-top:4px">Click any status icon above to view machines.</div>  
+          </div>  
+          <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
+        </div>  
+        <div id="deptMachineGrid" class="deptMachineGrid"></div>  
+      </div>  
 
-<div class="loginBox">
-
-<img src="icon-512.png" class="brandLogo" alt="Brembo">
-
-<div class="loginSub">OFFICIAL HIGH PERFORMANCE</div>
-
-<div class="redLine"></div>
-
-<div class="modeBar">
-
-<button id="operatorModeBtn"
-class="modeBtn active"
-onclick="showLoginMode('operator')">
-OPERATOR
-</button>
-
-<button id="departmentModeBtn"
-class="modeBtn"
-onclick="showLoginMode('department')">
-DEPARTMENT
-</button>
-
-</div>
-
-<div id="operatorLogin">
-
-<input id="opId"
-class="loginInput"
-placeholder="EMPLOYEE ID">
-
-<input id="opName"
-class="loginInput"
-placeholder="EMPLOYEE NAME">
-
-<input id="opPin"
-type="password"
-class="loginInput"
-placeholder="OPERATOR PIN">
-
-<select id="opMachine" class="loginSelect"></select>
-
-<select id="opShift" class="loginSelect">
-<option value="Shift A">Shift A (7:45 AM - 4:15 PM)</option>
-<option value="Shift B">Shift B (4:15 PM - 12:00 AM)</option>
-<option value="Shift C">Shift C (12:00 AM - 7:45 AM)</option>
-</select>
-
-<p id="autoShiftTxt"
-style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700">
-</p>
-
-<button onclick="doLogin()" class="loginBtn">
-OPERATOR LOGIN
-</button>
-
-</div>
-
-<div id="departmentLogin" style="display:none">
-
-<select id="departmentSelect" class="loginSelect">
-
-<option value="">-- SELECT DEPARTMENT --</option>
-<option value="maintenance">Maintenance</option>
-<option value="loading">Loading</option>
-<option value="quality">Quality</option>
-<option value="toolroom">Tool Room</option>
-<option value="store">Store Department</option>
-<option value="supervisor">Supervisor (View Only Mode)</option>
-
-</select>
-
-<input id="departmentPin"
-type="password"
-class="loginInput"
-placeholder="DEPARTMENT PIN">
-
-<button onclick="departmentLogin()" class="loginBtn">
-DEPARTMENT LOGIN
-</button>
-
-<div class="smallNote">
-Authorized department access only.
-</div>
-
-</div>
-
-<p id="fbStat"
-style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">
-Connecting LIVE...
-</p>
-
-</div>
-</div>
-
-<!-- OPERATOR DASHBOARD -->
-
-<div id="operatorDashboard" style="display:none">
-
-<div class="topBar">
-
-<div class="topLeft">
-
-<img src="icon-512.png" class="topLogo" alt="Brembo">
-
-<div class="topDivider"></div>
-
-<div id="wel" class="userName"></div>
-
-<div id="welMc" class="machineBadge"></div>
-
-<div class="shiftInfo">
-
-<div id="welShift" class="shiftMain">
-Shift A
-</div>
-
-<div id="shiftRangeTop" class="shiftRange">
-7:45 AM - 4:15 PM
-</div>
+      <div class="deptMachineBox">  
+        <b>SELECTED MACHINE DETAILS</b>  
+        <div id="deptSelected" class="deptSelected">Please select a status and machine.</div>  
+      </div>
+    </div>  
+  </div>  
 
 </div>
 
-</div>
-
-<div class="topActions">
-
-<span id="liveShiftBadge"
-class="pill"
-style="color:#ffd000">
-SHIFT: -
-</span>
-
-<span id="firebaseTopStatus"
-class="firebaseStatus">
-<span class="firebaseDot"></span>
-<span>CONNECTING</span>
-</span>
-
-<span class="pill livePill">
-<span class="liveDot"></span>
-LIVE
-</span>
-
-<button onclick="resetAll()" class="pill resetBtn">
-⟳ RESET ALL
-</button>
-
-<button onclick="doLogout()" class="pill logoutBtn">
-⇥ LOGOUT
-</button>
-
-</div>
-</div>
-
-<div id="operatorStatusCards" class="statusCards"></div>
-
-<div class="statusMachineArea">
-
-<div class="statusMachinePanel">
-
-<div class="statusMachineHeader">
-
-<div>
-
-<div id="operatorStatusMachineTitle"
-class="statusMachineTitle">
-⚙️ SELECT STATUS
-</div>
-
-<div id="operatorStatusMachineSub"
-class="statusMachineSub">
-Click a status card to view machines.
-</div>
-
-</div>
-
-<div id="operatorStatusMachineCount"
-style="font-size:11px;color:#aaa;font-weight:900">
-0 MACHINES
-</div>
-
-</div>
-
-<div id="operatorMachineResultGrid"
-class="machineResultGrid">
-</div>
-
-</div>
-
-</div>
-
-<div class="mainBox">
-
-<div class="panel detailPanel">
-
-<div id="machineDetail"></div>
-
-<div id="operatorBox"></div>
-
-<div id="statusList"></div>
-
-<div id="lockMsg"
-style="font-size:11px;color:#777;margin-top:8px">
-</div>
-
-<div id="routeInfo"
-class="routeInfo"
-style="display:none">
-</div>
-
-<button id="waBtn"
-class="waBtn"
-onclick="openWA()"
-style="display:none">
-SEND WHATSAPP
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- DEPARTMENT DASHBOARD -->
-
-<div id="departmentDashboard">
-
-<div class="deptHeader">
-
-<div>
-
-<div class="deptTitle" id="deptTitle">
-DEPARTMENT
-</div>
-
-<div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">
-BREMBO • LIVE
-</div>
-
-</div>
-
-<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-
-<span id="firebaseDeptStatus"
-class="firebaseStatus">
-<span class="firebaseDot"></span>
-<span>CONNECTING</span>
-</span>
-
-<button id="deptExcelBtn"
-onclick="downloadDepartmentExcel()"
-class="excelSmallBtn"
-style="display:none">
-📥 EXCEL REPORT
-</button>
-
-<button id="deptExcelResetBtn"
-onclick="resetExcelFile()"
-class="excelResetBtn"
-style="display:none">
-🚨 RESET EXCEL FILE
-</button>
-
-<span class="deptBadge" id="deptBadge"></span>
-
-<button onclick="departmentLogout()"
-class="pill logoutBtn">
-LOGOUT
-</button>
-
-</div>
-</div>
-
-<div class="deptContent">
-
-<div id="departmentStatusCards"
-class="deptStatusCards">
-</div>
-
-<div class="deptMachineBox">
-
-<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-
-<div>
-
-<b id="deptGridTitle">
-SELECT STATUS
-</b>
-
-<div style="font-size:11px;color:#777;margin-top:4px">
-Click any status icon above to view machines.
-</div>
-
-</div>
-
-<div id="deptGridCount"
-style="font-size:11px;color:#aaa;font-weight:900">
-0 MACHINES
-</div>
-
-</div>
-
-<div id="deptMachineGrid"
-class="deptMachineGrid">
-</div>
-
-</div>
-
-<div class="deptMachineBox">
-
-<b>SELECTED MACHINE DETAILS</b>
-
-<div id="deptSelected"
-class="deptSelected">
-Please select a status and machine.
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-/* =========================================================
-   FIREBASE
-========================================================= */
-
-const firebaseConfig={
-  apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",
-  authDomain:"brembo-dashboard.firebaseapp.com",
-  databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",
-  projectId:"brembo-dashboard",
-  storageBucket:"brembo-dashboard.firebasestorage.app",
-  messagingSenderId:"935783960863",
-  appId:"1:935783960863:web:115a5380ab005c50da602a"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db=firebase.database();
-
-const ADMIN_PIN="191197";
-const OPERATOR_PIN="1234";
-
-
-/* =========================================================
-   DEPARTMENT CONFIG
-========================================================= */
-
-const DEPARTMENT_CONFIG={
-
-maintenance:{
-  name:"MAINTENANCE",
-  pin:"2026",
-  allowedStatuses:["BREAKDOWN"],
-  actions:[
-    {label:"BREAKDOWN OFF",clearsIssue:"BREAKDOWN"}
-  ]
-},
-
-loading:{
-  name:"LOADING",
-  pin:"2024",
-  allowedStatuses:["LOT READY"],
-  actions:[
-    {label:"LOT TAKEN",clearsIssue:"LOT READY"}
-  ]
-},
-
-quality:{
-  name:"QUALITY",
-  pin:"2025",
-  allowedStatuses:["CMM NOT OK","LOT HOLD","SIGN PENDING"],
-  actions:[
-    {label:"CMM OK",clearsIssue:"CMM NOT OK"},
-    {label:"SIGN DONE",clearsIssue:"SIGN PENDING"},
-    {
-      label:"HOLD CLEAR (LOT READY)",
-      clearsIssue:"LOT HOLD",
-      addIssue:"LOT READY"
-    }
-  ]
-},
-
-toolroom:{
-  name:"TOOL ROOM",
-  pin:"2027",
-  allowedStatuses:["FIXTURE NOT OK"],
-  actions:[
-    {label:"FIXTURE OK",clearsIssue:"FIXTURE NOT OK"}
-  ]
-},
-
-store:{
-  name:"STORE DEPARTMENT",
-  pin:"2028",
-  allowedStatuses:["MATERIAL REQUIREMENT","MATERIAL SHORTAGE"],
-  actions:[
-    {
-      label:"⚠️ MARK OUT OF STOCK",
-      clearsIssue:"MATERIAL REQUIREMENT",
-      addIssue:"MATERIAL SHORTAGE"
-    }
-  ]
-},
-
-supervisor:{
-  name:"SUPERVISOR",
-  pin:"Ampa123",
-  isViewOnly:true,
-  allowedStatuses:[
-    "TOTAL",
-    "RUNNING",
-    "BREAKDOWN",
-    "CMM NOT OK",
-    "FIXTURE NOT OK",
-    "LOT READY",
-    "LOT HOLD",
-    "SIGN PENDING",
-    "MATERIAL REQUIREMENT",
-    "MATERIAL SHORTAGE"
-  ],
-  actions:[]
+<script>  
+const firebaseConfig = {  
+  apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",  
+  authDomain:"brembo-dashboard.firebaseapp.com",  
+  databaseURL:"https://brembo-dashboard-default-rtdb.firebaseio.com",  
+  projectId:"brembo-dashboard",  
+  storageBucket:"brembo-dashboard.firebasestorage.app",  
+  messagingSenderId:"935783960863",  
+  appId:"1:935783960863:web:115a5380ab005c50da602a"  
+};  
+firebase.initializeApp(firebaseConfig);  
+const db = firebase.database();  
+
+const ADMIN_PIN = "191197";  
+const OPERATOR_PIN = "1234";  
+
+/* DEPARTMENTS CONFIG */  
+const DEPARTMENT_CONFIG = {  
+  maintenance:{ 
+    name:"MAINTENANCE", 
+    pin:"2026", 
+    allowedStatuses: ["BREAKDOWN"],
+    actions:[{ label:"BREAKDOWN OFF", clearsIssue:"BREAKDOWN" }] 
+  },  
+  loading:{ 
+    name:"LOADING", 
+    pin:"2024", 
+    allowedStatuses: ["LOT READY"],
+    actions:[{ label:"LOT TAKEN", clearsIssue:"LOT READY" }] 
+  },  
+  quality:{ 
+    name:"QUALITY", 
+    pin:"2025", 
+    allowedStatuses: ["CMM NOT OK", "LOT HOLD", "SIGN PENDING"],
+    actions:[
+      { label:"CMM OK", clearsIssue:"CMM NOT OK" },
+      { label:"SIGN DONE", clearsIssue:"SIGN PENDING" },
+      { label:"HOLD CLEAR (LOT READY)", clearsIssue:"LOT HOLD", addIssue:"LOT READY" }
+    ] 
+  },  
+  toolroom:{ 
+    name:"TOOL ROOM", 
+    pin:"2027", 
+    allowedStatuses: ["FIXTURE NOT OK"],
+    actions:[{ label:"FIXTURE OK", clearsIssue:"FIXTURE NOT OK" }] 
+  },  
+  store:{ 
+    name:"STORE DEPARTMENT", 
+    pin:"2028", 
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
+  },  
+  supervisor:{ 
+    name:"SUPERVISOR", 
+    pin:"Ampa123", 
+    isViewOnly: true, 
+    allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    actions:[  
+      { label:"CLEAR HOLD", clearsIssue:"LOT HOLD" },  
+      { label:"CLEAR BREAKDOWN", clearsIssue:"BREAKDOWN" },  
+      { label:"CLEAR CMM NOT OK", clearsIssue:"CMM NOT OK" },  
+      { label:"CLEAR FIXTURE NOT OK", clearsIssue:"FIXTURE NOT OK" },  
+      { label:"CLEAR LOT READY", clearsIssue:"LOT READY" },  
+      { label:"CLEAR MATERIAL REQUIREMENT", clearsIssue:"MATERIAL REQUIREMENT" },  
+      { label:"CLEAR MATERIAL SHORTAGE", clearsIssue:"MATERIAL SHORTAGE" },  
+      { label:"RESET MACHINE TO RUNNING", clearsIssue:"ALL" }  
+    ] 
+  }  
+};  
+
+const ROUTE_MAP = {  
+  "BREAKDOWN":{ name:"Pravin Kolhe Bbi (Maintenance)", no:"919822431776", dept:"maintenance" },  
+  "FIXTURE NOT OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376", dept:"toolroom" },  
+  "FIXTURE OK":{ name:"Prashant Tarate (Tool Room)", no:"917350090376", dept:"toolroom" },  
+  "CMM NOT OK":{ name:"Santosh Shipurkar (Quality)", no:"919921862590", dept:"quality" },  
+  "LOT HOLD":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236", dept:"quality" },  
+  "LOT READY":{ name:"Sonpal Ram (Loading)", no:"919012683322", dept:"loading" },  
+  "SIGN PENDING":{ name:"Santosh Shipurkar (Quality)", no:"919921862590", dept:"quality" },  
+  "MATERIAL REQUIREMENT":{ name:"Sameer Sir (Store)", no:"918605802173", dept:"store" },  
+  "MATERIAL SHORTAGE":{ name:"Sameer Sir (Store)", no:"918605802173", dept:"store" },  
+  "RUNNING":{ name:"Mahesh Andhale (Supervisor)", no:"919881097236", dept:"supervisor" }  
+};  
+
+const ALL_MACHINES_LIST = (()=>{  
+  let a=[];  
+  for(let i=1;i<=35;i++){ a.push("EN"+i); }  
+  ["MK3","MK8","MK11","MK13","MK15","MK25","MK27","MK28"].forEach(x=>a.push(x));  
+  for(let i=1;i<=15;i++){ a.push("M"+i); }  
+  for(let i=1;i<=4;i++){ a.push("L"+i); }  
+  for(let i=1;i<=4;i++){ a.push("PN"+i); }  
+  for(let i=1;i<=3;i++){ a.push("BR"+i); }  
+  return a;  
+})();  
+
+const MASTER_STATUS_CONFIG = [  
+  { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
+  { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
+  { key:"BREAKDOWN", title:"BREAKDOWN", icon:"⚙️", accent:"#ff1744" },  
+  { key:"CMM NOT OK", title:"CMM NOT OK", icon:"⚙️", accent:"#0099ff" },  
+  { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
+  { key:"LOT READY", title:"LOT READY", icon:"⚙️", accent:"#ff9800" },  
+  { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
+  { key:"SIGN PENDING", title:"SIGN PENDING", icon:"📝", accent:"#38bdf8" },  
+  { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"📦", accent:"#ffd000" },  
+  { key:"MATERIAL SHORTAGE", title:"MAT SHORTAGE", icon:"⚠️", accent:"#ff0000" }  
+];  
+
+let machines = {};  
+let operator = null;  
+let department = null;  
+let curMachine = null;  
+let prev = {};  
+let lastWa = "";  
+let operatorStatusFilter = "TOTAL";  
+let departmentStatusFilter = "TOTAL";  
+let deptSelectedMachine = null;  
+
+function getCurrentShift(){  
+  const now = new Date();  
+  const t = now.getHours()*60 + now.getMinutes();  
+  if(t>=465 && t<975){ return "Shift A"; }  
+  if(t>=975 && t<1440){ return "Shift B"; }  
+  return "Shift C";  
+}  
+
+function getShiftRange(s){  
+  if(s==="Shift A" || s==="A"){ return "7:45 AM - 4:15 PM"; }  
+  if(s==="Shift B" || s==="B"){ return "4:15 PM - 12:00 AM"; }  
+  return "12:00 AM - 7:45 AM";  
+}  
+
+/* UNIQ REQ ID GENERATOR */
+function generateReqId() {
+  return "REQ-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
 }
 
-};
-
-
-/* =========================================================
-   WHATSAPP ROUTING
-========================================================= */
-
-const ROUTE_MAP={
-
-"BREAKDOWN":{
-  name:"Pravin Kolhe Bbi (Maintenance)",
-  no:"919822431776",
-  dept:"maintenance"
-},
-
-"FIXTURE NOT OK":{
-  name:"Prashant Tarate (Tool Room)",
-  no:"917350090376",
-  dept:"toolroom"
-},
-
-"FIXTURE OK":{
-  name:"Prashant Tarate (Tool Room)",
-  no:"917350090376",
-  dept:"toolroom"
-},
-
-"CMM NOT OK":{
-  name:"Santosh Shipurkar (Quality)",
-  no:"919921862590",
-  dept:"quality"
-},
-
-"LOT HOLD":{
-  name:"Mahesh Andhale (Supervisor)",
-  no:"919881097236",
-  dept:"quality"
-},
-
-"LOT READY":{
-  name:"Sonpal Ram (Loading)",
-  no:"919012683322",
-  dept:"loading"
-},
-
-"SIGN PENDING":{
-  name:"Santosh Shipurkar (Quality)",
-  no:"919921862590",
-  dept:"quality"
-},
-
-"MATERIAL REQUIREMENT":{
-  name:"Sameer Sir (Store)",
-  no:"918605802173",
-  dept:"store"
-},
-
-"MATERIAL SHORTAGE":{
-  name:"Sameer Sir (Store)",
-  no:"918605802173",
-  dept:"store"
-},
-
-"RUNNING":{
-  name:"Mahesh Andhale (Supervisor)",
-  no:"919881097236",
-  dept:"supervisor"
-}
-
-};
-
-
-/* =========================================================
-   69 MACHINES
-========================================================= */
-
-const ALL_MACHINES_LIST=(()=>{
-
-let a=[];
-
-for(let i=1;i<=35;i++){
-  a.push("EN"+i);
-}
-
-[
-  "MK3",
-  "MK8",
-  "MK11",
-  "MK13",
-  "MK15",
-  "MK25",
-  "MK27",
-  "MK28"
-].forEach(x=>a.push(x));
-
-for(let i=1;i<=15;i++){
-  a.push("M"+i);
-}
-
-for(let i=1;i<=4;i++){
-  a.push("L"+i);
-}
-
-for(let i=1;i<=4;i++){
-  a.push("PN"+i);
-}
-
-for(let i=1;i<=3;i++){
-  a.push("BR"+i);
-}
-
-return a;
-
-})();
-
-
-/* =========================================================
-   STATUS CONFIG
-========================================================= */
-
-const MASTER_STATUS_CONFIG=[
-
-{
-  key:"TOTAL",
-  title:"TOTAL",
-  icon:"⚙️",
-  accent:"#ffffff"
-},
-
-{
-  key:"RUNNING",
-  title:"RUNNING",
-  icon:"⚙️",
-  accent:"#00ff18"
-},
-
-{
-  key:"BREAKDOWN",
-  title:"BREAKDOWN",
-  icon:"⚙️",
-  accent:"#ff1744"
-},
-
-{
-  key:"CMM NOT OK",
-  title:"CMM NOT OK",
-  icon:"⚙️",
-  accent:"#0099ff"
-},
-
-{
-  key:"FIXTURE NOT OK",
-  title:"FIXTURE NOT OK",
-  icon:"⚙️",
-  accent:"#c83cff"
-},
-
-{
-  key:"LOT READY",
-  title:"LOT READY",
-  icon:"⚙️",
-  accent:"#ff9800"
-},
-
-{
-  key:"LOT HOLD",
-  title:"LOT HOLD",
-  icon:"⚙️",
-  accent:"#ffd000"
-},
-
-{
-  key:"SIGN PENDING",
-  title:"SIGN PENDING",
-  icon:"📝",
-  accent:"#38bdf8"
-},
-
-{
-  key:"MATERIAL REQUIREMENT",
-  title:"MAT REQ",
-  icon:"📦",
-  accent:"#ffd000"
-},
-
-{
-  key:"MATERIAL SHORTAGE",
-  title:"MAT SHORTAGE",
-  icon:"⚠️",
-  accent:"#ff0000"
-}
-
-];
-
-
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
-
-let machines={};
-
-let materialRequests={};
-
-let operator=null;
-let department=null;
-
-let curMachine=null;
-
-let prev={};
-
-let lastWa="";
-
-let operatorStatusFilter="TOTAL";
-
-let departmentStatusFilter="TOTAL";
-
-let deptSelectedMachine=null;
-
-let selectedDepartmentRequestId=null;
-
-
-/* =========================================================
-   SHIFT
-========================================================= */
-
-function getCurrentShift(){
-
-const now=new Date();
-
-const t=now.getHours()*60+now.getMinutes();
-
-if(t>=465 && t<975){
-  return "Shift A";
-}
-
-if(t>=975 && t<1440){
-  return "Shift B";
-}
-
-return "Shift C";
-
-}
-
-
-function getShiftRange(s){
-
-if(s==="Shift A" || s==="A"){
-  return "7:45 AM - 4:15 PM";
-}
-
-if(s==="Shift B" || s==="B"){
-  return "4:15 PM - 12:00 AM";
-}
-
-return "12:00 AM - 7:45 AM";
-
-}
-
-
-/* =========================================================
-   UNIQUE REQUEST ID
-========================================================= */
-
-function generateReqId(){
-
-return "REQ-"+
-Date.now().toString(36).toUpperCase()+
-"-"+
-Math.floor(1000+Math.random()*9000);
-
-}
-
-
-/* =========================================================
-   FIREBASE STATUS
-========================================================= */
-
-function setFirebaseStatus(online){
-
-const ids=[
-  "firebaseTopStatus",
-  "firebaseDeptStatus"
-];
-
-ids.forEach(id=>{
-
-const el=document.getElementById(id);
-
-if(!el)return;
-
-if(online){
-
-el.classList.remove("firebaseOffline");
-
-el.classList.add("firebaseOnline");
-
-el.innerHTML=
-'<span class="firebaseDot"></span>'+
-'<span>FIREBASE LIVE</span>';
-
-}else{
-
-el.classList.remove("firebaseOnline");
-
-el.classList.add("firebaseOffline");
-
-el.innerHTML=
-'<span class="firebaseDot"></span>'+
-'<span>OFFLINE</span>';
-
-}
-
-});
-
-const fb=document.getElementById("fbStat");
-
-if(fb){
-
-if(online){
-
-fb.innerText="LIVE - Firebase Connected";
-
-fb.style.color="#22c55e";
-
-}else{
-
-fb.innerText="OFFLINE - Check Internet";
-
-fb.style.color="#ef4444";
-
-}
-
-}
-
-}
-
-
-db.ref(".info/connected").on("value",snap=>{
-setFirebaseStatus(snap.val()===true);
-});
-
-
-/* =========================================================
-   DEFAULT MACHINE
-========================================================= */
-
-function getDefaultMachine(){
-
-return{
-  status:"RUNNING",
-  oldStatus:"RUNNING",
-  issues:{},
-  op:null
-};
-
-}
-
-
-function getAllMachines(){
-
-let m={};
-
-ALL_MACHINES_LIST.forEach(id=>{
-  m[id]=getDefaultMachine();
-});
-
-return m;
-
-}
-
-
-/* =========================================================
-   MATERIAL REQUEST HELPERS
-========================================================= */
-
-/*
- IMPORTANT:
-
- materialRequests/REQ-ID
-      |
-      |-- reqId
-      |-- machine
-      |-- partNo
-      |-- partName
-      |-- qty
-      |-- status
-      |-- operator
-      |-- shift
-      |-- createdAt
-      |-- updatedAt
-
- त्यामुळे Machine हा UNIQUE KEY नाही.
-*/
-
-
-function getMaterialRequestsForMachine(machineId){
-
-let arr=[];
-
-Object.keys(materialRequests||{}).forEach(id=>{
-
-const r=materialRequests[id];
-
-if(!r)return;
-
-if(String(r.machine||"")===String(machineId)){
-
-arr.push({
-  ...r,
-  reqId:r.reqId||id
-});
-
-}
-
-});
-
-
-/* OLD DATA COMPATIBILITY */
-
-const m=machines[machineId];
-
-if(m && m.materialDetails){
-
-const d=m.materialDetails;
-
-const oldId=d.reqId;
-
-const already=arr.some(x=>
-String(x.reqId)===String(oldId)
-);
-
-if(!already){
-
-arr.push({
-
-reqId:oldId||("LEGACY-"+machineId),
-
-machine:machineId,
-
-partNo:d.partNo||"-",
-
-partName:d.partName||"-",
-
-qty:d.qty||"-",
-
-status:
-hasStatus(m,"MATERIAL SHORTAGE")
-?
-"SHORTAGE"
-:
-"REQUIREMENT",
-
-operatorName:
-m.op ? m.op.name : "-",
-
-operatorId:
-m.op ? m.op.id : "-",
-
-shift:
-m.op ? m.op.shift : "-",
-
-createdAt:0
-
-});
-
-}
-
-}
-
-arr.sort((a,b)=>
-Number(b.createdAt||0)-Number(a.createdAt||0)
-);
-
-return arr;
-
-}
-
-
-function getActiveMaterialRequests(machineId){
-
-return getMaterialRequestsForMachine(machineId)
-.filter(r=>
-r.status==="REQUIREMENT" ||
-r.status==="SHORTAGE"
-);
-
-}
-
-
-/* =========================================================
-   SYNC MACHINE MATERIAL STATUS
-========================================================= */
-
-function syncMachineMaterialIssues(machineId){
-
-if(!machines[machineId]){
-  machines[machineId]=getDefaultMachine();
-}
-
-let m=machines[machineId];
-
-let issues=getMachineIssues(m);
-
-delete issues["MATERIAL REQUIREMENT"];
-
-delete issues["MATERIAL SHORTAGE"];
-
-const requests=getMaterialRequestsForMachine(machineId);
-
-requests.forEach(r=>{
-
-if(r.status==="REQUIREMENT"){
-
-issues["MATERIAL REQUIREMENT"]={
-  by:r.operatorName||"Operator",
-  time:r.createdAt
-  ?
-  new Date(r.createdAt).toLocaleTimeString("en-IN")
-  :
-  "-"
-};
-
-}
-
-if(r.status==="SHORTAGE"){
-
-issues["MATERIAL SHORTAGE"]={
-  by:r.updatedBy||"Store Department",
-  time:r.updatedAt
-  ?
-  new Date(r.updatedAt).toLocaleTimeString("en-IN")
-  :
-  "-"
-};
-
-}
-
-});
-
-m.issues=issues;
-
-m.status=getMachineStatusString(m);
-
-return m;
-
-}
-
-
-/* =========================================================
-   MACHINE ISSUES
-========================================================= */
-
-function getMachineIssues(m){
-
-if(!m)return{};
-
-if(m.issues && typeof m.issues==="object"){
-  return {...m.issues};
-}
-
-let obj={};
-
-if(m.status && m.status!=="RUNNING"){
-
-obj[m.status]={
-  by:m.op ? m.op.name : "Operator",
-  time:m.op ? m.op.time : "-"
-};
-
-}
-
-return obj;
-
-}
-
-
-function getMachineStatusString(m){
-
-if(!m)return"RUNNING";
-
-const issues=getMachineIssues(m);
-
-const keys=Object.keys(issues);
-
-if(keys.length===0){
-  return"RUNNING";
-}
-
-return keys.join(", ");
-
-}
-
-
-function hasStatus(m,st){
-
-if(!m)return false;
-
-if(st==="RUNNING"){
-
-return Object.keys(
-getMachineIssues(m)
-).length===0;
-
-}
-
-const issues=getMachineIssues(m);
-
-return !!issues[st];
-
-}
-
-
-/* =========================================================
-   SAVE MACHINE
-========================================================= */
-
-function saveMachine(id){
-
-if(!id || !machines[id]){
-
-return Promise.reject(
-new Error("Invalid machine")
-);
-
-}
-
-machines[id].status=
-getMachineStatusString(machines[id]);
-
-return db.ref("machines/"+id)
-.set(machines[id]);
-
-}
-
-
-/* =========================================================
-   LOG ACTION - IMPORTANT FIX
-========================================================= */
-
-function logStatusAction(
-mc,
-action,
-detail,
-user,
-oldSt,
-newSt,
-requestData=null
-){
-
-const mat=requestData||{};
-
-const reqId=
-mat.reqId||
-generateReqId();
-
-const payload={
-
-reqId:reqId,
-
-machine:mc||"-",
-
-oldStatus:oldSt||"RUNNING",
-
-newStatus:newSt||"RUNNING",
-
-action:action||"-",
-
-detail:detail||"-",
-
-user:user||"System",
-
-shift:
-mat.shift||
-getCurrentShift(),
-
-partNo:
-mat.partNo||
-"-",
-
-partName:
-mat.partName||
-"-",
-
-qty:
-mat.qty||
-"-",
-
-timestamp:Date.now(),
-
-timeStr:
-new Date().toLocaleString("en-IN")
-
-};
-
-return db.ref("statusLogs")
-.push(payload);
-
-}
-
-
-/* =========================================================
-   LOAD FIREBASE DATA
-========================================================= */
-
-function load(){
-
-/* MACHINES */
-
-db.ref("machines").on("value",snap=>{
-
-let d=snap.val();
-
-if(!d){
-
-machines=getAllMachines();
-
-const updates={};
-
-ALL_MACHINES_LIST.forEach(id=>{
-  updates["machines/"+id]=machines[id];
-});
-
-db.ref().update(updates);
-
-renderAllDashboards();
-
-return;
-
-}
-
-machines={};
-
-const missing=[];
-
-ALL_MACHINES_LIST.forEach(id=>{
-
-if(d[id]){
-
-machines[id]=d[id];
-
-machines[id].issues=
-getMachineIssues(d[id]);
-
-if(!machines[id].oldStatus){
-  machines[id].oldStatus="RUNNING";
-}
-
-}else{
-
-machines[id]=getDefaultMachine();
-
-missing.push(id);
-
-}
-
-});
-
-if(missing.length){
-
-const updates={};
-
-missing.forEach(id=>{
-  updates["machines/"+id]=machines[id];
-});
-
-db.ref().update(updates);
-
-}
-
-prev=
-JSON.parse(JSON.stringify(machines));
-
-renderAllDashboards();
-
-},error=>{
-
-console.error(error);
-
-setFirebaseStatus(false);
-
-});
-
-
-/* MATERIAL REQUESTS */
-
-db.ref("materialRequests").on("value",snap=>{
-
-materialRequests=snap.val()||{};
-
-ALL_MACHINES_LIST.forEach(id=>{
-  if(machines[id]){
-    syncMachineMaterialIssues(id);
+function setFirebaseStatus(online){  
+  const ids=["firebaseTopStatus","firebaseDeptStatus"];  
+  ids.forEach(id=>{  
+    const el=document.getElementById(id);  
+    if(!el) return;  
+    if(online){  
+      el.classList.remove("firebaseOffline");  
+      el.classList.add("firebaseOnline");  
+      el.innerHTML='<span class="firebaseDot"></span><span>FIREBASE LIVE</span>';  
+    }else{  
+      el.classList.remove("firebaseOnline");  
+      el.classList.add("firebaseOffline");  
+      el.innerHTML='<span class="firebaseDot"></span><span>OFFLINE</span>';  
+    }  
+  });  
+  const fb=document.getElementById("fbStat");  
+  if(fb){  
+    if(online){ fb.innerText="LIVE - Firebase Connected"; fb.style.color="#22c55e"; }  
+    else{ fb.innerText="OFFLINE - Check Internet"; fb.style.color="#ef4444"; }  
+  }  
+}  
+
+db.ref(".info/connected").on("value",snap=>{  
+  setFirebaseStatus(snap.val()===true);  
+});  
+
+function handleShiftChange(newShift){  
+  if(operator){  
+    operator.shift = newShift;  
+    localStorage.setItem("brembo_shift", newShift);  
+    localStorage.setItem("brembo_v7", JSON.stringify(operator));  
+  }  
+  renderAllDashboards();  
+}  
+
+function checkShiftAutoReset(){  
+  const saved = localStorage.getItem("brembo_shift");  
+  const live = getCurrentShift();  
+  const badge = document.getElementById("liveShiftBadge");  
+  if(badge){ badge.innerText = "SHIFT: "+live; }  
+  const txt = document.getElementById("autoShiftTxt");  
+  if(txt){ txt.innerText = "Current Running Shift: "+live+" ("+getShiftRange(live)+")"; }  
+
+  if(saved && saved!==live){  
+    handleShiftChange(live);  
+  }  
+}  
+
+function getMachineIssues(m){  
+  if(!m) return {};  
+  if(m.issues && typeof m.issues === 'object') return m.issues;  
+  let obj = {};  
+  if(m.status && m.status !== "RUNNING"){  
+    obj[m.status] = { by: m.op ? m.op.name : "Operator", time: m.op ? m.op.time : "-" };  
+  }  
+  return obj;  
+}  
+
+function getMachineStatusString(m){  
+  if(!m) return "RUNNING";  
+  const issues = getMachineIssues(m);  
+  const keys = Object.keys(issues);  
+  if(keys.length === 0) return "RUNNING";  
+  return keys.join(", ");  
+}  
+
+function hasStatus(m, st){  
+  if(!m) return false;  
+  if(st === "RUNNING"){  
+    return Object.keys(getMachineIssues(m)).length === 0;  
+  }  
+  const issues = getMachineIssues(m);  
+  return !!issues[st];  
+}  
+
+function getDefaultMachine(){  
+  return { status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null };  
+}  
+
+function getAllMachines(){  
+  let m={};  
+  ALL_MACHINES_LIST.forEach(id=>{ m[id]=getDefaultMachine(); });  
+  return m;  
+}  
+
+function saveMachine(id){  
+  if(!id || !machines[id]){ return Promise.reject(new Error("Invalid machine")); }  
+  machines[id].status = getMachineStatusString(machines[id]);  
+  return db.ref("machines/"+id).set(machines[id]);  
+}  
+
+function resetAllMachinesFirebase(){  
+  const updates={};  
+  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null }; });  
+  return db.ref().update(updates);  
+}  
+
+/* LOGGING FUNCTION (REQ ID सह डेटा मॅपिंग) */
+function logStatusAction(mc, action, detail, user, oldSt, newSt){  
+  const m = machines[mc] || {};  
+  const mat = m.materialDetails || {};  
+  
+  db.ref("statusLogs").push({  
+    reqId: mat.reqId || generateReqId(),
+    machine: mc,  
+    oldStatus: oldSt || m.oldStatus || "RUNNING",  
+    newStatus: newSt || getMachineStatusString(m),  
+    action: action,  
+    detail: detail,  
+    user: user || "System",  
+    shift: getCurrentShift(),  
+    partNo: mat.partNo || "-",  
+    partName: mat.partName || "-",  
+    qty: mat.qty || "-",  
+    timestamp: Date.now(),  
+    timeStr: new Date().toLocaleString("en-IN")  
+  });  
+}  
+
+function load(){  
+  db.ref("machines").on("value",snap=>{  
+    let d=snap.val();  
+    if(!d){  
+      machines=getAllMachines();  
+      const updates={};  
+      ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]=machines[id]; });  
+      db.ref().update(updates);  
+      renderAllDashboards();  
+      return;  
+    }  
+    machines={};  
+    const missing=[];  
+    ALL_MACHINES_LIST.forEach(id=>{  
+      if(d[id]){   
+        machines[id]=d[id];   
+        machines[id].issues = getMachineIssues(d[id]);  
+        if(!machines[id].oldStatus) machines[id].oldStatus = "RUNNING";
+      } else{   
+        machines[id]=getDefaultMachine(); missing.push(id);   
+      }  
+    });  
+
+    if(missing.length){  
+      const updates={};  
+      missing.forEach(id=>{ updates["machines/"+id]=machines[id]; });  
+      db.ref().update(updates);  
+    }  
+
+    for(let id of ALL_MACHINES_LIST){  
+      const stNow = getMachineStatusString(machines[id]);  
+      const stPrev = getMachineStatusString(prev[id]);  
+      if(prev[id] && stPrev !== stNow){  
+        const who = machines[id].op ? machines[id].op.name : "Someone";  
+        const firstIssue = Object.keys(getMachineIssues(machines[id]))[0] || "RUNNING";  
+        const route = ROUTE_MAP[firstIssue] || ROUTE_MAP.RUNNING;  
+        
+        if(department && (department === route.dept || department === "supervisor")){
+          loudPopup(id, stNow, who, route);  
+        } else if(!department && operator && operator.machine === id){
+          loudPopup(id, stNow, who, route);  
+        }
+      }  
+    }  
+
+    prev = JSON.parse(JSON.stringify(machines));  
+    const fb = document.getElementById("fbStat");  
+    if(fb){  
+      fb.innerText="LIVE - "+Object.keys(machines).length+" M/C";  
+      fb.style.color="#22c55e";  
+    }  
+    
+    renderAllDashboards();  
+  },error=>{  
+    console.error("Firebase read error:", error);  
+    setFirebaseStatus(false);  
+  });  
+}  
+
+function checkExistingSession(){  
+  const savedOp = localStorage.getItem("brembo_v7");  
+  const savedDept = localStorage.getItem("brembo_department");  
+  
+  if(savedOp){  
+    try {  
+      operator = JSON.parse(savedOp);  
+      curMachine = operator.machine;  
+      document.getElementById("login").style.display="none";  
+      document.getElementById("operatorDashboard").style.display="block";  
+      document.getElementById("departmentDashboard").style.display="none";  
+      applyOperator(true);  
+      return true;  
+    } catch(e){  
+      localStorage.removeItem("brembo_v7");  
+    }  
+  } else if(savedDept){  
+    department = savedDept;  
+    document.getElementById("login").style.display="none";  
+    document.getElementById("operatorDashboard").style.display="none";  
+    document.getElementById("departmentDashboard").style.display="block";  
+    renderDepartmentDashboard();  
+    return true;  
+  }  
+  
+  document.getElementById("login").style.display="flex";  
+  return false;  
+}  
+
+function renderAllDashboards(){  
+  if(operator){  
+    renderOperatorStatusCards();  
+    renderOperatorMachineList();  
+    if(curMachine) sel(curMachine);  
+  }  
+  if(department){  
+    renderDepartmentDashboard();  
+  }  
+}  
+
+function showLoginMode(mode){  
+  const op = document.getElementById("operatorLogin");  
+  const dep = document.getElementById("departmentLogin");  
+  const opBtn = document.getElementById("operatorModeBtn");  
+  const depBtn = document.getElementById("departmentModeBtn");  
+
+  if(mode==="operator"){  
+    op.style.display="block"; dep.style.display="none";  
+    opBtn.classList.add("active"); depBtn.classList.remove("active");  
+  }else{  
+    op.style.display="none"; dep.style.display="block";  
+    opBtn.classList.remove("active"); depBtn.classList.add("active");  
+  }  
+}  
+
+function fillMachineDropdown(){  
+  const sel = document.getElementById("opMachine");  
+  sel.innerHTML = '<option value="">-- SELECT MACHINE --</option>'+  
+    ALL_MACHINES_LIST.map(m=>`<option value="${m}">${m}</option>`).join("");  
+  document.getElementById("opShift").value = getCurrentShift();  
+  checkShiftAutoReset();  
+}  
+
+function doLogin(){  
+  const id = document.getElementById("opId").value.trim();  
+  const nm = document.getElementById("opName").value.trim();  
+  const pin = document.getElementById("opPin").value.trim();  
+  const mc = document.getElementById("opMachine").value;  
+  const sh = document.getElementById("opShift").value;  
+
+  if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
+  if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
+
+  const targetMc = machines[mc];  
+  if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
+    alert("⛔ ACCESS DENIED: Machine "+mc+" currently has an active session by "+targetMc.op.name+" ("+targetMc.op.id+"). Multiple logins not allowed!");  
+    return;  
+  }  
+
+  operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };  
+  department=null;  
+
+  localStorage.setItem("brembo_v7", JSON.stringify(operator));  
+  localStorage.setItem("brembo_shift", sh);  
+
+  document.getElementById("login").style.display="none";  
+  document.getElementById("operatorDashboard").style.display="block";  
+  applyOperator();  
+
+  const focusEl = document.getElementById("operatorFocusArea");
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
+}  
+
+function applyOperator(isReload = false){  
+  if(!operator) return;  
+  document.getElementById("wel").innerText = operator.name+" ("+operator.id+")";  
+  document.getElementById("welMc").innerText = operator.machine;  
+  document.getElementById("welShift").innerText = operator.shift;  
+  document.getElementById("shiftRangeTop").innerText = getShiftRange(operator.shift);  
+  curMachine = operator.machine;  
+
+  if(!isReload){  
+    if(!machines[operator.machine]){ machines[operator.machine]=getDefaultMachine(); }  
+    machines[operator.machine].op={  
+      name:operator.name, id:operator.id, time: new Date().toLocaleTimeString("en-IN"),  
+      machine:operator.machine, shift:operator.shift  
+    };  
+    saveMachine(operator.machine).catch(err=>{  
+      console.error(err); alert("Firebase save failed. Please check Internet.");  
+    });  
+  }  
+  renderAllDashboards();  
+}  
+
+function doLogout(){  
+  if(!confirm("Logout?")) return;  
+  if(operator && machines[operator.machine]){
+    machines[operator.machine].op = null;
+    saveMachine(operator.machine);
   }
-});
-
-renderAllDashboards();
-
-});
-
-
-/* STATUS LOGS NOTIFICATION */
-
-db.ref("statusLogs").limitToLast(1)
-.on("child_added",snap=>{
-
-const l=snap.val();
-
-if(!l)return;
-
-});
-
-}
-
-
-/* =========================================================
-   SESSION
-========================================================= */
-
-function checkExistingSession(){
-
-const savedOp=
-localStorage.getItem("brembo_v7");
-
-const savedDept=
-localStorage.getItem("brembo_department");
-
-
-if(savedOp){
-
-try{
-
-operator=JSON.parse(savedOp);
-
-curMachine=operator.machine;
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("operatorDashboard").style.display="block";
-
-applyOperator(true);
-
-return true;
-
-}catch(e){
-
-localStorage.removeItem("brembo_v7");
-
-}
-
-}
-
-
-if(savedDept){
-
-department=savedDept;
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("departmentDashboard").style.display="block";
-
-const cfg=DEPARTMENT_CONFIG[department];
-
-departmentStatusFilter=
-cfg && cfg.allowedStatuses.length
-?
-cfg.allowedStatuses[0]
-:
-"TOTAL";
-
-renderDepartmentDashboard();
-
-return true;
-
-}
-
-
-document.getElementById("login").style.display="flex";
-
-return false;
-
-}
-
-
-/* =========================================================
-   RENDER ALL
-========================================================= */
-
-function renderAllDashboards(){
-
-if(operator){
-
-renderOperatorStatusCards();
-
-renderOperatorMachineList();
-
-if(curMachine){
-  sel(curMachine);
-}
-
-}
-
-if(department){
-
-renderDepartmentDashboard();
-
-}
-
-}
-
-
-/* =========================================================
-   LOGIN MODE
-========================================================= */
-
-function showLoginMode(mode){
-
-const op=document.getElementById("operatorLogin");
-
-const dep=document.getElementById("departmentLogin");
-
-const opBtn=document.getElementById("operatorModeBtn");
-
-const depBtn=document.getElementById("departmentModeBtn");
-
-
-if(mode==="operator"){
-
-op.style.display="block";
-
-dep.style.display="none";
-
-opBtn.classList.add("active");
-
-depBtn.classList.remove("active");
-
-}else{
-
-op.style.display="none";
-
-dep.style.display="block";
-
-opBtn.classList.remove("active");
-
-depBtn.classList.add("active");
-
-}
-
-}
-
-
-/* =========================================================
-   MACHINE DROPDOWN
-========================================================= */
-
-function fillMachineDropdown(){
-
-const selEl=document.getElementById("opMachine");
-
-selEl.innerHTML=
-'<option value="">-- SELECT MACHINE --</option>'+
-ALL_MACHINES_LIST
-.map(m=>`<option value="${m}">${m}</option>`)
-.join("");
-
-document.getElementById("opShift").value=
-getCurrentShift();
-
-document.getElementById("autoShiftTxt").innerText=
-"Current Running Shift: "+
-getCurrentShift()+
-" ("+
-getShiftRange(getCurrentShift())+
-")";
-
-}
-
-
-/* =========================================================
-   OPERATOR LOGIN
-========================================================= */
-
-function doLogin(){
-
-const id=
-document.getElementById("opId").value.trim();
-
-const nm=
-document.getElementById("opName").value.trim();
-
-const pin=
-document.getElementById("opPin").value.trim();
-
-const mc=
-document.getElementById("opMachine").value;
-
-const sh=
-document.getElementById("opShift").value;
-
-
-if(!id||!nm||!pin||!mc||!sh){
-
-alert(
-"Please fill ID, Name, PIN, Machine and Shift!"
-);
-
-return;
-
-}
-
-
-if(pin!==OPERATOR_PIN){
-
-alert("Wrong Operator PIN! Access Denied.");
-
-return;
-
-}
-
-
-const targetMc=machines[mc];
-
-if(
-targetMc &&
-targetMc.op &&
-targetMc.op.id &&
-targetMc.op.id!==id
-){
-
-alert(
-"⛔ ACCESS DENIED: Machine "+
-mc+
-" currently has an active session by "+
-targetMc.op.name+
-" ("+
-targetMc.op.id+
-")."
-);
-
-return;
-
-}
-
-
-operator={
-  id:id,
-  name:nm,
-  machine:mc,
-  shift:sh,
-  time:new Date().toLocaleTimeString("en-IN")
-};
-
-department=null;
-
-localStorage.setItem(
-"brembo_v7",
-JSON.stringify(operator)
-);
-
-localStorage.setItem(
-"brembo_shift",
-sh
-);
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("operatorDashboard").style.display="block";
-
-applyOperator();
-
-}
-
-
-/* =========================================================
-   APPLY OPERATOR
-========================================================= */
-
-function applyOperator(isReload=false){
-
-if(!operator)return;
-
-document.getElementById("wel").innerText=
-operator.name+
-" ("+
-operator.id+
-")";
-
-document.getElementById("welMc").innerText=
-operator.machine;
-
-document.getElementById("welShift").innerText=
-operator.shift;
-
-document.getElementById("shiftRangeTop").innerText=
-getShiftRange(operator.shift);
-
-curMachine=operator.machine;
-
-
-if(!isReload){
-
-if(!machines[operator.machine]){
-  machines[operator.machine]=getDefaultMachine();
-}
-
-machines[operator.machine].op={
-
-name:operator.name,
-
-id:operator.id,
-
-time:
-new Date().toLocaleTimeString("en-IN"),
-
-machine:operator.machine,
-
-shift:operator.shift
-
-};
-
-saveMachine(operator.machine);
-
-}
-
-renderAllDashboards();
-
-}
-
-
-/* =========================================================
-   OPERATOR LOGOUT
-========================================================= */
-
-function doLogout(){
-
-if(!confirm("Logout?"))return;
-
-if(
-operator &&
-machines[operator.machine]
-){
-
-machines[operator.machine].op=null;
-
-saveMachine(operator.machine);
-
-}
-
-localStorage.removeItem("brembo_v7");
-
-localStorage.removeItem("brembo_shift");
-
-operator=null;
-
-location.reload();
-
-}
-
-
-/* =========================================================
-   RESET ALL
-   MATERIAL REQUEST HISTORY IS NOT DELETED
-========================================================= */
-
-function resetAll(){
-
-const pin=prompt("ENTER ADMIN PIN:");
-
-if(pin===null)return;
-
-if(pin!==ADMIN_PIN){
-
-alert("Wrong PIN! Access Denied!");
-
-return;
-
-}
-
-if(
-!confirm(
-"Reset all 69 machines to RUNNING?\n\nMaterial Request History will NOT be deleted."
-)
-)return;
-
-
-/*
- Only normal machine issues reset.
- Material requests are kept separately.
-*/
-
-const updates={};
-
-ALL_MACHINES_LIST.forEach(id=>{
-
-const m=machines[id]||getDefaultMachine();
-
-const materialIssues={};
-
-const issues=getMachineIssues(m);
-
-if(issues["MATERIAL REQUIREMENT"]){
-  materialIssues["MATERIAL REQUIREMENT"]=
-  issues["MATERIAL REQUIREMENT"];
-}
-
-if(issues["MATERIAL SHORTAGE"]){
-  materialIssues["MATERIAL SHORTAGE"]=
-  issues["MATERIAL SHORTAGE"];
-}
-
-updates["machines/"+id]={
-
-status:
-Object.keys(materialIssues).length
-?
-Object.keys(materialIssues).join(", ")
-:
-"RUNNING",
-
-oldStatus:m.status||"RUNNING",
-
-issues:materialIssues,
-
-op:m.op||null
-
-};
-
-});
-
-
-db.ref().update(updates)
-.then(()=>{
-
-alert(
-"All 69 machines reset.\nMaterial Request History preserved."
-);
-
-renderAllDashboards();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"Reset failed. Check Firebase connection."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   POPUP
-========================================================= */
-
-function loudPopup(mid,st,who,routeTo){
-
-const b=document.getElementById("notifBig");
-
-b.innerHTML=
-
-"🚨 "+
-escapeHtml(mid)+
-"<br><br>"+
-escapeHtml(st)+
-"<br><br>"+
-"<span style='font-size:13px;color:#ffeb3b'>To: "+
-escapeHtml(routeTo.name)+
-"</span>"+
-"<br>"+
-"<span style='font-size:11px'>By: "+
-escapeHtml(who)+
-"</span>"+
-"<br><br>"+
-"<button onclick=\"this.parentElement.style.display='none'\" "+
-"style='padding:8px 20px;border-radius:20px;border:none;font-weight:900'>"+
-"CLOSE"+
-"</button>";
-
-b.style.display="block";
-
-if(navigator.vibrate){
-  navigator.vibrate([600,200,600,200,600]);
-}
-
-setTimeout(()=>{
-  b.style.display="none";
-},9000);
-
-}
-
-
-/* =========================================================
-   STATUS COUNT
-========================================================= */
-
-function getStatusCount(status){
-
-if(status==="TOTAL"){
-  return ALL_MACHINES_LIST.length;
-}
-
-return ALL_MACHINES_LIST.filter(id=>{
-
-const m=
-machines[id]||
-getDefaultMachine();
-
-return hasStatus(m,status);
-
-}).length;
-
-}
-
-
-/* =========================================================
-   STATUS CARDS
-========================================================= */
-
-function renderStatusCards(
-containerId,
-activeStatus,
-clickFunction,
-filterList=null
-){
-
-const container=
-document.getElementById(containerId);
-
-if(!container)return;
-
-let cards=MASTER_STATUS_CONFIG;
-
-if(
-Array.isArray(filterList)
-){
-
-cards=
-MASTER_STATUS_CONFIG.filter(
-x=>filterList.includes(x.key)
-);
-
-}
-
-container.innerHTML=
-cards.map(item=>{
-
-const count=
-getStatusCount(item.key);
-
-const active=
-activeStatus===item.key
-?
-"active"
-:
-"";
-
-const blink=
-item.key==="MATERIAL SHORTAGE" &&
-count>0
-?
-"blinkAlert"
-:
-"";
-
-return`
-
-<div
-class="statusCard ${active} ${blink}"
-style="--accent:${item.accent}"
-onclick="${clickFunction}('${item.key}')">
-
-<div class="statusCardTitle">
-
-<span class="statusIcon">
-${item.icon}
-</span>
-
-<span>
-${item.title}
-</span>
-
-</div>
-
-<div class="statusCardCount">
-${count}
-</div>
-
-<div class="statusCardHint">
-CLICK TO VIEW MACHINES
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-function getStatusDisplayName(status){
-
-if(status==="MATERIAL REQUIREMENT"){
-  return"📦 MAT REQ";
-}
-
-if(status==="MATERIAL SHORTAGE"){
-  return"⚠️ MAT SHORTAGE";
-}
-
-if(!status){
-  return"RUNNING";
-}
-
-return status;
-
-}
-
-
-/* =========================================================
-   OPERATOR STATUS
-========================================================= */
-
-function setOperatorStatusFilter(status){
-
-operatorStatusFilter=status;
-
-renderOperatorStatusCards();
-
-renderOperatorMachineList();
-
-}
-
-
-function renderOperatorStatusCards(){
-
-renderStatusCards(
-"operatorStatusCards",
-operatorStatusFilter,
-"setOperatorStatusFilter"
-);
-
-}
-
-
-function renderOperatorMachineList(){
-
-const grid=
-document.getElementById(
-"operatorMachineResultGrid"
-);
-
-const title=
-document.getElementById(
-"operatorStatusMachineTitle"
-);
-
-const sub=
-document.getElementById(
-"operatorStatusMachineSub"
-);
-
-const count=
-document.getElementById(
-"operatorStatusMachineCount"
-);
-
-if(!grid)return;
-
-let filtered=[];
-
-
-if(operatorStatusFilter==="TOTAL"){
-
-filtered=
-ALL_MACHINES_LIST.slice();
-
-title.innerText=
-"⚙️ ALL MACHINES";
-
-sub.innerText=
-"Select a machine to view details.";
-
-}else{
-
-filtered=
-ALL_MACHINES_LIST.filter(id=>{
-
-const m=
-machines[id]||
-getDefaultMachine();
-
-return hasStatus(
-m,
-operatorStatusFilter
-);
-
-});
-
-title.innerText=
-"⚙️ "+
-getStatusDisplayName(
-operatorStatusFilter
-)+
-" MACHINES";
-
-sub.innerText=
-"Machines currently showing this status.";
-
-}
-
-
-count.innerText=
-filtered.length+
-" MACHINES";
-
-
-if(filtered.length===0){
-
-grid.innerHTML=
-`<div style="grid-column:1/-1;text-align:center;color:#777;padding:25px">
-NO MACHINES IN THIS STATUS
-</div>`;
-
-return;
-
-}
-
-
-grid.innerHTML=
-filtered.map(id=>{
-
-const m=
-machines[id]||
-getDefaultMachine();
-
-const selected=
-curMachine===id
-?
-"selected"
-:
-"";
-
-const st=
-getMachineStatusString(m);
-
-const shortage=
-hasStatus(m,"MATERIAL SHORTAGE")
-?
-"blinkAlert"
-:
-"";
-
-return`
-
-<div
-class="machineResult ${selected} ${shortage}"
-onclick="operatorSelectMachine('${id}')">
-
-${id}
-
-<span class="machineResultStatus">
-${getStatusDisplayName(st)}
-</span>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-function operatorSelectMachine(id){
-
-if(!operator)return;
-
-if(!machines[id])return;
-
-curMachine=id;
-
-sel(id);
-
-renderOperatorMachineList();
-
-}
-
-
-/* =========================================================
-   MATERIAL REQUEST HTML
-========================================================= */
-
-function materialRequestHtml(
-machineId,
-showActions=false,
-departmentMode=false
-){
-
-const requests=
-getMaterialRequestsForMachine(machineId);
-
-if(!requests.length){
-
-return"";
-
-}
-
-
-let html=`
-
-<div class="materialRequestBox">
-
-<div style="font-weight:900;color:#eab308;font-size:13px">
-📦 MATERIAL REQUEST RECORDS
-</div>
-
-<div style="font-size:10px;color:#777;margin-top:3px">
-All requests are stored separately. Old requests are not overwritten.
-</div>
-
-`;
-
-
-requests.forEach(r=>{
-
-let statusClass="pending";
-
-let statusText="MATERIAL REQUIREMENT";
-
-let statusCss="reqPending";
-
-
-if(r.status==="SHORTAGE"){
-
-statusClass="shortage";
-
-statusText="MATERIAL SHORTAGE";
-
-statusCss="reqShortage";
-
-}
-
-
-if(r.status==="RECEIVED"){
-
-statusClass="received";
-
-statusText="MATERIAL RECEIVED";
-
-statusCss="reqReceived";
-
-}
-
-
-html+=`
-
-<div
-class="materialRequestItem ${statusClass}"
-data-req="${escapeHtml(r.reqId)}">
-
-<div class="reqTitle">
-
-<span class="reqId">
-${escapeHtml(r.reqId)}
-</span>
-
-<span class="reqStatus ${statusCss}">
-${statusText}
-</span>
-
-</div>
-
-<div class="reqData">
-
-<b>Machine:</b>
-${escapeHtml(r.machine||machineId)}
-<br>
-
-<b>Part No:</b>
-${escapeHtml(r.partNo||"-")}
-<br>
-
-<b>Part Name:</b>
-${escapeHtml(r.partName||"-")}
-<br>
-
-<b>Quantity:</b>
-${escapeHtml(r.qty||"-")}
-<br>
-
-<b>Shift:</b>
-${escapeHtml(r.shift||"-")}
-<br>
-
-<b>Requested By:</b>
-${escapeHtml(r.operatorName||"-")}
-
-`;
-
-if(r.createdAt){
-
-html+=`
-<br>
-<b>Request Time:</b>
-${escapeHtml(
-new Date(r.createdAt)
-.toLocaleString("en-IN")
-)}
-`;
-
-}
-
-if(r.updatedAt){
-
-html+=`
-<br>
-<b>Last Action:</b>
-${escapeHtml(
-r.updatedBy||"-"
-)}
-<br>
-<b>Action Time:</b>
-${escapeHtml(
-new Date(r.updatedAt)
-.toLocaleString("en-IN")
-)}
-`;
-
-}
-
-html+=`
-</div>
-`;
-
-
-/* OPERATOR MATERIAL RECEIVED */
-
-if(
-showActions &&
-!departmentMode &&
-operator &&
-r.status!=="RECEIVED"
-){
-
-html+=`
-
-<button
-class="reqAction"
-style="background:#166534;color:#fff;border-color:#22c55e"
-onclick="receiveSpecificMaterial('${escapeHtml(r.reqId)}')">
-
-✅ MATERIAL RECEIVED — ${escapeHtml(r.reqId)}
-
-</button>
-
-`;
-
-}
-
-
-/* STORE ACTION */
-
-if(
-departmentMode &&
-department==="store" &&
-r.status==="REQUIREMENT"
-){
-
-html+=`
-
-<button
-class="reqAction"
-style="background:#7f1d1d;color:#fff;border-color:#ef4444"
-onclick="markSpecificRequestShortage('${escapeHtml(r.reqId)}')">
-
-⚠️ MARK OUT OF STOCK — ${escapeHtml(r.reqId)}
-
-</button>
-
-`;
-
-}
-
-html+=`
-</div>
-`;
-
-});
-
-
-html+=`
-</div>
-`;
-
-return html;
-
-}
-
-
-/* =========================================================
-   OPERATOR MACHINE DETAILS
-========================================================= */
-
-function sel(id){
-
-if(!machines[id])return;
-
-curMachine=id;
-
-const m=machines[id];
-
-const op=m.op;
-
-const issues=getMachineIssues(m);
-
-const mainIssue=
-Object.keys(issues)[0]||
-"RUNNING";
-
-const route=
-ROUTE_MAP[mainIssue]||
-ROUTE_MAP.RUNNING;
-
-const statusStr=
-getMachineStatusString(m);
-
-let badgeBg="#a30b11";
-
-if(statusStr==="RUNNING"){
-  badgeBg="#087f23";
-}
-
-const isOwnMachine=
-operator &&
-id===operator.machine;
-
-
-document.getElementById("machineDetail").innerHTML=`
-
-<div class="detailTop">
-
-<div>
-
-<div>
-
-<span class="machineTitle">
-${escapeHtml(id)}
-</span>
-
-${
-isOwnMachine
-?
-`<span class="yours">☆ YOUR MACHINE</span>`
-:
-`<span style="color:#777;font-size:12px;font-weight:800;margin-left:10px">
-VIEW ONLY
-</span>`
-}
-
-</div>
-
-<div class="statusLine">
-
-Status:
-
-<b style="
-background:${badgeBg};
-color:#fff;
-padding:6px 10px;
-border-radius:6px">
-
-${getStatusDisplayName(statusStr)}
-
-</b>
-
-${
-isOwnMachine
-?
-`&nbsp;|&nbsp; Shift:
-<b style="color:#ffd000">
-${escapeHtml(operator.shift)}
-(${escapeHtml(getShiftRange(operator.shift))})
-</b>`
-:
-""
-}
-
-</div>
-
-</div>
-
-<div class="routeTop">
-
-<div class="routeTitle">
-WHATSAPP ROUTING
-</div>
-
-<div class="routeLine">
-👤 ${escapeHtml(route.name)}
-</div>
-
-<div class="routeLine">
-☎ +${escapeHtml(route.no)}
-</div>
-
-</div>
-
-</div>
-
-`;
-
-
-/* MATERIAL RECORDS */
-
-document.getElementById("machineDetail").innerHTML+=
-materialRequestHtml(
-id,
-isOwnMachine,
-false
-);
-
-
-/* OPERATOR DETAILS */
-
-if(operator){
-
-if(isOwnMachine){
-
-document.getElementById("operatorBox").innerHTML=`
-
-<div class="infoBox">
-
-<div class="infoTitle">
-YOUR DETAILS
-</div>
-
-<div class="infoGrid">
-
-<div class="label">ID</div>
-<div class="value">
-${escapeHtml(operator.id)}
-</div>
-
-<div></div>
-
-<div class="label">Name</div>
-<div class="value">
-${escapeHtml(operator.name)}
-</div>
-
-<div></div>
-
-<div class="label">Machine</div>
-<div class="value">
-${escapeHtml(id)}
-</div>
-
-<div></div>
-
-<div class="label">Shift</div>
-<div class="value" style="color:#ffd000">
-${escapeHtml(operator.shift)}
-(${escapeHtml(getShiftRange(operator.shift))})
-</div>
-
-<div></div>
-
-<div class="label">Login Time</div>
-<div class="value">
-${escapeHtml(
-op ? op.time : operator.time
-)}
-</div>
-
-<div></div>
-
-</div>
-</div>
-`;
-
-}else{
-
-document.getElementById("operatorBox").innerHTML=`
-
-<div class="infoBox">
-
-<div class="infoTitle" style="color:#777">
-ASSIGNED OPERATOR DETAILS
-</div>
-
-<div class="infoGrid">
-
-<div class="label">ID</div>
-<div class="value">
-${op ? escapeHtml(op.id) : "-"}
-</div>
-
-<div></div>
-
-<div class="label">Name</div>
-<div class="value">
-${op ? escapeHtml(op.name) : "-"}
-</div>
-
-<div></div>
-
-<div class="label">Machine</div>
-<div class="value">
-${escapeHtml(id)}
-</div>
-
-<div></div>
-
-<div class="label">Shift</div>
-<div class="value">
-${op ? escapeHtml(op.shift) : "-"}
-</div>
-
-<div></div>
-
-</div>
-</div>
-`;
-
-}
-
-}
-
-
-/* STATUS BUTTONS */
-
-const statuses=[
-"RUNNING",
-"BREAKDOWN",
-"CMM NOT OK",
-"FIXTURE NOT OK",
-"LOT HOLD",
-"LOT READY",
-"SIGN PENDING",
-"MATERIAL REQUIREMENT"
-];
-
-
-if(operator && isOwnMachine){
-
-let btns=statuses.map(s=>`
-
-<button
-class="statusBtn"
-onclick="upd('${s}')">
-
-<span>
-${
-s==="MATERIAL REQUIREMENT"
-?
-"📦 Request Material"
-:
-s
-}
-</span>
-
-<span>›</span>
-
-</button>
-
-`).join("");
-
-
-const activeReqs=
-getActiveMaterialRequests(id);
-
-
-if(activeReqs.length){
-
-btns=`
-
-<button
-class="statusBtn matRecvBtn"
-onclick="receiveAllVisibleMaterials()">
-
-✅ MATERIAL RECEIVED — SELECT REQUEST BELOW
-
-<span>✓</span>
-
-</button>
-
-`+
-btns;
-
-}
-
-
-document.getElementById("statusList").innerHTML=`
-
-<div class="statusHeading">
-UPDATE MACHINE STATUS
-</div>
-
-<div class="statusGrid">
-${btns}
-</div>
-
-<div class="urgentBox">
-
-<input
-type="checkbox"
-id="urgentWaCheck">
-
-<label for="urgentWaCheck">
-🚨 URGENT? SEND WHATSAPP ALERT
-</label>
-
-</div>
-
-`;
-
-document.getElementById("lockMsg").innerText=
-"You can update only your assigned machine: "+
-operator.machine;
-
-}else{
-
-document.getElementById("statusList").innerHTML=`
-
-<div style="
-margin-top:18px;
-padding:14px;
-border:1px dashed #444;
-border-radius:10px;
-color:#777;
-font-size:12px;
-font-weight:700;
-text-align:center">
-
-🔒 VIEW ONLY
-
-</div>
-
-`;
-
-document.getElementById("lockMsg").innerText=
-"View only. Your assigned machine is: "+
-(operator ? operator.machine : "None");
-
-}
-
-}
-
-
-/* =========================================================
-   OPEN MATERIAL FORM
-========================================================= */
-
-function upd(s){
-
-if(!operator){
-
-document.getElementById("login").style.display="flex";
-
-return;
-
-}
-
-if(curMachine!==operator.machine){
-
-alert(
-"Access denied. You can update only your assigned machine: "+
-operator.machine
-);
-
-return;
-
-}
-
-
-if(s==="MATERIAL REQUIREMENT"){
-
-openMaterialModal();
-
-return;
-
-}
-
-
-executeStatusUpdate(s);
-
-}
-
-
-function openMaterialModal(){
-
-document.getElementById("matPartNo").value="";
-
-document.getElementById("matPartName").value="";
-
-document.getElementById("matQty").value="";
-
-document.getElementById("materialModal").style.display="flex";
-
-}
-
-
-function closeMaterialModal(){
-
-document.getElementById("materialModal").style.display="none";
-
-}
-
-
-/* =========================================================
-   SUBMIT NEW MATERIAL REQUEST
-   NEW INDEPENDENT FIREBASE RECORD
-========================================================= */
-
-function submitMaterialRequirement(){
-
-const partNo=
-document.getElementById("matPartNo")
-.value.trim();
-
-const partName=
-document.getElementById("matPartName")
-.value.trim();
-
-const qty=
-document.getElementById("matQty")
-.value.trim();
-
-
-if(!partNo||!partName||!qty){
-
-alert(
-"Please fill Part No, Part Name, and Quantity!"
-);
-
-return;
-
-}
-
-
-if(
-!operator||
-!curMachine||
-curMachine!==operator.machine
-){
-
-alert(
-"Access denied. Please login to your assigned machine."
-);
-
-return;
-
-}
-
-
-const reqId=generateReqId();
-
-const request={
-
-reqId:reqId,
-
-machine:curMachine,
-
-partNo:partNo,
-
-partName:partName,
-
-qty:qty,
-
-status:"REQUIREMENT",
-
-operatorName:operator.name,
-
-operatorId:operator.id,
-
-shift:operator.shift,
-
-createdAt:Date.now(),
-
-updatedAt:Date.now(),
-
-updatedBy:operator.name
-
-};
-
-
-/*
- IMPORTANT:
-
- DO NOT save request inside machine.materialDetails only.
-
- Save it separately under materialRequests/REQ-ID
-*/
-
-db.ref("materialRequests/"+reqId)
-.set(request)
-.then(()=>{
-
-/*
- Update machine issue.
-
- Existing old material requests remain untouched.
-*/
-
-if(!machines[curMachine]){
-  machines[curMachine]=getDefaultMachine();
-}
-
-let m=machines[curMachine];
-
-let issues=getMachineIssues(m);
-
-m.oldStatus=
-getMachineStatusString(m);
-
-issues["MATERIAL REQUIREMENT"]={
-  by:operator.name,
-  time:new Date().toLocaleTimeString("en-IN")
-};
-
-m.issues=issues;
-
-m.status=
-getMachineStatusString(m);
-
-
-/*
- Legacy compatibility only.
- This is NOT used as unique storage.
-*/
-
-m.materialDetails={
-  reqId:reqId,
-  partNo:partNo,
-  partName:partName,
-  qty:qty
-};
-
-
-return saveMachine(curMachine);
-
-})
-.then(()=>{
-
-return logStatusAction(
-
-curMachine,
-
-"OPERATOR UPDATE",
-
-"MATERIAL REQUIREMENT",
-
-operator.name,
-
-"RUNNING",
-
-getMachineStatusString(
-machines[curMachine]
-),
-
-request
-
-);
-
-})
-.then(()=>{
-
-closeMaterialModal();
-
-alert(
-"✅ Material Requirement Saved!\n\n"+
-"Request ID: "+
-reqId+
-"\n\nOld requests are safe."
-);
-
-renderAllDashboards();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"❌ Material Request save failed.\nPlease check Firebase connection."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   GENERAL STATUS UPDATE
-========================================================= */
-
-function executeStatusUpdate(s){
-
-if(!operator){
-
-alert("Operator login required.");
-
-return;
-
-}
-
-
-if(curMachine!==operator.machine){
-
-alert(
-"Access denied. You can update only your assigned machine."
-);
-
-return;
-
-}
-
-
-if(!machines[curMachine]){
-
-machines[curMachine]=getDefaultMachine();
-
-}
-
-
-const isUrgent=
-document.getElementById("urgentWaCheck")
-?
-document.getElementById("urgentWaCheck").checked
-:
-false;
-
-
-const oldSt=
-getMachineStatusString(
-machines[curMachine]
-);
-
-
-machines[curMachine].oldStatus=oldSt;
-
-let issues=
-getMachineIssues(
-machines[curMachine]
-);
-
-
-if(s==="RUNNING"){
-
-/*
- IMPORTANT:
- Running button must NOT delete Material Requests.
-*/
-
-delete issues["BREAKDOWN"];
-
-delete issues["CMM NOT OK"];
-
-delete issues["FIXTURE NOT OK"];
-
-delete issues["LOT HOLD"];
-
-delete issues["LOT READY"];
-
-delete issues["SIGN PENDING"];
-
-
-/*
- Material status is derived from materialRequests.
-*/
-
-syncMachineMaterialIssues(curMachine);
-
-}else{
-
-issues[s]={
-
-by:operator.name,
-
-time:
-new Date()
-.toLocaleTimeString("en-IN")
-
-};
-
-machines[curMachine].issues=issues;
-
-machines[curMachine].status=
-getMachineStatusString(
-machines[curMachine]
-);
-
-}
-
-
-saveMachine(curMachine)
-.then(()=>{
-
-const newSt=
-getMachineStatusString(
-machines[curMachine]
-);
-
-const route=
-ROUTE_MAP[s]||
-ROUTE_MAP.RUNNING;
-
-
-let matInfo="";
-
-const active=
-getActiveMaterialRequests(curMachine);
-
-
-if(active.length){
-
-matInfo=
-"%0A%0A*📦 MATERIAL DETAILS:*";
-
-active.forEach(r=>{
-
-matInfo+=
-"%0AReq ID: "+
-encodeURIComponent(r.reqId)+
-"%0APart No: "+
-encodeURIComponent(r.partNo||"-")+
-"%0APart Name: "+
-encodeURIComponent(r.partName||"-")+
-"%0AQty: "+
-encodeURIComponent(r.qty||"-");
-
-});
-
-}
-
-
-const msg=
-"*🚨 BREMBO URGENT ALERT*"+
-"%0A%0AMachine: "+
-encodeURIComponent(curMachine)+
-"%0AStatus: *"+
-encodeURIComponent(newSt)+
-"*"+
-matInfo+
-"%0AOperator: "+
-encodeURIComponent(operator.name)+
-"%0AID: "+
-encodeURIComponent(operator.id)+
-"%0AShift: "+
-encodeURIComponent(operator.shift)+
-"%0ATime: "+
-encodeURIComponent(
-new Date().toLocaleString("en-IN")
-)+
-"%0A%0AAction Required By: "+
-encodeURIComponent(route.name);
-
-
-lastWa=
-"https://wa.me/"+
-route.no+
-"?text="+
-msg;
-
-
-if(isUrgent){
-
-document.getElementById("routeInfo").style.display="block";
-
-document.getElementById("routeInfo").innerHTML=
-"<b style='color:#ffd000'>ROUTE INFO</b><br>"+
-"Route To: "+
-escapeHtml(route.name)+
-"<br>☎ +"+
-escapeHtml(route.no);
-
-document.getElementById("waBtn").style.display="block";
-
-setTimeout(()=>{
-  window.open(lastWa,"_blank");
-},700);
-
-}else{
-
-document.getElementById("routeInfo").style.display="none";
-
-document.getElementById("waBtn").style.display="none";
-
-alert(
-"Status updated on Dashboard successfully!"
-);
-
-}
-
-renderAllDashboards();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"Firebase update failed. Please check Internet connection."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   MATERIAL RECEIVED - SPECIFIC REQUEST
-========================================================= */
-
-function receiveSpecificMaterial(reqId){
-
-if(!operator){
-
-alert("Operator login required.");
-
-return;
-
-}
-
-
-if(!reqId){
-
-alert("Invalid Request ID.");
-
-return;
-
-}
-
-
-const r=
-materialRequests[reqId];
-
-
-if(!r){
-
-alert(
-"Request not found in Firebase."
-);
-
-return;
-
-}
-
-
-if(r.machine!==operator.machine){
-
-alert(
-"Access denied. This request belongs to machine "+
-r.machine
-);
-
-return;
-
-}
-
-
-if(
-r.status==="RECEIVED"
-){
-
-alert(
-"This material request is already marked RECEIVED."
-);
-
-return;
-
-}
-
-
-if(
-!confirm(
-"Confirm Material Received?\n\n"+
-"Request: "+reqId+
-"\nPart No: "+(r.partNo||"-")+
-"\nPart Name: "+(r.partName||"-")+
-"\nQty: "+(r.qty||"-")
-)
-){
-
-return;
-
-}
-
-
-const oldMachineStatus=
-getMachineStatusString(
-machines[curMachine]
-);
-
-
-const updated={
-
-...r,
-
-status:"RECEIVED",
-
-updatedAt:Date.now(),
-
-updatedBy:operator.name
-
-};
-
-
-db.ref("materialRequests/"+reqId)
-.set(updated)
-.then(()=>{
-
-/*
- Recalculate machine material status
- without deleting other requests.
-*/
-
-syncMachineMaterialIssues(
-operator.machine
-);
-
-
-/*
- Keep legacy field only for compatibility.
- If another active request exists, show latest active request.
-*/
-
-const active=
-getActiveMaterialRequests(
-operator.machine
-);
-
-if(active.length){
-
-const latest=active[0];
-
-machines[operator.machine]
-.materialDetails={
-
-reqId:latest.reqId,
-
-partNo:latest.partNo,
-
-partName:latest.partName,
-
-qty:latest.qty
-
-};
-
-}else{
-
-delete machines[operator.machine]
-.materialDetails;
-
-}
-
-
-return saveMachine(operator.machine)
-.then(()=>{
-
-return logStatusAction(
-
-operator.machine,
-
-"MATERIAL RECEIVED",
-
-"MATERIAL RECEIVED",
-
-operator.name,
-
-oldMachineStatus,
-
-getMachineStatusString(
-machines[operator.machine]
-),
-
-updated
-
-);
-
-});
-
-})
-.then(()=>{
-
-alert(
-"✅ Material Received!\n\n"+
-"Request "+reqId+
-" recorded successfully."
-);
-
-renderAllDashboards();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"❌ Material Received update failed."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   RECEIVED ALL VISIBLE - USER CAN SELECT
-========================================================= */
-
-function receiveAllVisibleMaterials(){
-
-const reqs=
-getActiveMaterialRequests(
-operator.machine
-);
-
-if(!reqs.length){
-
-alert("No active material requests.");
-
-return;
-
-}
-
-
-if(reqs.length===1){
-
-receiveSpecificMaterial(
-reqs[0].reqId
-);
-
-return;
-
-}
-
-
-/*
- Multiple requests:
- show request IDs.
-*/
-
-const text=
-reqs.map((r,i)=>
-(i+1)+
-". "+
-r.reqId+
-" | "+
-r.partNo+
-" | "+
-r.partName+
-" | Qty "+
-r.qty
-).join("\n");
-
-
-const answer=
-prompt(
-"Multiple active requests.\n\n"+
-text+
-"\n\nEnter Request ID to mark RECEIVED:"
-);
-
-
-if(!answer)return;
-
-const id=answer.trim();
-
-const found=
-reqs.find(r=>
-r.reqId===id
-);
-
-if(!found){
-
-alert("Invalid Request ID.");
-
-return;
-
-}
-
-receiveSpecificMaterial(id);
-
-}
-
-
-/* =========================================================
-   STORE DEPARTMENT - MARK EXACT REQUEST SHORTAGE
-========================================================= */
-
-function markSpecificRequestShortage(reqId){
-
-if(department!=="store"){
-
-alert(
-"Only Store Department can mark shortage."
-);
-
-return;
-
-}
-
-
-const r=
-materialRequests[reqId];
-
-
-if(!r){
-
-alert(
-"Request not found."
-);
-
-return;
-
-}
-
-
-if(r.status!=="REQUIREMENT"){
-
-alert(
-"This request is already processed."
-);
-
-return;
-
-}
-
-
-if(
-!confirm(
-"⚠️ MARK THIS REQUEST AS MATERIAL SHORTAGE?\n\n"+
-"Req ID: "+reqId+
-"\nMachine: "+r.machine+
-"\nPart No: "+r.partNo+
-"\nPart Name: "+r.partName+
-"\nQty: "+r.qty
-)
-){
-
-return;
-
-}
-
-
-const machineId=r.machine;
-
-const oldSt=
-getMachineStatusString(
-machines[machineId]
-);
-
-
-const updated={
-
-...r,
-
-status:"SHORTAGE",
-
-updatedAt:Date.now(),
-
-updatedBy:"STORE DEPARTMENT"
-
-};
-
-
-db.ref("materialRequests/"+reqId)
-.set(updated)
-.then(()=>{
-
-syncMachineMaterialIssues(machineId);
-
-
-/*
- Keep latest active request in legacy field
-*/
-
-const active=
-getActiveMaterialRequests(machineId);
-
-if(active.length){
-
-const latest=active[0];
-
-machines[machineId].materialDetails={
-
-reqId:latest.reqId,
-
-partNo:latest.partNo,
-
-partName:latest.partName,
-
-qty:latest.qty
-
-};
-
-}
-
-
-return saveMachine(machineId)
-.then(()=>{
-
-return logStatusAction(
-
-machineId,
-
-"DEPT ACTION",
-
-"MATERIAL SHORTAGE",
-
-"STORE DEPARTMENT",
-
-oldSt,
-
-getMachineStatusString(
-machines[machineId]
-),
-
-updated
-
-);
-
-});
-
-})
-.then(()=>{
-
-alert(
-"⚠️ MATERIAL SHORTAGE UPDATED\n\n"+
-"Request ID: "+
-reqId+
-"\n\nPart data saved completely."
-);
-
-renderDepartmentDashboard();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"❌ Material shortage update failed."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   WHATSAPP
-========================================================= */
-
-function openWA(){
-
-if(lastWa){
-
-window.open(
-lastWa,
-"_blank"
-);
-
-}
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHtml(value){
-
-return String(value??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
-}
-
-
-/* =========================================================
-   DEPARTMENT LOGIN
-========================================================= */
-
-function departmentLogin(){
-
-const dep=
-document.getElementById(
-"departmentSelect"
-).value;
-
-const pin=
-document.getElementById(
-"departmentPin"
-).value;
-
-
-if(!dep||!pin){
-
-alert(
-"Please select department and enter PIN."
-);
-
-return;
-
-}
-
-
-const config=
-DEPARTMENT_CONFIG[dep];
-
-
-if(!config){
-
-alert("Invalid department.");
-
-return;
-
-}
-
-
-if(pin!==config.pin){
-
-alert(
-"Wrong Department PIN! Access Denied!"
-);
-
-return;
-
-}
-
-
-department=dep;
-
-operator=null;
-
-departmentStatusFilter=
-config.allowedStatuses[0]||
-"TOTAL";
-
-deptSelectedMachine=null;
-
-selectedDepartmentRequestId=null;
-
-
-localStorage.setItem(
-"brembo_department",
-dep
-);
-
-localStorage.removeItem("brembo_v7");
-
-localStorage.removeItem("brembo_shift");
-
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("operatorDashboard").style.display="none";
-
-document.getElementById("departmentDashboard").style.display="block";
-
-
-renderDepartmentDashboard();
-
-}
-
-
-/* =========================================================
-   DEPARTMENT LOGOUT
-========================================================= */
-
-function departmentLogout(){
-
-if(!confirm(
-"Logout from department dashboard?"
-))return;
-
-localStorage.removeItem(
-"brembo_department"
-);
-
-department=null;
-
-location.reload();
-
-}
-
-
-/* =========================================================
-   DEPARTMENT STATUS
-========================================================= */
-
-function setDepartmentStatusFilter(status){
-
-departmentStatusFilter=status;
-
-deptSelectedMachine=null;
-
-selectedDepartmentRequestId=null;
-
-renderDepartmentDashboard();
-
-}
-
-
-function renderDepartmentStatusCards(){
-
-if(!department)return;
-
-const config=
-DEPARTMENT_CONFIG[department];
-
-renderStatusCards(
-
-"departmentStatusCards",
-
-departmentStatusFilter,
-
-"setDepartmentStatusFilter",
-
-config.allowedStatuses
-
-);
-
-}
-
-
-function getDepartmentFilteredMachines(){
-
-if(!department)return[];
-
-if(departmentStatusFilter==="TOTAL"){
-
-return ALL_MACHINES_LIST.slice();
-
-}
-
-return ALL_MACHINES_LIST.filter(id=>{
-
-const m=
-machines[id]||
-getDefaultMachine();
-
-return hasStatus(
-m,
-departmentStatusFilter
-);
-
-});
-
-}
-
-
-/* =========================================================
-   DEPARTMENT DASHBOARD
-========================================================= */
-
-function renderDepartmentDashboard(){
-
-if(!department)return;
-
-const config=
-DEPARTMENT_CONFIG[department];
-
-if(!config)return;
-
-
-document.getElementById("deptTitle").innerText=
-config.name+
-" DASHBOARD"+
-(
-config.isViewOnly
-?
-" (VIEW ONLY)"
-:
-""
-);
-
-
-document.getElementById("deptBadge").innerText=
-config.name+
-(
-config.isViewOnly
-?
-" [VIEW ONLY]"
-:
-""
-);
-
-
-const excelBtn=
-document.getElementById("deptExcelBtn");
-
-if(excelBtn){
-
-excelBtn.style.display=
-(
-department==="store"||
-department==="supervisor"
-)
-?
-"inline-block"
-:
-"none";
-
-}
-
-
-const resetBtn=
-document.getElementById(
-"deptExcelResetBtn"
-);
-
-if(resetBtn){
-
-resetBtn.style.display=
-(
-department==="store"||
-department==="supervisor"
-)
-?
-"inline-block"
-:
-"none";
-
-}
-
-
-if(
-!config.allowedStatuses.includes(
-departmentStatusFilter
-)
-){
-
-departmentStatusFilter=
-config.allowedStatuses[0];
-
-}
-
-
-renderDepartmentStatusCards();
-
-renderDepartmentMachineGrid();
-
-}
-
-
-/* =========================================================
-   DEPARTMENT MACHINE GRID
-========================================================= */
-
-function renderDepartmentMachineGrid(){
-
-const grid=
-document.getElementById(
-"deptMachineGrid"
-);
-
-if(!grid)return;
-
-const filtered=
-getDepartmentFilteredMachines();
-
-const title=
-document.getElementById(
-"deptGridTitle"
-);
-
-const count=
-document.getElementById(
-"deptGridCount"
-);
-
-
-if(
-departmentStatusFilter==="TOTAL"
-){
-
-title.innerText=
-"⚙️ ALL MACHINES";
-
-}else{
-
-title.innerText=
-"⚙️ "+
-getStatusDisplayName(
-departmentStatusFilter
-)+
-" MACHINES";
-
-}
-
-
-count.innerText=
-filtered.length+
-" MACHINES";
-
-
-if(filtered.length===0){
-
-grid.innerHTML=
-`<div style="
-grid-column:1/-1;
-text-align:center;
-padding:25px;
-color:#777;
-font-size:12px;
-font-weight:700">
-
-NO MACHINES IN THIS STATUS
-
-</div>`;
-
-deptSelectedMachine=null;
-
-renderDepartmentSelected();
-
-return;
-
-}
-
-
-if(
-!filtered.includes(
-deptSelectedMachine
-)
-){
-
-deptSelectedMachine=
-filtered[0];
-
-}
-
-
-grid.innerHTML=
-filtered.map(id=>{
-
-const m=
-machines[id]||
-getDefaultMachine();
-
-const selected=
-deptSelectedMachine===id
-?
-"selected"
-:
-"";
-
-const st=
-getMachineStatusString(m);
-
-const shortage=
-hasStatus(m,"MATERIAL SHORTAGE")
-?
-"blinkAlert"
-:
-"";
-
-
-let color="#ef4444";
-
-if(st==="RUNNING"){
-  color="#22c55e";
-}
-
-
-return`
-
-<div
-class="deptMachine ${selected} ${shortage}"
-onclick="selectDepartmentMachine('${id}')">
-
-${id}
-
-<span
-class="deptMachineStatus"
-style="color:${color}">
-
-${getStatusDisplayName(st)}
-
-</span>
-
-</div>
-
-`;
-
-}).join("");
-
-
-renderDepartmentSelected();
-
-}
-
-
-/* =========================================================
-   SELECT DEPARTMENT MACHINE
-========================================================= */
-
-function selectDepartmentMachine(id){
-
-if(!machines[id])return;
-
-deptSelectedMachine=id;
-
-selectedDepartmentRequestId=null;
-
-renderDepartmentMachineGrid();
-
-}
-
-
-/* =========================================================
-   DEPARTMENT SELECTED DETAILS
-========================================================= */
-
-function renderDepartmentSelected(){
-
-const box=
-document.getElementById(
-"deptSelected"
-);
-
-if(!box)return;
-
-
-if(!deptSelectedMachine){
-
-box.innerHTML=
-`<div style="
-text-align:center;
-color:#777;
-padding:20px">
-
-Select a status and machine.
-
-</div>`;
-
-return;
-
-}
-
-
-const m=
-machines[deptSelectedMachine];
-
-
-if(!m){
-
-box.innerHTML=
-"Please select machine.";
-
-return;
-
-}
-
-
-const op=m.op;
-
-const config=
-DEPARTMENT_CONFIG[department];
-
-const stStr=
-getMachineStatusString(m);
-
-const oldStStr=
-m.oldStatus||
-"RUNNING";
-
-
-let statusColor="#ef4444";
-
-if(stStr==="RUNNING"){
-  statusColor="#22c55e";
-}
-
-
-let html=`
-
-<h2 style="
-font-size:28px;
-font-weight:900">
-
-${escapeHtml(deptSelectedMachine)}
-
-</h2>
-
-<div style="
-margin:8px 0;
-font-size:13px">
-
-Old Status:
-
-<b style="color:#aaa">
-${getStatusDisplayName(oldStStr)}
-</b>
-
-|
-
-Current Status:
-
-<b style="color:${statusColor}">
-${getStatusDisplayName(stStr)}
-</b>
-
-</div>
-
-`;
-
-
-if(op){
-
-html+=`
-
-<div style="
-font-size:12px;
-color:#aaa;
-margin-bottom:12px">
-
-Operator:
-${escapeHtml(op.name)}
-(${escapeHtml(op.id)})
-
-|
-
-Shift:
-${escapeHtml(op.shift)}
-
-</div>
-
-`;
-
-}
-
-
-/*
- IMPORTANT:
- Store Department sees ALL request records,
- not only one materialDetails object.
-*/
-
-html+=
-materialRequestHtml(
-deptSelectedMachine,
-false,
-department==="store"
-);
-
-
-/* DEPARTMENT ACTIONS */
-
-if(department==="supervisor"){
-
-html+=`
-
-<div style="
-margin-top:14px;
-font-weight:900;
-color:#eab308">
-
-🔒 SUPERVISOR MODE
-(VIEW ONLY - ACTIONS DISABLED)
-
-</div>
-
-<div class="viewOnly">
-
-<b>VIEW ONLY</b>
-
-<br>
-
-<span style="
-font-size:11px;
-color:#777">
-
-No status changes allowed.
-
-</span>
-
-</div>
-
-`;
-
-}else if(department==="store"){
-
-const active=
-getActiveMaterialRequests(
-deptSelectedMachine
-);
-
-if(!active.length){
-
-html+=`
-
-<div class="viewOnly">
-
-<b>NO ACTIVE MATERIAL REQUEST</b>
-
-<br>
-
-<span style="
-font-size:11px;
-color:#777">
-
-All material requests are already processed.
-
-</span>
-
-</div>
-
-`;
-
-}
-
-}else if(config && config.actions){
-
-let actionButtons="";
-
-config.actions.forEach(a=>{
-
-if(
-a.clearsIssue &&
-hasStatus(
-m,
-a.clearsIssue
-)
-){
-
-actionButtons+=`
-
-<button
-onclick="updateDepartmentMachineStatus(
-'${a.clearsIssue}',
-'',
-'${a.addIssue||""}'
-)"
-style="
-width:100%;
-margin-top:10px;
-padding:15px;
-border:1px solid #ef4444;
-border-radius:10px;
-background:#7f1d1d;
-color:#fff;
-font-weight:900;
-font-size:14px">
-
-${escapeHtml(a.label)}
-
-</button>
-
-`;
-
-}
-
-});
-
-
-if(actionButtons){
-
-html+=`
-
-<div style="
-margin-top:14px;
-font-weight:900">
-
-${escapeHtml(config.name)}
-ACTIONS
-
-</div>
-
-${actionButtons}
-
-`;
-
-}else{
-
-html+=`
-
-<div class="viewOnly">
-
-<b>VIEW ONLY</b>
-
-<br>
-
-<span style="
-font-size:11px;
-color:#777">
-
-Machine is currently RUNNING or no actions available.
-
-</span>
-
-</div>
-
-`;
-
-}
-
-}
-
-
-box.innerHTML=html;
-
-}
-
-
-/* =========================================================
-   NORMAL DEPARTMENT STATUS ACTION
-========================================================= */
-
-function updateDepartmentMachineStatus(
-clearIssue1,
-clearIssue2,
-addIssue
-){
-
-if(
-department==="supervisor"||
-DEPARTMENT_CONFIG[department].isViewOnly
-){
-
-alert(
-"Supervisor is in VIEW-ONLY mode! No changes allowed."
-);
-
-return;
-
-}
-
-
-if(
-!deptSelectedMachine||
-!machines[deptSelectedMachine]
-){
-
-return;
-
-}
-
-
-if(
-department==="store"
-){
-
-alert(
-"Store material action must be performed on the exact Request ID."
-);
-
-return;
-
-}
-
-
-if(
-!confirm(
-"Confirm action for "+
-deptSelectedMachine+
-"?"
-)
-)return;
-
-
-let m=
-machines[deptSelectedMachine];
-
-const oldSt=
-getMachineStatusString(m);
-
-m.oldStatus=oldSt;
-
-let issues=
-getMachineIssues(m);
-
-
-if(clearIssue1){
-
-delete issues[clearIssue1];
-
-}
-
-if(clearIssue2){
-
-delete issues[clearIssue2];
-
-}
-
-
-if(addIssue){
-
-issues[addIssue]={
-
-by:
-DEPARTMENT_CONFIG[department].name,
-
-time:
-new Date()
-.toLocaleTimeString("en-IN")
-
-};
-
-}
-
-
-m.issues=issues;
-
-m.status=
-getMachineStatusString(m);
-
-
-saveMachine(deptSelectedMachine)
-.then(()=>{
-
-renderDepartmentDashboard();
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"Update failed. Please check internet connection."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   EXCEL FILTER
-   FULL MATERIAL DATA
-========================================================= */
-
-function getFilteredLogsForDepartment(
-logsData
-){
-
-let filtered=[];
-
-if(!logsData)return filtered;
-
-
-Object.keys(logsData).forEach(logKey=>{
-
-const l=logsData[logKey];
-
-if(!l)return;
-
-
-const ns=
-String(l.newStatus||"")
-.toUpperCase();
-
-const os=
-String(l.oldStatus||"")
-.toUpperCase();
-
-const act=
-String(l.action||"")
-.toUpperCase();
-
-const det=
-String(l.detail||"")
-.toUpperCase();
-
-
-if(
-ns.includes("MATERIAL")||
-os.includes("MATERIAL")||
-act.includes("MATERIAL")||
-det.includes("MATERIAL")
-){
-
-filtered.unshift({
-
-"Request ID":
-l.reqId||"-",
-
-"Date and time":
-l.timeStr||"-",
-
-"मशिन नाव":
-l.machine||"-",
-
-"action taken":
-l.detail||l.action||"-",
-
-"shift":
-l.shift||"-",
-
-"part name":
-l.partName||"-",
-
-"part number":
-l.partNo||"-",
-
-"Qty":
-l.qty||"-",
-
-"User":
-l.user||"-",
-
-"Old Status":
-l.oldStatus||"-",
-
-"New Status":
-l.newStatus||"-"
-
-});
-
-}
-
-});
-
-
-return filtered;
-
-}
-
-
-/* =========================================================
-   EXCEL DOWNLOAD
-========================================================= */
-
-function downloadDepartmentExcel(){
-
-if(
-department!=="store" &&
-department!=="supervisor"
-){
-
-alert(
-"Excel Report is available for Store Department & Supervisor only."
-);
-
-return;
-
-}
-
-
-db.ref("statusLogs")
-.once("value")
-.then(snapshot=>{
-
-const logsData=
-snapshot.val()||{};
-
-let rows=
-getFilteredLogsForDepartment(
-logsData
-);
-
-
-/*
- If logs are empty, build report directly
- from Firebase materialRequests.
-*/
-
-if(rows.length===0){
-
-Object.keys(
-materialRequests||{}
-).forEach(id=>{
-
-const r=
-materialRequests[id];
-
-if(!r)return;
-
-rows.push({
-
-"Request ID":
-r.reqId||id,
-
-"Date and time":
-r.createdAt
-?
-new Date(r.createdAt)
-.toLocaleString("en-IN")
-:
-"-",
-
-"मशिन नाव":
-r.machine||"-",
-
-"action taken":
-r.status==="SHORTAGE"
-?
-"MATERIAL SHORTAGE"
-:
-r.status==="RECEIVED"
-?
-"MATERIAL RECEIVED"
-:
-"MATERIAL REQUIREMENT",
-
-"shift":
-r.shift||"-",
-
-"part name":
-r.partName||"-",
-
-"part number":
-r.partNo||"-",
-
-"Qty":
-r.qty||"-",
-
-"User":
-r.updatedBy||
-r.operatorName||
-"-",
-
-"Old Status":
-"-",
-
-"New Status":
-r.status||"-"
-
-});
-
-});
-
-}
-
-
-if(rows.length===0){
-
-alert(
-"मटेरियल रेकॉर्ड उपलब्ध नाही."
-);
-
-return;
-
-}
-
-
-const workbook=
-XLSX.utils.book_new();
-
-
-const worksheet=
-XLSX.utils.json_to_sheet(
-rows
-);
-
-
-worksheet["!cols"]=[
-
-{wch:25},
-{wch:22},
-{wch:12},
-{wch:25},
-{wch:12},
-{wch:25},
-{wch:18},
-{wch:10},
-{wch:22},
-{wch:22},
-{wch:25}
-
-];
-
-
-XLSX.utils.book_append_sheet(
-workbook,
-worksheet,
-"Material Record"
-);
-
-
-const date=
-new Date()
-.toISOString()
-.slice(0,10);
-
-
-const fileName=
-"Material_Record_"+
-date+
-".xlsx";
-
-
-XLSX.writeFile(
-workbook,
-fileName
-);
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"Error fetching material logs from Firebase."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   RESET EXCEL LOGS
-========================================================= */
-
-function resetExcelFile(){
-
-if(
-department!=="store" &&
-department!=="supervisor"
-){
-
-alert(
-"Excel File Reset option only Store & Supervisor साठी उपलब्ध आहे."
-);
-
-return;
-
-}
-
-
-if(
-!confirm(
-"⚠️ सर्व Excel Log History delete करायची आहे?"
-)
-){
-
-return;
-
-}
-
-
-if(
-!confirm(
-"❌ ही क्रिया परत करता येणार नाही. Continue?"
-)
-){
-
-return;
-
-}
-
-
-/*
- Only statusLogs are deleted.
- materialRequests are NEVER deleted.
-*/
-
-db.ref("statusLogs")
-.remove()
-.then(()=>{
-
-alert(
-"✅ Excel Log History reset झाली.\n\n"+
-"Material Request records सुरक्षित आहेत."
-);
-
-})
-.catch(err=>{
-
-console.error(err);
-
-alert(
-"डेटा delete करताना त्रुटी आली."
-);
-
-});
-
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-window.onload=function(){
-
-fillMachineDropdown();
-
-checkExistingSession();
-
-load();
-
-};
-
-</script>
-
-</body>
-  </html>
+  localStorage.removeItem("brembo_v7");  
+  localStorage.removeItem("brembo_shift");  
+  operator=null;  
+  location.reload();  
+}  
+
+function resetAll(){  
+  const pin = prompt("ENTER ADMIN PIN:");  
+  if(pin===null) return;  
+  if(pin!==ADMIN_PIN){ alert("Wrong PIN! Access Denied!"); return; }  
+  if(!confirm("Reset all 69 machines to RUNNING?")) return;  
+
+  resetAllMachinesFirebase().then(()=>{  
+    machines=getAllMachines();  
+    alert("All 69 machines are RUNNING!");  
+    renderAllDashboards();  
+  }).catch(err=>{  
+    console.error(err); alert("Reset failed. Check Firebase connection.");  
+  });  
+}  
+
+function loudPopup(mid, st, who, routeTo){  
+  const b = document.getElementById("notifBig");  
+  b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900">CLOSE</button>`;  
+  b.style.display="block";  
+  if(navigator.vibrate){ navigator.vibrate([600,200,600,200,600]); }  
+  setTimeout(()=>{ b.style.display="none"; },9000);  
+}  
+
+function getStatusCount(status){  
+  if(status==="TOTAL"){ return ALL_MACHINES_LIST.length; }  
+  return ALL_MACHINES_LIST.filter(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    return hasStatus(m, status);  
+  }).length;  
+}  
+
+function renderStatusCards(containerId, activeStatus, clickFunction, filterList=null){  
+  const container = document.getElementById(containerId);  
+  if(!container) return;  
+  
+  let cardsToDisplay = MASTER_STATUS_CONFIG;
+  if(filterList && Array.isArray(filterList)){
+    cardsToDisplay = MASTER_STATUS_CONFIG.filter(item => filterList.includes(item.key));
+  }
+
+  container.innerHTML = cardsToDisplay.map(item=>{  
+    const count = getStatusCount(item.key);  
+    const active = activeStatus===item.key ? "active" : "";  
+    const blinkClass = (item.key === "MATERIAL SHORTAGE") && count > 0 ? "blinkAlert" : "";
+    return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
+        <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
+        <div class="statusCardCount">${count}</div>  
+        <div class="statusCardHint">CLICK TO VIEW MACHINES</div>  
+      </div>`;  
+  }).join("");  
+}  
+
+function getStatusDisplayName(status){  
+  if(status==="MATERIAL REQUIREMENT"){ return "📦 MAT REQ"; }  
+  if(status==="MATERIAL SHORTAGE"){ return "⚠️ MAT SHORTAGE"; }  
+  return status;  
+}  
+
+function setOperatorStatusFilter(status){  
+  operatorStatusFilter=status;  
+  renderOperatorStatusCards();  
+  renderOperatorMachineList();  
+}  
+
+function renderOperatorStatusCards(){  
+  renderStatusCards("operatorStatusCards", operatorStatusFilter, "setOperatorStatusFilter");  
+}  
+
+function renderOperatorMachineList(){  
+  const grid = document.getElementById("operatorMachineResultGrid");  
+  const title = document.getElementById("operatorStatusMachineTitle");  
+  const sub = document.getElementById("operatorStatusMachineSub");  
+  const count = document.getElementById("operatorStatusMachineCount");  
+  if(!grid) return;  
+
+  let filtered=[];  
+  if(operatorStatusFilter==="TOTAL"){  
+    filtered=ALL_MACHINES_LIST.slice();  
+    title.innerText= "⚙️ ALL MACHINES";  
+    sub.innerText= "Select a machine to view details. Operator updates are locked to your assigned machine.";  
+  }else{  
+    filtered = ALL_MACHINES_LIST.filter(id=>{  
+      const m = machines[id] || getDefaultMachine();  
+      return hasStatus(m, operatorStatusFilter);  
+    });  
+    title.innerText = "⚙️ "+getStatusDisplayName(operatorStatusFilter)+" MACHINES";  
+    sub.innerText = "Machines currently showing this status.";  
+  }  
+
+  count.innerText = filtered.length+" MACHINES";  
+  if(filtered.length===0){  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:#777;padding:25px;font-size:12px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
+    return;  
+  }  
+
+  grid.innerHTML = filtered.map(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    const selected = curMachine===id ? "selected" : "";  
+    const stStr = getMachineStatusString(m);  
+    const isShortage = hasStatus(m, "MATERIAL SHORTAGE") ? "blinkAlert" : "";
+    return `<div class="machineResult ${selected} ${isShortage}" onclick="operatorSelectMachine('${id}')">${id}<span class="machineResultStatus">${getStatusDisplayName(stStr)}</span></div>`;  
+  }).join("");  
+}  
+
+function operatorSelectMachine(id){  
+  if(!operator) return;  
+  if(!machines[id]) return;  
+  curMachine=id;  
+  sel(id);  
+  renderOperatorMachineList();  
+}  
+
+function sel(id){  
+  if(!machines[id]) return;  
+  curMachine=id;  
+  const m = machines[id];  
+  const op = m.op;  
+  const issues = getMachineIssues(m);  
+  const mainIssue = Object.keys(issues)[0] || "RUNNING";  
+  const route = ROUTE_MAP[mainIssue] || ROUTE_MAP.RUNNING;  
+  let matHtml="";  
+
+  if(m.materialDetails || hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){  
+    const d = m.materialDetails || {};
+    const isShortage = hasStatus(m, "MATERIAL SHORTAGE");
+    const headerTitle = isShortage ? "⚠️ MATERIAL SHORTAGE DETAILS" : "📦 MATERIAL REQUIREMENT DETAILS";
+    const headerColor = isShortage ? "#ff3333" : "#eab308";
+    const boxBorder = isShortage ? "1px dashed #ff3333" : "1px dashed #eab308";
+    const boxBg = isShortage ? "#2a0808" : "#2a2508";
+
+    matHtml=`<div style="background:${boxBg};border:${boxBorder};padding:12px;border-radius:10px;font-size:13px;margin-top:10px;line-height:1.6">  
+        <b style="color:${headerColor}">${headerTitle}</b><br>  
+        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(d.reqId || generateReqId())}</span><br>  
+        <b>Part No:</b> ${escapeHtml(d.partNo || '-').toString()}<br>  
+        <b>Part Name:</b> ${escapeHtml(d.partName || '-').toString()}<br>  
+        <b>Quantity:</b> ${escapeHtml((d.qty || '-').toString())}  
+      </div>`;  
+  }  
+
+  const statusStr = getMachineStatusString(m);  
+  let badgeBg="#a30b11";  
+  if(statusStr==="RUNNING"){ badgeBg="#087f23"; }  
+
+  const isOwnMachine = operator && id===operator.machine;  
+  document.getElementById("machineDetail").innerHTML=`  
+    <div class="detailTop">  
+      <div>  
+        <div>  
+          <span class="machineTitle">${id}</span>  
+          ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:12px;font-weight:800;margin-left:10px">VIEW ONLY</span>`}  
+        </div>  
+        <div class="statusLine">  
+          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${getStatusDisplayName(statusStr)}</b>  
+          ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
+        </div>  
+      </div>  
+      <div class="routeTop">  
+        <div class="routeTitle">WHATSAPP ROUTING</div>  
+        <div class="routeLine">👤 ${route.name}</div>  
+        <div class="routeLine">☎ +${route.no}</div>  
+      </div>  
+    </div>  
+    ${matHtml}`;  
+
+  if(operator){  
+    if(isOwnMachine){  
+      document.getElementById("operatorBox").innerHTML=`  
+        <div class="infoBox">  
+          <div class="infoTitle">YOUR DETAILS</div>  
+          <div class="infoGrid">  
+            <div class="label">ID</div><div class="value">${escapeHtml(operator.id)}</div><div></div>  
+            <div class="label">Name</div><div class="value">${escapeHtml(operator.name)}</div><div></div>  
+            <div class="label">Machine</div><div class="value">${id}</div><div></div>  
+            <div class="label">Shift</div><div class="value" style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</div><div></div>  
+            <div class="label">Login Time</div><div class="value">${op ? op.time : operator.time}</div><div></div>  
+          </div>  
+        </div>`;  
+    } else {  
+      document.getElementById("operatorBox").innerHTML=`  
+        <div class="infoBox">  
+          <div class="infoTitle" style="color:#777">ASSIGNED OPERATOR DETAILS</div>  
+          <div class="infoGrid">  
+            <div class="label">ID</div><div class="value">${op ? escapeHtml(op.id) : "-"}</div><div></div>  
+            <div class="label">Name</div><div class="value">${op ? escapeHtml(op.name) : "-"}</div><div></div>  
+            <div class="label">Machine</div><div class="value">${id}</div><div></div>  
+            <div class="label">Shift</div><div class="value">${op ? escapeHtml(op.shift) : "-"}</div><div></div>  
+          </div>  
+        </div>`;  
+    }  
+  }  
+
+  const statuses=["RUNNING","BREAKDOWN","CMM NOT OK","FIXTURE NOT OK","FIXTURE OK","LOT HOLD","LOT READY","SIGN PENDING","MATERIAL REQUIREMENT"];  
+
+  if(operator && isOwnMachine){  
+    let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
+    
+    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
+    }  
+
+    document.getElementById("statusList").innerHTML=`  
+      <div class="statusHeading">UPDATE MACHINE STATUS</div>  
+      <div class="statusGrid">  
+        ${btns}  
+      </div>  
+      <div class="urgentBox">  
+        <input type="checkbox" id="urgentWaCheck">  
+        <label for="urgentWaCheck">🚨 URGENT? SEND WHATSAPP ALERT (इमर्जन्सी असल्यास व्हॉट्सॲप मेसेज पाठवा)</label>  
+      </div>`;  
+    document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
+  }else{  
+    document.getElementById("statusList").innerHTML=`<div style="margin-top:18px;padding:14px;border:1px dashed #444;border-radius:10px;color:#777;font-size:12px;font-weight:700;text-align:center">🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.</div>`;  
+    document.getElementById("lockMsg").innerText = "View only. Your assigned machine is: "+(operator ? operator.machine : "None");  
+  }  
+}  
+
+function clearMaterialRequirement(){  
+  if(!operator){ alert("Operator login required."); return; }  
+  if(curMachine!==operator.machine){ alert("Access denied."); return; }  
+  if(!confirm("Confirm material received for "+curMachine+"? Machine status will change to RUNNING.")) return;  
+
+  let m = machines[curMachine];  
+  const oldSt = getMachineStatusString(m);  
+  let issues = getMachineIssues(m);  
+
+  m.oldStatus = oldSt;  
+  delete issues["MATERIAL REQUIREMENT"];  
+  delete issues["MATERIAL SHORTAGE"];  
+  
+  m.issues = issues;  
+  m.status = getMachineStatusString(m);  
+
+  saveMachine(curMachine).then(()=>{  
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "MATERIAL RECEIVED", operator.name, oldSt, "RUNNING");  
+    m.materialDetails = null;  
+    alert("Material received! Machine status set to RUNNING and recorded in Excel database.");  
+    sel(curMachine);  
+    renderAllDashboards();  
+  }).catch(err=>{  
+    console.error(err);  
+    alert("Failed to update Firebase.");  
+  });  
+}  
+
+function upd(s){  
+  if(!operator){ document.getElementById("login").style.display="flex"; return; }  
+  if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine: "+operator.machine); return; }  
+  if(s==="MATERIAL REQUIREMENT"){ openMaterialModal(); return; }  
+
+  executeStatusUpdate(s);  
+}  
+
+function openMaterialModal(){  
+  document.getElementById("matPartNo").value="";  
+  document.getElementById("matPartName").value="";  
+  document.getElementById("matQty").value="";  
+  document.getElementById("materialModal").style.display="flex";  
+}  
+
+function closeMaterialModal(){  
+  document.getElementById("materialModal").style.display="none";  
+}  
+
+function submitMaterialRequirement(){  
+  const partNo=document.getElementById("matPartNo").value.trim();  
+  const partName=document.getElementById("matPartName").value.trim();  
+  const qty=document.getElementById("matQty").value.trim();  
+
+  if(!partNo || !partName || !qty){ alert("Please fill Part No, Part Name, and Quantity!"); return; }  
+  if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
+  if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
+
+  const reqId = generateReqId();  
+  machines[curMachine].materialDetails={reqId: reqId, partNo: partNo, partName: partName, qty: qty};  
+  closeMaterialModal();  
+
+  executeStatusUpdate("MATERIAL REQUIREMENT");  
+}  
+
+function executeStatusUpdate(s){  
+  if(!operator){ alert("Operator login required."); return; }  
+  if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
+  if(!machines[curMachine]){ machines[curMachine]=getDefaultMachine(); }  
+
+  const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;  
+
+  const oldSt = getMachineStatusString(machines[curMachine]);  
+  machines[curMachine].oldStatus = oldSt;  
+
+  let issues = getMachineIssues(machines[curMachine]);  
+  if(s === "RUNNING"){  
+    issues = {};  
+  } else {  
+    issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };  
+  }  
+  machines[curMachine].issues = issues;  
+
+  return saveMachine(curMachine).then(()=>{  
+    const newSt = getMachineStatusString(machines[curMachine]);  
+    
+    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE") {  
+      logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
+    }  
+    
+    const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
+    
+    let date = new Date().toLocaleString("en-IN");  
+    let matInfo="";  
+    if(machines[curMachine].materialDetails){  
+      const d = machines[curMachine].materialDetails;  
+      matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0AReq ID: "+encodeURIComponent(d.reqId || '-')+"%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty);  
+    }  
+
+    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(newSt)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
+
+    lastWa = "https://wa.me/"+route.no+"?text="+msg;  
+
+    if(isUrgent){  
+      document.getElementById("routeInfo").style.display="block";  
+      document.getElementById("routeInfo").innerHTML=`<b style="color:#ffd000">ROUTE INFO</b><br>Route To: ${route.name}<br>☎ +${route.no}`;  
+      document.getElementById("waBtn").style.display="block";  
+      document.getElementById("waBtn").innerText = "◉ SEND WHATSAPP";  
+
+      setTimeout(()=>{ window.open(lastWa, "_blank"); },700);  
+    } else {  
+      document.getElementById("routeInfo").style.display="none";  
+      document.getElementById("waBtn").style.display="none";  
+      alert("Status updated on Dashboard successfully!");  
+    }  
+
+    renderAllDashboards();  
+  }).catch(err=>{  
+    console.error(err); alert("Firebase update failed. Please check Internet connection.");  
+  });  
+}  
+
+function openWA(){  
+  if(lastWa){ window.open(lastWa, "_blank"); }  
+}  
+
+function escapeHtml(value){  
+  return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
+}  
+
+function getFilteredLogsForDepartment(logsData) {  
+  let filtered = [];  
+  if (!logsData) return filtered;  
+
+  Object.keys(logsData).forEach(logKey => {  
+    const l = logsData[logKey];  
+    const ns = String(l.newStatus || "").toUpperCase();  
+    const os = String(l.oldStatus || "").toUpperCase();  
+    const act = String(l.action || "").toUpperCase();  
+    const det = String(l.detail || "").toUpperCase();  
+
+    if (ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL") || det.includes("MATERIAL")) {  
+      filtered.unshift({  
+        "Date and time": l.timeStr || "-",  
+        "मशिन नाव": l.machine || "-",  
+        "action taken": l.detail || l.action || "-",  
+        "shift": l.shift || "-",  
+        "part name": l.partName || "-",  
+        "part number": l.partNo || "-",  
+        "Qty": l.qty || "-"  
+      });  
+    }  
+  });  
+  return filtered;  
+}  
+
+function downloadDepartmentExcel(){  
+  try{  
+    if(typeof XLSX === "undefined"){   
+      alert("Excel library not loaded. Please refresh the page and try again.");   
+      return;   
+    }  
+    if(department !== "store" && department !== "supervisor"){  
+      alert("Excel Report is available for Store Department & Supervisor only.");  
+      return;  
+    }  
+
+    db.ref("statusLogs").once("value").then(snapshot => {  
+      const logsData = snapshot.val() || {};  
+      const workbook = XLSX.utils.book_new();    
+      const sheetName = "Material Record";  
+
+      let rows = getFilteredLogsForDepartment(logsData);  
+
+      if(rows.length === 0){  
+        ALL_MACHINES_LIST.forEach(mcId => {  
+          const m = machines[mcId] || {};  
+          const stStr = getMachineStatusString(m);  
+          if(stStr.includes("MATERIAL")){  
+            const mat = m.materialDetails || {};  
+            rows.push({  
+              "Date and time": new Date().toLocaleString("en-IN"),  
+              "मशिन नाव": mcId,  
+              "action taken": stStr,  
+              "shift": getCurrentShift(),  
+              "part name": mat.partName || "-",  
+              "part number": mat.partNo || "-",  
+              "Qty": mat.qty || "-"  
+            });  
+          }  
+        });  
+      }  
+
+      if(rows.length === 0){  
+        alert("मटेरियल रेकॉर्ड्स (Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");  
+        return;  
+      }  
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);    
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];    
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);    
+
+      const date = new Date().toISOString().slice(0,10);    
+      const fileName = "Material_Record_" + date + ".xlsx";  
+      XLSX.writeFile(workbook, fileName);    
+    }).catch(err => {  
+      console.error("Firebase Read Error:", err);  
+      alert("Error fetching logs from database.");  
+    });  
+
+  } catch(err){    
+    console.error("Excel Error:", err);   
+    alert("Excel download failed: " + err.message);    
+  }    
+}  
+
+function resetExcelFile(){  
+  if(department !== "store" && department !== "supervisor"){  
+    alert("Excel File Reset option only Store & Supervisor साठी उपलब्ध आहे.");  
+    return;  
+  }  
+
+  const confirm1 = confirm("⚠️ इशारा: तुम्ही खरंच सर्व Excel Log History डिलीट करू इच्छिता का?");  
+  if(!confirm1) return;  
+
+  const confirm2 = confirm("❌ ही क्रिया परत करता येणार नाही. डेटा पूर्णपणे डिलीट होईल. सुरू ठेवायचे?");  
+  if(!confirm2) return;  
+
+  db.ref("statusLogs").remove().then(() => {  
+    alert("✅ Excel File Data (Logs History) पूर्णपणे रिसेट/डिलीट झाला आहे.");  
+  }).catch(err => {  
+    console.error("Delete Error:", err);  
+    alert("डेटा डिलीट करताना त्रुटी आली. कृपया इंटरनेट कनेक्शन तपासा.");  
+  });  
+}  
+
+function departmentLogin(){  
+  const dep = document.getElementById("departmentSelect").value;  
+  const pin = document.getElementById("departmentPin").value;  
+
+  if(!dep || !pin){ alert("Please select department and enter PIN."); return; }  
+  const config = DEPARTMENT_CONFIG[dep];  
+  if(!config){ alert("Invalid department."); return; }  
+  if(pin!==config.pin){ alert("Wrong Department PIN! Access Denied!"); return; }  
+
+  department=dep;  
+  operator=null;  
+  departmentStatusFilter = config.allowedStatuses[0] || "TOTAL";  
+  deptSelectedMachine=null;  
+
+  localStorage.setItem("brembo_department", dep);  
+  localStorage.removeItem("brembo_v7");  
+  localStorage.removeItem("brembo_shift");  
+
+  document.getElementById("login").style.display="none";  
+  document.getElementById("operatorDashboard").style.display="none";  
+  document.getElementById("departmentDashboard").style.display="block";  
+  renderDepartmentDashboard();  
+
+  const focusEl = document.getElementById("deptFocusArea");  
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });  
+}  
+
+function departmentLogout(){  
+  if(!confirm("Logout from department dashboard?")) return;  
+  localStorage.removeItem("brembo_department");  
+  department=null;  
+  location.reload();  
+}  
+
+function setDepartmentStatusFilter(status){  
+  departmentStatusFilter=status;  
+  deptSelectedMachine=null;  
+  renderDepartmentDashboard();  
+}  
+
+function renderDepartmentStatusCards(){  
+  if(!department) return;  
+  const config = DEPARTMENT_CONFIG[department];  
+  renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", config.allowedStatuses);  
+}  
+
+function getDepartmentFilteredMachines(){  
+  if(!department){ return []; }  
+  if(departmentStatusFilter==="TOTAL"){ return ALL_MACHINES_LIST.slice(); }  
+  return ALL_MACHINES_LIST.filter(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    return hasStatus(m, departmentStatusFilter);  
+  });  
+}  
+
+function renderDepartmentDashboard(){  
+  if(!department) return;  
+  const config = DEPARTMENT_CONFIG[department];  
+  if(!config) return;  
+
+  document.getElementById("deptTitle").innerText = config.name+" DASHBOARD" + (config.isViewOnly ? " (VIEW ONLY)" : "");  
+  document.getElementById("deptBadge").innerText = config.name + (config.isViewOnly ? " [VIEW ONLY]" : "");  
+
+  const excelBtn = document.getElementById("deptExcelBtn");  
+  if(excelBtn){  
+    excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";  
+  }  
+
+  const excelResetBtn = document.getElementById("deptExcelResetBtn");  
+  if(excelResetBtn){  
+    excelResetBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";  
+  }  
+
+  if(!config.allowedStatuses.includes(departmentStatusFilter)){  
+    departmentStatusFilter = config.allowedStatuses[0];  
+  }  
+
+  renderDepartmentStatusCards();  
+  renderDepartmentMachineGrid();  
+}  
+
+function renderDepartmentMachineGrid(){  
+  const grid = document.getElementById("deptMachineGrid");  
+  if(!grid) return;  
+  const filtered = getDepartmentFilteredMachines();  
+  const title = document.getElementById("deptGridTitle");  
+  const count = document.getElementById("deptGridCount");  
+
+  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES"; }  
+  else{ title.innerText = "⚙️ "+getStatusDisplayName(departmentStatusFilter)+" MACHINES"; }  
+
+  count.innerText = filtered.length+" MACHINES";  
+
+  if(filtered.length===0){  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:25px;color:#777;font-size:12px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
+    deptSelectedMachine=null;  
+    renderDepartmentSelected();  
+    return;  
+  }  
+
+  if(!filtered.includes(deptSelectedMachine)){ deptSelectedMachine = filtered[0]; }  
+
+  grid.innerHTML = filtered.map(id=>{  
+    const m = machines[id] || getDefaultMachine();  
+    const selected = deptSelectedMachine===id ? "selected" : "";  
+    const stStr = getMachineStatusString(m);  
+
+    let color="#ef4444";  
+    if(stStr==="RUNNING"){ color="#22c55e"; }  
+
+    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
+  }).join("");  
+  renderDepartmentSelected();  
+}  
+
+function selectDepartmentMachine(id){  
+  if(!machines[id]) return;  
+  deptSelectedMachine=id;  
+  renderDepartmentMachineGrid();  
+}  
+
+/* FIXED MATERIAL SHORTAGE & REQUIREMENT DATA FILL FUNCTION */
+function renderDepartmentSelected(){  
+  const box = document.getElementById("deptSelected");  
+  if(!box) return;  
+
+  if(!deptSelectedMachine){  
+    box.innerHTML=`<div style="text-align:center;color:#777;padding:20px">Select a status and machine.</div>`;  
+    return;  
+  }  
+
+  const m = machines[deptSelectedMachine];  
+  if(!m){  
+    box.innerHTML = "Please select machine.";  
+    return;  
+  }  
+
+  const op = m.op;  
+  const config = DEPARTMENT_CONFIG[department];  
+  const stStr = getMachineStatusString(m);  
+  const oldStStr = m.oldStatus || "RUNNING";  
+
+  let statusColor="#ef4444";  
+  if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
+
+  let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
+  <div style="margin:8px 0;font-size:13px">Old Status: <b style="color:#aaa">${getStatusDisplayName(oldStStr)}</b> | Current Status: <b style="color:${statusColor}">${getStatusDisplayName(stStr)}</b></div>`;  
+
+  if(op){  
+    html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
+  }  
+
+  // MATERIAL DATA CHECK AND RENDER FIX (फिक्स केलेले लॉजिक)
+  const isShortage = hasStatus(m, "MATERIAL SHORTAGE");
+  const isReq = hasStatus(m, "MATERIAL REQUIREMENT");
+
+  if(m.materialDetails || isShortage || isReq){  
+    const d = m.materialDetails || {};
+    const headerTitle = isShortage ? "⚠️ MATERIAL SHORTAGE DETAILS" : "📦 MATERIAL REQUIREMENT DETAILS";
+    const headerColor = isShortage ? "#ff3333" : "#eab308";
+    const boxBorder = isShortage ? "1px dashed #ff3333" : "1px dashed #eab308";
+    const boxBg = isShortage ? "#2a0808" : "#2a2508";
+
+    html += `<div style="background:${boxBg};border:${boxBorder};padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
+        <b style="color:${headerColor};font-size:14px">${headerTitle}</b><br>  
+        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(d.reqId || generateReqId())}</span><br>  
+        <b>Part No:</b> ${escapeHtml(d.partNo || '-').toString()}<br>  
+        <b>Part Name:</b> ${escapeHtml(d.partName || '-').toString()}<br>  
+        <b>Quantity:</b> ${escapeHtml((d.qty || '-').toString())}  
+      </div>`;  
+  }  
+
+  let actionButtonsHtml = "";  
+
+  if(department === "supervisor"){  
+    const currentIssues = Object.keys(getMachineIssues(m));  
+    actionButtonsHtml += `<div style="margin-top:14px;font-weight:900;color:#eab308">🔒 SUPERVISOR MODE (VIEW ONLY - ACTIONS DISABLED)</div>`;  
+    
+    currentIssues.forEach(iss => {  
+      actionButtonsHtml += `<button disabled style="width:100%;margin-top:10px;padding:12px;border:1px solid #777;border-radius:10px;background:#333;color:#888;font-weight:900;font-size:13px">CLEAR ${iss} (VIEW ONLY)</button>`;  
+    });  
+    actionButtonsHtml += `<button disabled style="width:100%;margin-top:10px;padding:14px;border:1px solid #777;border-radius:10px;background:#333;color:#888;font-weight:900;font-size:14px">RESET MACHINE TO RUNNING (VIEW ONLY)</button>`;  
+  } else if(config && config.actions && config.actions.length > 0){  
+    let hasDeptIssue = false;  
+    config.actions.forEach(a=>{  
+      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+        hasDeptIssue = true;  
+      }  
+    });  
+    if(hasDeptIssue){  
+      actionButtonsHtml += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
+      config.actions.forEach(a=>{  
+        if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
+          actionButtonsHtml += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #ef4444;border-radius:10px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
+        }  
+      });  
+    }  
+  }  
+
+  if(actionButtonsHtml){  
+    html += actionButtonsHtml;  
+  } else {  
+    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">Machine is currently RUNNING or no actions available for this department.</span></div>`;  
+  }  
+
+  box.innerHTML = html;  
+}  
+
+function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
+  if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){  
+    alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");  
+    return;  
+  }  
+
+  if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
+  if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
+
+  let m = machines[deptSelectedMachine];  
+  const oldSt = getMachineStatusString(m);  
+  m.oldStatus = oldSt;   
+  let issues = getMachineIssues(m);  
+
+  if(clearIssue1 === "ALL"){  
+    issues = {};  
+    m.materialDetails = null;  
+  } else {  
+    if(clearIssue1) delete issues[clearIssue1];  
+    if(clearIssue2) delete issues[clearIssue2];  
+    if((clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE") && !addIssue){  
+      m.materialDetails = null;  
+    }  
+  }  
+
+  if(addIssue){  
+    issues[addIssue] = { by: DEPARTMENT_CONFIG[department].name, time: new Date().toLocaleTimeString("en-IN") };  
+  }  
+
+  m.issues = issues;  
+  m.status = getMachineStatusString(m);  
+
+  saveMachine(deptSelectedMachine).then(()=>{  
+    const newSt = getMachineStatusString(m);  
+    
+    if(department === "store"){  
+      logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+    }  
+    
+    renderDepartmentDashboard();  
+  }).catch(err=>{  
+    console.error(err);  
+    alert("Update failed. Please check internet connection.");  
+  });  
+}  
+
+window.onload = function(){  
+  fillMachineDropdown();  
+  checkExistingSession();  
+  load();  
+};  
+</script>  
+</body>  
+      </html>
