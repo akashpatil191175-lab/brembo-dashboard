@@ -1185,7 +1185,7 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
     action: action,  
     detail: detail,  
     user: user || "System",  
-    shift: getCurrentShift(),  
+    shift: (m.op && m.op.shift) ? m.op.shift : getCurrentShift(),  
     partNo: mat.partNo || "-",  
     partName: mat.partName || "-",  
     qty: mat.qty || "-",  
@@ -1723,6 +1723,7 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
+/* EXCEL MAPPING DEFINITION FOR MATCHING EXACT HEADINGS */
 function getFilteredLogsForDepartment(logsData) {  
   let filtered = [];  
   if (!logsData) return filtered;  
@@ -1737,11 +1738,11 @@ function getFilteredLogsForDepartment(logsData) {
     if (ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL") || det.includes("MATERIAL")) {  
       filtered.unshift({  
         "Date and time": l.timeStr || "-",  
-        "मशिन नाव": l.machine || "-",  
+        "मशीन नाव": l.machine || "-",  
+        "Shift": l.shift || "-",  
+        "Part Number": l.partNo || "-",  
         "action taken": l.detail || l.action || "-",  
-        "shift": l.shift || "-",  
         "part name": l.partName || "-",  
-        "part number": l.partNo || "-",  
         "Qty": l.qty || "-"  
       });  
     }  
@@ -1773,13 +1774,14 @@ function downloadDepartmentExcel(){
           const stStr = getMachineStatusString(m);  
           if(stStr.includes("MATERIAL")){  
             const mat = m.materialDetails || {};  
+            const currentShift = (m.op && m.op.shift) ? m.op.shift : getCurrentShift();
             rows.push({  
               "Date and time": new Date().toLocaleString("en-IN"),  
-              "मशिन नाव": mcId,  
+              "मशीन नाव": mcId,  
+              "Shift": currentShift,  
+              "Part Number": mat.partNo || "-",  
               "action taken": stStr,  
-              "shift": getCurrentShift(),  
               "part name": mat.partName || "-",  
-              "part number": mat.partNo || "-",  
               "Qty": mat.qty || "-"  
             });  
           }  
@@ -1792,7 +1794,7 @@ function downloadDepartmentExcel(){
       }  
 
       const worksheet = XLSX.utils.json_to_sheet(rows);    
-      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];    
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:10},{wch:16},{wch:25},{wch:20},{wch:10}];    
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);    
 
       const date = new Date().toISOString().slice(0,10);    
@@ -2072,7 +2074,8 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
     const newSt = getMachineStatusString(m);  
     
     if(department === "store"){  
-      logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+      const actionDetail = addIssue === "MATERIAL SHORTAGE" ? "MATERIAL SHORTAGE" : (addIssue || ("Cleared " + clearIssue1));
+      logStatusAction(deptSelectedMachine, "DEPT ACTION", actionDetail, DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
       
       // AUTO EXCEL DOWNLOAD ON OUT OF STOCK
       if(addIssue === "MATERIAL SHORTAGE") {
