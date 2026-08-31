@@ -1502,13 +1502,20 @@ function sel(id){
   const route = ROUTE_MAP[mainIssue] || ROUTE_MAP.RUNNING;  
   let matHtml="";  
 
-  if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin-top:10px;line-height:1.6">  
-        <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
-        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(m.materialDetails.reqId || '-')}</span><br>  
-        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
-        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
-        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
+  if(m.materialDetails || hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){  
+    const d = m.materialDetails || {};
+    const isShortage = hasStatus(m, "MATERIAL SHORTAGE");
+    const headerTitle = isShortage ? "⚠️ MATERIAL SHORTAGE DETAILS" : "📦 MATERIAL REQUIREMENT DETAILS";
+    const headerColor = isShortage ? "#ff3333" : "#eab308";
+    const boxBorder = isShortage ? "1px dashed #ff3333" : "1px dashed #eab308";
+    const boxBg = isShortage ? "#2a0808" : "#2a2508";
+
+    matHtml=`<div style="background:${boxBg};border:${boxBorder};padding:12px;border-radius:10px;font-size:13px;margin-top:10px;line-height:1.6">  
+        <b style="color:${headerColor}">${headerTitle}</b><br>  
+        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(d.reqId || generateReqId())}</span><br>  
+        <b>Part No:</b> ${escapeHtml(d.partNo || '-').toString()}<br>  
+        <b>Part Name:</b> ${escapeHtml(d.partName || '-').toString()}<br>  
+        <b>Quantity:</b> ${escapeHtml((d.qty || '-').toString())}  
       </div>`;  
   }  
 
@@ -1606,9 +1613,8 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    // लॉग नोंदवणे जेणेकरून Excel मध्ये Received दिसेल
     logStatusAction(curMachine, "MATERIAL RECEIVED", "MATERIAL RECEIVED", operator.name, oldSt, "RUNNING");  
-    m.materialDetails = null;
+    m.materialDetails = null;  
     alert("Material received! Machine status set to RUNNING and recorded in Excel database.");  
     sel(curMachine);  
     renderAllDashboards();  
@@ -1646,8 +1652,8 @@ function submitMaterialRequirement(){
   if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
   if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
 
-  const reqId = generateReqId();
-  machines[curMachine].materialDetails={reqId, partNo, partName, qty};  
+  const reqId = generateReqId();  
+  machines[curMachine].materialDetails={reqId: reqId, partNo: partNo, partName: partName, qty: qty};  
   closeMaterialModal();  
 
   executeStatusUpdate("MATERIAL REQUIREMENT");  
@@ -1658,7 +1664,7 @@ function executeStatusUpdate(s){
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine."); return; }  
   if(!machines[curMachine]){ machines[curMachine]=getDefaultMachine(); }  
 
-  const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;
+  const isUrgent = document.getElementById("urgentWaCheck") ? document.getElementById("urgentWaCheck").checked : false;  
 
   const oldSt = getMachineStatusString(machines[curMachine]);  
   machines[curMachine].oldStatus = oldSt;  
@@ -1674,8 +1680,7 @@ function executeStatusUpdate(s){
   return saveMachine(curMachine).then(()=>{  
     const newSt = getMachineStatusString(machines[curMachine]);  
     
-    // मटेरियल डेटा ट्रॅक करून लॉगमध्ये सेव्ह करणे
-    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE") {
+    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE") {  
       logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
     }  
     
@@ -1719,114 +1724,111 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT EXCEL FILTERING & GENERATOR FOR STORE */
-function getFilteredLogsForDepartment(logsData) {
-  let filtered = [];
-  if (!logsData) return filtered;
+function getFilteredLogsForDepartment(logsData) {  
+  let filtered = [];  
+  if (!logsData) return filtered;  
 
-  Object.keys(logsData).forEach(logKey => {
-    const l = logsData[logKey];
-    const ns = String(l.newStatus || "").toUpperCase();
-    const os = String(l.oldStatus || "").toUpperCase();
-    const act = String(l.action || "").toUpperCase();
-    const det = String(l.detail || "").toUpperCase();
+  Object.keys(logsData).forEach(logKey => {  
+    const l = logsData[logKey];  
+    const ns = String(l.newStatus || "").toUpperCase();  
+    const os = String(l.oldStatus || "").toUpperCase();  
+    const act = String(l.action || "").toUpperCase();  
+    const det = String(l.detail || "").toUpperCase();  
 
-    // Material Requirement, Shortage किंवा Received चा डेटा असल्यास तो रो जोडा
-    if (ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL") || det.includes("MATERIAL")) {
-      filtered.unshift({
-        "Date and time": l.timeStr || "-",
-        "मशिन नाव": l.machine || "-",
-        "action taken": l.detail || l.action || "-",
-        "shift": l.shift || "-",
-        "part name": l.partName || "-",
-        "part number": l.partNo || "-",
-        "Qty": l.qty || "-"
-      });
-    }
-  });
-  return filtered;
-}
+    if (ns.includes("MATERIAL") || os.includes("MATERIAL") || act.includes("MATERIAL") || det.includes("MATERIAL")) {  
+      filtered.unshift({  
+        "Date and time": l.timeStr || "-",  
+        "मशिन नाव": l.machine || "-",  
+        "action taken": l.detail || l.action || "-",  
+        "shift": l.shift || "-",  
+        "part name": l.partName || "-",  
+        "part number": l.partNo || "-",  
+        "Qty": l.qty || "-"  
+      });  
+    }  
+  });  
+  return filtered;  
+}  
 
 function downloadDepartmentExcel(){  
   try{  
-    if(typeof XLSX === "undefined"){ 
-      alert("Excel library not loaded. Please refresh the page and try again."); 
-      return; 
-    }
-    if(department !== "store" && department !== "supervisor"){
-      alert("Excel Report is available for Store Department & Supervisor only.");
-      return;
-    }
+    if(typeof XLSX === "undefined"){   
+      alert("Excel library not loaded. Please refresh the page and try again.");   
+      return;   
+    }  
+    if(department !== "store" && department !== "supervisor"){  
+      alert("Excel Report is available for Store Department & Supervisor only.");  
+      return;  
+    }  
 
-    db.ref("statusLogs").once("value").then(snapshot => {
-      const logsData = snapshot.val() || {};
-      const workbook = XLSX.utils.book_new();  
-      const sheetName = "Material Record";
+    db.ref("statusLogs").once("value").then(snapshot => {  
+      const logsData = snapshot.val() || {};  
+      const workbook = XLSX.utils.book_new();    
+      const sheetName = "Material Record";  
 
-      let rows = getFilteredLogsForDepartment(logsData);
+      let rows = getFilteredLogsForDepartment(logsData);  
 
-      // जर Logs रिकामे असतील तर फक्त चालू Live Material Status जोडा
-      if(rows.length === 0){
-        ALL_MACHINES_LIST.forEach(mcId => {
-          const m = machines[mcId] || {};
-          const stStr = getMachineStatusString(m);
-          if(stStr.includes("MATERIAL")){
-            const mat = m.materialDetails || {};
-            rows.push({
-              "Date and time": new Date().toLocaleString("en-IN"),
-              "मशिन नाव": mcId,
-              "action taken": stStr,
-              "shift": getCurrentShift(),
-              "part name": mat.partName || "-",
-              "part number": mat.partNo || "-",
-              "Qty": mat.qty || "-"
-            });
-          }
-        });
-      }
+      if(rows.length === 0){  
+        ALL_MACHINES_LIST.forEach(mcId => {  
+          const m = machines[mcId] || {};  
+          const stStr = getMachineStatusString(m);  
+          if(stStr.includes("MATERIAL")){  
+            const mat = m.materialDetails || {};  
+            rows.push({  
+              "Date and time": new Date().toLocaleString("en-IN"),  
+              "मशिन नाव": mcId,  
+              "action taken": stStr,  
+              "shift": getCurrentShift(),  
+              "part name": mat.partName || "-",  
+              "part number": mat.partNo || "-",  
+              "Qty": mat.qty || "-"  
+            });  
+          }  
+        });  
+      }  
 
-      if(rows.length === 0){
-        alert("मटेरियल रेकॉर्ड्स (Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
-        return;
-      }
+      if(rows.length === 0){  
+        alert("मटेरियल रेकॉर्ड्स (Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");  
+        return;  
+      }  
 
-      const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
+      const worksheet = XLSX.utils.json_to_sheet(rows);    
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];    
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);    
 
-      const date = new Date().toISOString().slice(0,10);  
-      const fileName = "Material_Record_" + date + ".xlsx";
-      XLSX.writeFile(workbook, fileName);  
-    }).catch(err => {
-      console.error("Firebase Read Error:", err);
-      alert("Error fetching logs from database.");
-    });
+      const date = new Date().toISOString().slice(0,10);    
+      const fileName = "Material_Record_" + date + ".xlsx";  
+      XLSX.writeFile(workbook, fileName);    
+    }).catch(err => {  
+      console.error("Firebase Read Error:", err);  
+      alert("Error fetching logs from database.");  
+    });  
 
-  } catch(err){  
-    console.error("Excel Error:", err); 
-    alert("Excel download failed: " + err.message);  
-  }  
+  } catch(err){    
+    console.error("Excel Error:", err);   
+    alert("Excel download failed: " + err.message);    
+  }    
 }  
 
-function resetExcelFile(){
-  if(department !== "store" && department !== "supervisor"){
-    alert("Excel File Reset option only Store & Supervisor साठी उपलब्ध आहे.");
-    return;
-  }
+function resetExcelFile(){  
+  if(department !== "store" && department !== "supervisor"){  
+    alert("Excel File Reset option only Store & Supervisor साठी उपलब्ध आहे.");  
+    return;  
+  }  
 
-  const confirm1 = confirm("⚠️ इशारा: तुम्ही खरंच सर्व Excel Log History डिलीट करू इच्छिता का?");
-  if(!confirm1) return;
+  const confirm1 = confirm("⚠️ इशारा: तुम्ही खरंच सर्व Excel Log History डिलीट करू इच्छिता का?");  
+  if(!confirm1) return;  
 
-  const confirm2 = confirm("❌ ही क्रिया परत करता येणार नाही. डेटा पूर्णपणे डिलीट होईल. सुरू ठेवायचे?");
-  if(!confirm2) return;
+  const confirm2 = confirm("❌ ही क्रिया परत करता येणार नाही. डेटा पूर्णपणे डिलीट होईल. सुरू ठेवायचे?");  
+  if(!confirm2) return;  
 
-  db.ref("statusLogs").remove().then(() => {
-    alert("✅ Excel File Data (Logs History) पूर्णपणे रिसेट/डिलीट झाला आहे.");
-  }).catch(err => {
-    console.error("Delete Error:", err);
-    alert("डेटा डिलीट करताना त्रुटी आली. कृपया इंटरनेट कनेक्शन तपासा.");
-  });
-}
+  db.ref("statusLogs").remove().then(() => {  
+    alert("✅ Excel File Data (Logs History) पूर्णपणे रिसेट/डिलीट झाला आहे.");  
+  }).catch(err => {  
+    console.error("Delete Error:", err);  
+    alert("डेटा डिलीट करताना त्रुटी आली. कृपया इंटरनेट कनेक्शन तपासा.");  
+  });  
+}  
 
 function departmentLogin(){  
   const dep = document.getElementById("departmentSelect").value;  
@@ -1851,8 +1853,8 @@ function departmentLogin(){
   document.getElementById("departmentDashboard").style.display="block";  
   renderDepartmentDashboard();  
 
-  const focusEl = document.getElementById("deptFocusArea");
-  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
+  const focusEl = document.getElementById("deptFocusArea");  
+  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });  
 }  
 
 function departmentLogout(){  
@@ -1869,8 +1871,8 @@ function setDepartmentStatusFilter(status){
 }  
 
 function renderDepartmentStatusCards(){  
-  if(!department) return;
-  const config = DEPARTMENT_CONFIG[department];
+  if(!department) return;  
+  const config = DEPARTMENT_CONFIG[department];  
   renderStatusCards("departmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", config.allowedStatuses);  
 }  
 
@@ -1891,19 +1893,19 @@ function renderDepartmentDashboard(){
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD" + (config.isViewOnly ? " (VIEW ONLY)" : "");  
   document.getElementById("deptBadge").innerText = config.name + (config.isViewOnly ? " [VIEW ONLY]" : "");  
 
-  const excelBtn = document.getElementById("deptExcelBtn");
-  if(excelBtn){
-    excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
-  }
+  const excelBtn = document.getElementById("deptExcelBtn");  
+  if(excelBtn){  
+    excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";  
+  }  
 
-  const excelResetBtn = document.getElementById("deptExcelResetBtn");
-  if(excelResetBtn){
-    excelResetBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
-  }
+  const excelResetBtn = document.getElementById("deptExcelResetBtn");  
+  if(excelResetBtn){  
+    excelResetBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";  
+  }  
 
-  if(!config.allowedStatuses.includes(departmentStatusFilter)){
-    departmentStatusFilter = config.allowedStatuses[0];
-  }
+  if(!config.allowedStatuses.includes(departmentStatusFilter)){  
+    departmentStatusFilter = config.allowedStatuses[0];  
+  }  
 
   renderDepartmentStatusCards();  
   renderDepartmentMachineGrid();  
@@ -1949,6 +1951,7 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
+/* FIXED MATERIAL SHORTAGE & REQUIREMENT DATA FILL FUNCTION */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1967,7 +1970,7 @@ function renderDepartmentSelected(){
   const op = m.op;  
   const config = DEPARTMENT_CONFIG[department];  
   const stStr = getMachineStatusString(m);  
-  const oldStStr = m.oldStatus || "RUNNING";
+  const oldStStr = m.oldStatus || "RUNNING";  
 
   let statusColor="#ef4444";  
   if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
@@ -1979,17 +1982,27 @@ function renderDepartmentSelected(){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
   }  
 
-  if(m.materialDetails){  
-    html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
-        <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
-        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(m.materialDetails.reqId || '-')}</span><br>  
-        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
-        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
-        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
+  // MATERIAL DATA CHECK AND RENDER FIX (फिक्स केलेले लॉजिक)
+  const isShortage = hasStatus(m, "MATERIAL SHORTAGE");
+  const isReq = hasStatus(m, "MATERIAL REQUIREMENT");
+
+  if(m.materialDetails || isShortage || isReq){  
+    const d = m.materialDetails || {};
+    const headerTitle = isShortage ? "⚠️ MATERIAL SHORTAGE DETAILS" : "📦 MATERIAL REQUIREMENT DETAILS";
+    const headerColor = isShortage ? "#ff3333" : "#eab308";
+    const boxBorder = isShortage ? "1px dashed #ff3333" : "1px dashed #eab308";
+    const boxBg = isShortage ? "#2a0808" : "#2a2508";
+
+    html += `<div style="background:${boxBg};border:${boxBorder};padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
+        <b style="color:${headerColor};font-size:14px">${headerTitle}</b><br>  
+        <b>Req ID:</b> <span style="color:#22c55e;font-weight:900">${escapeHtml(d.reqId || generateReqId())}</span><br>  
+        <b>Part No:</b> ${escapeHtml(d.partNo || '-').toString()}<br>  
+        <b>Part Name:</b> ${escapeHtml(d.partName || '-').toString()}<br>  
+        <b>Quantity:</b> ${escapeHtml((d.qty || '-').toString())}  
       </div>`;  
   }  
 
-  let actionButtonsHtml = "";
+  let actionButtonsHtml = "";  
 
   if(department === "supervisor"){  
     const currentIssues = Object.keys(getMachineIssues(m));  
@@ -2026,17 +2039,17 @@ function renderDepartmentSelected(){
 }  
 
 function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
-  if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){
-    alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");
-    return;
-  }
+  if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){  
+    alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");  
+    return;  
+  }  
 
   if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
   if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
 
   let m = machines[deptSelectedMachine];  
   const oldSt = getMachineStatusString(m);  
-  m.oldStatus = oldSt; 
+  m.oldStatus = oldSt;   
   let issues = getMachineIssues(m);  
 
   if(clearIssue1 === "ALL"){  
@@ -2060,8 +2073,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);  
     
-    // मटेरियल Shortage/Out of Stock एक्शन लॉगमध्ये सेव्ह करणे
-    if(department === "store"){
+    if(department === "store"){  
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     }  
     
