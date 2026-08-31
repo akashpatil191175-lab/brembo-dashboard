@@ -1599,7 +1599,6 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    // MATERIAL RECEIVED चे बटन प्रेस झाल्यावर डेटा सेव्ह होईल
     logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
@@ -1641,7 +1640,6 @@ function submitMaterialRequirement(){
   machines[curMachine].materialDetails={partNo,partName,qty};  
   closeMaterialModal();  
 
-  // MATERIAL REQUIREMENT बटन प्रेस झाल्यावर डेटा सेव्ह होईल
   executeStatusUpdate("MATERIAL REQUIREMENT");  
 }  
 
@@ -1666,7 +1664,6 @@ function executeStatusUpdate(s){
   return saveMachine(curMachine).then(()=>{  
     const newSt = getMachineStatusString(machines[curMachine]);  
     
-    // फक्त MATERIAL संदर्भातील बटन्स क्लिक झाल्यावरच Excel Log मध्ये एंट्री जतन केली जाईल
     if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE" || s === "MATERIAL RECEIVED") {
       logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
     }
@@ -1711,12 +1708,11 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT EXCEL FILTERING: फक्त ३ WORDS READ करेल */
+/* STRICT EXCEL FILTERING: "live status मशिन" कॉलम काढून टाकलेला फंक्शन */
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
 
-  // STRICT LIST: फक्त हे शब्द असतील तरच Excel मध्ये एंट्री येईल
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", 
     "MATERIAL SHORTAGE", 
@@ -1730,7 +1726,6 @@ function getFilteredLogsForDepartment(logsData) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    // शब्दानुसार अचूक तपासणी
     const isMatched = ALLOWED_KEYWORDS.some(kw => 
       ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
     );
@@ -1739,7 +1734,6 @@ function getFilteredLogsForDepartment(logsData) {
       filtered.unshift({
         "Date and time": l.timeStr || "-",
         "मशिन नाव": l.machine || "-",
-        "live status मशिन": l.newStatus || "RUNNING",
         "action taken": l.detail || l.action || "-",
         "shift": l.shift || "-",
         "part name": l.partName || "-",
@@ -1778,7 +1772,6 @@ function downloadDepartmentExcel(){
             rows.push({
               "Date and time": new Date().toLocaleString("en-IN"),
               "मशिन नाव": mcId,
-              "live status मशिन": stStr,
               "action taken": "CURRENT LIVE STATUS",
               "shift": getCurrentShift(),
               "part name": mat.partName || "-",
@@ -1795,7 +1788,7 @@ function downloadDepartmentExcel(){
       }
 
       const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:22},{wch:12},{wch:22},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
@@ -2062,12 +2055,11 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.status = getMachineStatusString(m);  
 
   saveMachine(deptSelectedMachine).then(()=>{  
-    const newSt = getMachineStatusString(m);
+    const newSt = getMachineStatusString(m);  
     
-    // Store विभागाने Action घेतल्यास Log मध्ये एंट्री सेव्ह होईल
     if(department === "store"){
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
-    }
+    }  
     
     renderDepartmentDashboard();  
   }).catch(err=>{  
