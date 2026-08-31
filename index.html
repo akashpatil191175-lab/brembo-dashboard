@@ -1168,7 +1168,7 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-/* LOGGING FUNCTION (EXCEL साठी फक्त मटेरियल संदर्भातील माहिती फिल्टर होऊन राहिल) */
+/* LOGGING FUNCTION (EXCEL साठी मटेरियल संदर्भातील माहिती पूर्णपणे लॉग करण्यासाठी) */
 function logStatusAction(mc, action, detail, user, oldSt, newSt){  
   const m = machines[mc] || {};  
   const mat = m.materialDetails || {};  
@@ -1595,11 +1595,14 @@ function clearMaterialRequirement(){
   delete issues["MATERIAL SHORTAGE"];  
   
   m.issues = issues;  
+  
+  // Excel Log मध्ये Material Received बाबत सर्व डिटेल्स सेव्ह करण्यासाठी
+  logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");
+
   m.materialDetails = null;  
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
     renderAllDashboards();  
@@ -1666,7 +1669,7 @@ function executeStatusUpdate(s){
     
     if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE" || s === "MATERIAL RECEIVED") {
       logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
-    }
+    }  
     
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     
@@ -1708,7 +1711,7 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT EXCEL FILTERING: "live status मशिन" कॉलम काढून टाकलेला फंक्शन */
+/* STRICT EXCEL FILTERING: Material Requirement, Shortage आणि Received च्या सर्व केसेससाठी माहिती पुरवणे */
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
@@ -1716,7 +1719,8 @@ function getFilteredLogsForDepartment(logsData) {
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", 
     "MATERIAL SHORTAGE", 
-    "MATERIAL RECEIVED"
+    "MATERIAL RECEIVED",
+    "OUT OF STOCK"
   ];
 
   Object.keys(logsData).forEach(logKey => {
@@ -1763,6 +1767,7 @@ function downloadDepartmentExcel(){
 
       let rows = getFilteredLogsForDepartment(logsData);
 
+      // जर लॉग हिस्टरी नसेल तर लाइव्ह स्टेटसवरून डेटा तयार केला जाईल
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
@@ -1772,7 +1777,7 @@ function downloadDepartmentExcel(){
             rows.push({
               "Date and time": new Date().toLocaleString("en-IN"),
               "मशिन नाव": mcId,
-              "action taken": "CURRENT LIVE STATUS",
+              "action taken": stStr,
               "shift": getCurrentShift(),
               "part name": mat.partName || "-",
               "part number": mat.partNo || "-",
@@ -2032,7 +2037,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
 
   let m = machines[deptSelectedMachine];  
-  const oldSt = getMachineStatusString(m);
+  const oldSt = getMachineStatusString(m);  
   m.oldStatus = oldSt; 
   let issues = getMachineIssues(m);  
 
@@ -2057,7 +2062,8 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);  
     
-    if(department === "store"){
+    // Store किंवा Supervisor ने बदल केल्यास तो Excel Log मध्ये सेव्ह होईल
+    if(department === "store" || department === "supervisor"){
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     }  
     
