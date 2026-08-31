@@ -1168,6 +1168,7 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
+/* LOGGING FUNCTION (EXCEL साठी फक्त मटेरियल संदर्भातील माहिती फिल्टर होऊन राहिल) */
 function logStatusAction(mc, action, detail, user, oldSt, newSt){  
   const m = machines[mc] || {};  
   const mat = m.materialDetails || {};  
@@ -1381,7 +1382,6 @@ function resetAll(){
 
   resetAllMachinesFirebase().then(()=>{  
     machines=getAllMachines();  
-    logStatusAction("ALL", "ADMIN RESET", "Reset all machines to RUNNING", "ADMIN", "VARIOUS", "RUNNING");  
     alert("All 69 machines are RUNNING!");  
     renderAllDashboards();  
   }).catch(err=>{  
@@ -1563,7 +1563,7 @@ function sel(id){
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material (फॉर्म भरा)":s}</span><span>›</span></button>`).join("");  
     
     if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मतेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED (मटेरियल मिळाले - RUNNING करा)</span><span>✓</span></button>` + btns;  
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -1599,6 +1599,7 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
+    // MATERIAL RECEIVED चे बटन प्रेस झाल्यावर डेटा सेव्ह होईल
     logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
@@ -1613,11 +1614,7 @@ function upd(s){
   if(!operator){ document.getElementById("login").style.display="flex"; return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine: "+operator.machine); return; }  
   if(s==="MATERIAL REQUIREMENT"){ openMaterialModal(); return; }  
-  
-  /* जर ब्रेकडाउन लागला असेल तर मटेरियल डिटेल्स सुरक्षित ठेवा जेणेकरून नंतर माहिती Excel मध्ये जाईल */
-  if(s !== "BREAKDOWN") {
-    machines[curMachine].materialDetails=null;  
-  }
+
   executeStatusUpdate(s);  
 }  
 
@@ -1644,6 +1641,7 @@ function submitMaterialRequirement(){
   machines[curMachine].materialDetails={partNo,partName,qty};  
   closeMaterialModal();  
 
+  // MATERIAL REQUIREMENT बटन प्रेस झाल्यावर डेटा सेव्ह होईल
   executeStatusUpdate("MATERIAL REQUIREMENT");  
 }  
 
@@ -1661,14 +1659,18 @@ function executeStatusUpdate(s){
   if(s === "RUNNING"){  
     issues = {};  
   } else {  
-    /* मल्टी-स्टेटस सपोर्ट: जर आधी Material Requirement असेल आणि मग Breakdown पडला तर दोन्ही राहू द्या */
     issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };  
   }  
   machines[curMachine].issues = issues;  
 
   return saveMachine(curMachine).then(()=>{  
     const newSt = getMachineStatusString(machines[curMachine]);  
-    logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
+    
+    // फक्त MATERIAL संदर्भातील बटन्स क्लिक झाल्यावरच Excel Log मध्ये एंट्री जतन केली जाईल
+    if(s === "MATERIAL REQUIREMENT" || s === "MATERIAL SHORTAGE" || s === "MATERIAL RECEIVED") {
+      logStatusAction(curMachine, "OPERATOR UPDATE", s, operator.name, oldSt, newSt);  
+    }
+    
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     
     let date = new Date().toLocaleString("en-IN");  
@@ -1709,10 +1711,17 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT FILTER FOR EXCEL - ONLY MAT REQUIREMENT / SHORTAGE / RECEIVED */
+/* STRICT EXCEL FILTERING: फक्त ३ WORDS READ करेल */
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
+
+  // STRICT LIST: फक्त हे शब्द असतील तरच Excel मध्ये एंट्री येईल
+  const ALLOWED_KEYWORDS = [
+    "MATERIAL REQUIREMENT", 
+    "MATERIAL SHORTAGE", 
+    "MATERIAL RECEIVED"
+  ];
 
   Object.keys(logsData).forEach(logKey => {
     const l = logsData[logKey];
@@ -1721,16 +1730,12 @@ function getFilteredLogsForDepartment(logsData) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    // STRICT STORE ONLY FILTER: फक्त MATERIAL चा स्टेटस आणि एन्ट्रीज Excel मध्ये जातील
-    const isStoreRelated = 
-      ns.includes("MATERIAL") || 
-      os.includes("MATERIAL") || 
-      act.includes("MATERIAL") || 
-      det.includes("MATERIAL") ||
-      (l.partNo && l.partNo !== "-") ||
-      l.user === "STORE DEPARTMENT";
+    // शब्दानुसार अचूक तपासणी
+    const isMatched = ALLOWED_KEYWORDS.some(kw => 
+      ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
+    );
 
-    if (isStoreRelated) {
+    if (isMatched) {
       filtered.unshift({
         "Date and time": l.timeStr || "-",
         "मशिन नाव": l.machine || "-",
@@ -2058,7 +2063,12 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
 
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+    
+    // Store विभागाने Action घेतल्यास Log मध्ये एंट्री सेव्ह होईल
+    if(department === "store"){
+      logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+    }
+    
     renderDepartmentDashboard();  
   }).catch(err=>{  
     console.error(err);  
