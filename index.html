@@ -529,14 +529,15 @@ button:disabled {
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }  
 
+/* OUT OF STOCK Red Alert Blink Style */
 .blinkAlert {
-  animation: blinkAnim 1s infinite alternate;
+  animation: blinkAnim 0.8s infinite alternate;
   border-color: #ff0000 !important;
-  background: rgba(229, 9, 20, 0.2) !important;
+  background: rgba(229, 9, 20, 0.25) !important;
 }
 @keyframes blinkAnim {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.4; transform: scale(0.98); }
+  0% { opacity: 1; transform: scale(1); box-shadow: 0 0 15px #ff0000; }
+  100% { opacity: 0.5; transform: scale(0.98); box-shadow: none; }
 }
 
 .routeInfo{  
@@ -956,7 +957,7 @@ const db = firebase.database();
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
 
-/* DEPARTMENTS CONFIG */  
+/* DEPARTMENTS CONFIG (STORE ACTION UPDATED WITH AUTOMATIC EXCEL EXPORT) */  
 const DEPARTMENT_CONFIG = {  
   maintenance:{ 
     name:"MAINTENANCE", 
@@ -990,7 +991,7 @@ const DEPARTMENT_CONFIG = {
     name:"STORE DEPARTMENT", 
     pin:"2028", 
     allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
-    actions:[{ label:"⚠️ MARK OUT OF STOCK (MATERIAL SHORTAGE)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
+    actions:[{ label:"🚨 MARK OUT OF STOCK (MOVE TO SHORTAGE & AUTO EXCEL)", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
     name:"SUPERVISOR", 
@@ -1071,7 +1072,6 @@ function getShiftRange(s){
   return "12:00 AM - 7:45 AM";  
 }  
 
-/* UNIQ REQ ID GENERATOR */
 function generateReqId() {
   return "REQ-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
 }
@@ -1173,7 +1173,6 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-/* LOGGING FUNCTION (REQ ID सह डेटा मॅपिंग) */
 function logStatusAction(mc, action, detail, user, oldSt, newSt){  
   const m = machines[mc] || {};  
   const mat = m.materialDetails || {};  
@@ -1936,11 +1935,12 @@ function renderDepartmentMachineGrid(){
     const m = machines[id] || getDefaultMachine();  
     const selected = deptSelectedMachine===id ? "selected" : "";  
     const stStr = getMachineStatusString(m);  
+    const isShortage = hasStatus(m, "MATERIAL SHORTAGE") ? "blinkAlert" : "";
 
     let color="#ef4444";  
     if(stStr==="RUNNING"){ color="#22c55e"; }  
 
-    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
+    return `<div class="deptMachine ${selected} ${isShortage}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
   }).join("");  
   renderDepartmentSelected();  
 }  
@@ -1951,7 +1951,6 @@ function selectDepartmentMachine(id){
   renderDepartmentMachineGrid();  
 }  
 
-/* FIXED MATERIAL SHORTAGE & REQUIREMENT DATA FILL FUNCTION */
 function renderDepartmentSelected(){  
   const box = document.getElementById("deptSelected");  
   if(!box) return;  
@@ -1982,7 +1981,6 @@ function renderDepartmentSelected(){
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
   }  
 
-  // MATERIAL DATA CHECK AND RENDER FIX (फिक्स केलेले लॉजिक)
   const isShortage = hasStatus(m, "MATERIAL SHORTAGE");
   const isReq = hasStatus(m, "MATERIAL REQUIREMENT");
 
@@ -2075,6 +2073,11 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
     
     if(department === "store"){  
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+      
+      // AUTO EXCEL DOWNLOAD ON OUT OF STOCK
+      if(addIssue === "MATERIAL SHORTAGE") {
+        setTimeout(()=>{ downloadDepartmentExcel(); }, 500);
+      }
     }  
     
     renderDepartmentDashboard();  
@@ -2091,4 +2094,4 @@ window.onload = function(){
 };  
 </script>  
 </body>  
-      </html>
+</html>
