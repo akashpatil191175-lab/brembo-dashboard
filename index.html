@@ -1613,7 +1613,11 @@ function upd(s){
   if(!operator){ document.getElementById("login").style.display="flex"; return; }  
   if(curMachine!==operator.machine){ alert("Access denied. You can update only your assigned machine: "+operator.machine); return; }  
   if(s==="MATERIAL REQUIREMENT"){ openMaterialModal(); return; }  
-  machines[curMachine].materialDetails=null;  
+  
+  /* जर ब्रेकडाउन लागला असेल तर मटेरियल डिटेल्स सुरक्षित ठेवा जेणेकरून नंतर माहिती Excel मध्ये जाईल */
+  if(s !== "BREAKDOWN") {
+    machines[curMachine].materialDetails=null;  
+  }
   executeStatusUpdate(s);  
 }  
 
@@ -1657,6 +1661,7 @@ function executeStatusUpdate(s){
   if(s === "RUNNING"){  
     issues = {};  
   } else {  
+    /* मल्टी-स्टेटस सपोर्ट: जर आधी Material Requirement असेल आणि मग Breakdown पडला तर दोन्ही राहू द्या */
     issues[s] = { by: operator.name, time: new Date().toLocaleTimeString("en-IN") };  
   }  
   machines[curMachine].issues = issues;  
@@ -1716,12 +1721,13 @@ function getFilteredLogsForDepartment(logsData) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    // STRICT MATERIAL ONLY FILTER
+    // STRICT STORE ONLY FILTER: फक्त MATERIAL चा स्टेटस आणि एन्ट्रीज Excel मध्ये जातील
     const isStoreRelated = 
       ns.includes("MATERIAL") || 
       os.includes("MATERIAL") || 
       act.includes("MATERIAL") || 
       det.includes("MATERIAL") ||
+      (l.partNo && l.partNo !== "-") ||
       l.user === "STORE DEPARTMENT";
 
     if (isStoreRelated) {
