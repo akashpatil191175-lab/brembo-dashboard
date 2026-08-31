@@ -826,9 +826,9 @@ button:disabled {
         <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
         <select id="opMachine" class="loginSelect"></select>  
         <select id="opShift" class="loginSelect">  
-          <option value="A">Shift A (7:45 AM - 4:15 PM)</option>  
-          <option value="B">Shift B (4:15 PM - 12:00 AM)</option>  
-          <option value="C">Shift C (12:00 AM - 7:45 AM)</option>  
+          <option value="Shift A">Shift A (7:45 AM - 4:15 PM)</option>  
+          <option value="Shift B">Shift B (4:15 PM - 12:00 AM)</option>  
+          <option value="Shift C">Shift C (12:00 AM - 7:45 AM)</option>  
         </select>  
         <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>  
         <button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>  
@@ -1060,14 +1060,14 @@ let deptSelectedMachine = null;
 function getCurrentShift(){  
   const now = new Date();  
   const t = now.getHours()*60 + now.getMinutes();  
-  if(t>=465 && t<975){ return "A"; }  
-  if(t>=975 && t<1440){ return "B"; }  
-  return "C";  
+  if(t>=465 && t<975){ return "Shift A"; }  
+  if(t>=975 && t<1440){ return "Shift B"; }  
+  return "Shift C";  
 }  
 
 function getShiftRange(s){  
-  if(s==="A"){ return "7:45 AM - 4:15 PM"; }  
-  if(s==="B"){ return "4:15 PM - 12:00 AM"; }  
+  if(s==="Shift A" || s==="A"){ return "7:45 AM - 4:15 PM"; }  
+  if(s==="Shift B" || s==="B"){ return "4:15 PM - 12:00 AM"; }  
   return "12:00 AM - 7:45 AM";  
 }  
 
@@ -1344,7 +1344,7 @@ function applyOperator(isReload = false){
   if(!operator) return;  
   document.getElementById("wel").innerText = operator.name+" ("+operator.id+")";  
   document.getElementById("welMc").innerText = operator.machine;  
-  document.getElementById("welShift").innerText = "Shift "+operator.shift;  
+  document.getElementById("welShift").innerText = operator.shift;  
   document.getElementById("shiftRangeTop").innerText = getShiftRange(operator.shift);  
   curMachine = operator.machine;  
 
@@ -1599,7 +1599,7 @@ function clearMaterialRequirement(){
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
-    logStatusAction(curMachine, "MATERIAL RECEIVED", "Cleared material requirement & status set to RUNNING", operator.name, oldSt, "RUNNING");  
+    logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");  
     alert("Material received! Machine status set to RUNNING.");  
     sel(curMachine);  
     renderAllDashboards();  
@@ -1704,8 +1704,8 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT FILTER FOR STORE DEPARTMENT ENTRIES ONLY */
-function getFilteredLogsForDepartment(logsData, currentDept) {
+/* STRICT FILTER FOR EXCEL - ONLY MAT REQUIREMENT / SHORTAGE / RECEIVED */
+function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
 
@@ -1716,7 +1716,7 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
 
-    // EXCLUSIVE STORE ONLY CHECK (इतर सर्व विभागाच्या एंट्री पूर्णपणे ब्लॉक केल्या आहेत)
+    // STRICT MATERIAL ONLY FILTER
     const isStoreRelated = 
       ns.includes("MATERIAL") || 
       os.includes("MATERIAL") || 
@@ -1726,15 +1726,13 @@ function getFilteredLogsForDepartment(logsData, currentDept) {
 
     if (isStoreRelated) {
       filtered.unshift({
-        "Date & Time": l.timeStr || "-",
-        "Machine No": l.machine || "-",
-        "Old Status": l.oldStatus || "RUNNING",
-        "New Status": l.newStatus || "RUNNING",
-        "Action Taken": l.action || "-",
-        "Updated By": l.user || "-",
-        "Shift": l.shift || "-",
-        "Part No": l.partNo || "-",
-        "Part Name": l.partName || "-",
+        "Date and time": l.timeStr || "-",
+        "मशिन नाव": l.machine || "-",
+        "live status मशिन": l.newStatus || "RUNNING",
+        "action taken": l.detail || l.action || "-",
+        "shift": l.shift || "-",
+        "part name": l.partName || "-",
+        "part number": l.partNo || "-",
         "Qty": l.qty || "-"
       });
     }
@@ -1756,9 +1754,9 @@ function downloadDepartmentExcel(){
     db.ref("statusLogs").once("value").then(snapshot => {
       const logsData = snapshot.val() || {};
       const workbook = XLSX.utils.book_new();  
-      const sheetName = "Store Entry Logs";
+      const sheetName = "Material Record";
 
-      let rows = getFilteredLogsForDepartment(logsData, "store");
+      let rows = getFilteredLogsForDepartment(logsData);
 
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
@@ -1767,15 +1765,13 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Date & Time": new Date().toLocaleString("en-IN"),
-              "Machine No": mcId,
-              "Old Status": m.oldStatus || "RUNNING",
-              "New Status": stStr,
-              "Action Taken": "CURRENT LIVE STATUS",
-              "Updated By": m.op ? m.op.name : "System",
-              "Shift": getCurrentShift(),
-              "Part No": mat.partNo || "-",
-              "Part Name": mat.partName || "-",
+              "Date and time": new Date().toLocaleString("en-IN"),
+              "मशिन नाव": mcId,
+              "live status मशिन": stStr,
+              "action taken": "CURRENT LIVE STATUS",
+              "shift": getCurrentShift(),
+              "part name": mat.partName || "-",
+              "part number": mat.partNo || "-",
               "Qty": mat.qty || "-"
             });
           }
@@ -1783,16 +1779,16 @@ function downloadDepartmentExcel(){
       }
 
       if(rows.length === 0){
-        alert("Store Entry (Material Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
+        alert("मटेरियल रेकॉर्ड्स (Material Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
         return;
       }
 
       const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:20},{wch:12},{wch:20},{wch:22},{wch:20},{wch:16},{wch:8},{wch:15},{wch:20},{wch:10}];  
+      worksheet["!cols"] = [{wch:22},{wch:12},{wch:22},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
-      const fileName = "Store_Department_Report_" + date + ".xlsx";
+      const fileName = "Material_Record_" + date + ".xlsx";
       XLSX.writeFile(workbook, fileName);  
     }).catch(err => {
       console.error("Firebase Read Error:", err);
@@ -2056,7 +2052,7 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
 
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);
-    logStatusAction(deptSelectedMachine, "DEPT ACTION", "Action: "+(addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+    logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     renderDepartmentDashboard();  
   }).catch(err=>{  
     console.error(err);  
