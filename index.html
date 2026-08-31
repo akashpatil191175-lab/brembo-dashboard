@@ -797,7 +797,6 @@ button:disabled {
 
 <div id="appWrapper">
 
-  <!-- MATERIAL MODAL -->  
   <div id="materialModal">    
     <div class="modalContent">  
       <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
@@ -809,7 +808,6 @@ button:disabled {
     </div>  
   </div>  
 
-  <!-- LOGIN -->  
   <div id="login">    
     <div class="loginBox">  
       <img src="icon-512.png" class="brandLogo" alt="Brembo">  
@@ -825,7 +823,7 @@ button:disabled {
         <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">  
         <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
         <select id="opMachine" class="loginSelect"></select>  
-        <select id="opShift" class="loginSelect">  
+        <select id="opShift" class="loginSelect" style="display:none;">  
           <option value="Shift A">Shift A (7:45 AM - 4:15 PM)</option>  
           <option value="Shift B">Shift B (4:15 PM - 12:00 AM)</option>  
           <option value="Shift C">Shift C (12:00 AM - 7:45 AM)</option>  
@@ -852,7 +850,6 @@ button:disabled {
     </div>  
   </div>  
 
-  <!-- OPERATOR DASHBOARD -->  
   <div id="operatorDashboard" style="display:none">    
     <div class="topBar">  
       <div class="topLeft">  
@@ -901,7 +898,6 @@ button:disabled {
     </div>  
   </div>  
 
-  <!-- DEPARTMENT DASHBOARD -->  
   <div id="departmentDashboard" style="display:none">    
     <div class="deptHeader">  
       <div>  
@@ -996,7 +992,7 @@ const DEPARTMENT_CONFIG = {
     name:"SUPERVISOR", 
     pin:"Ampa123", 
     isViewOnly: true, 
-    allowedStatuses: ["TOTAL", "RUNNING", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
+    allowedStatuses: ["TOTAL", "ACTIVE LOGINS", "MACHINE IDLE", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[  
       { label:"CLEAR HOLD", clearsIssue:"LOT HOLD" },  
       { label:"CLEAR BREAKDOWN", clearsIssue:"BREAKDOWN" },  
@@ -1036,7 +1032,8 @@ const ALL_MACHINES_LIST = (()=>{
 
 const MASTER_STATUS_CONFIG = [  
   { key:"TOTAL", title:"TOTAL", icon:"⚙️", accent:"#ffffff" },  
-  { key:"RUNNING", title:"RUNNING", icon:"⚙️", accent:"#00ff18" },  
+  { key:"ACTIVE LOGINS", title:"ACTIVE LOGINS", icon:"👥", accent:"#00ff18" },  
+  { key:"MACHINE IDLE", title:"MACHINE IDLE", icon:"⏸️", accent:"#ff9800" },  
   { key:"BREAKDOWN", title:"BREAKDOWN", icon:"⚙️", accent:"#ff1744" },  
   { key:"CMM NOT OK", title:"CMM NOT OK", icon:"⚙️", accent:"#0099ff" },  
   { key:"FIXTURE NOT OK", title:"FIXTURE NOT OK", icon:"⚙️", accent:"#c83cff" },  
@@ -1099,9 +1096,9 @@ db.ref(".info/connected").on("value",snap=>{
 
 function handleShiftChange(newShift){  
   if(operator){  
-    operator.shift = newShift;  
-    localStorage.setItem("brembo_shift", newShift);  
-    localStorage.setItem("brembo_v7", JSON.stringify(operator));  
+    alert("⚠️ Shift End! Your shift (" + operator.shift + ") has ended. System is logging out automatically.");
+    doLogout(true);
+    return;
   }  
   renderAllDashboards();  
 }  
@@ -1112,12 +1109,15 @@ function checkShiftAutoReset(){
   const badge = document.getElementById("liveShiftBadge");  
   if(badge){ badge.innerText = "SHIFT: "+live; }  
   const txt = document.getElementById("autoShiftTxt");  
-  if(txt){ txt.innerText = "Current Running Shift: "+live+" ("+getShiftRange(live)+")"; }  
+  if(txt){ txt.innerText = "Auto Connected Shift: "+live+" ("+getShiftRange(live)+")"; }  
 
   if(saved && saved!==live){  
     handleShiftChange(live);  
   }  
 }  
+
+// ३० सेकंदांनी Shift End तपासा
+setInterval(checkShiftAutoReset, 30000);
 
 function getMachineIssues(m){  
   if(!m) return {};  
@@ -1139,6 +1139,19 @@ function getMachineStatusString(m){
 
 function hasStatus(m, st){  
   if(!m) return false;  
+  
+  if(st === "ACTIVE LOGINS"){
+    return !!(m.op && m.op.id);
+  }  
+  
+  /* 1) MATERIAL SHORTAGE सुधारणा: 'MATERIAL REQUIREMENT' हटवले आहे. आता फक्त SHORTAGE, BREAKDOWN किंवा OPERATOR LOGOUT असल्यास idle दिसेल */
+  if(st === "MACHINE IDLE"){
+    const isBreakdown = hasStatus(m, "BREAKDOWN");
+    const isMatShortage = hasStatus(m, "MATERIAL SHORTAGE");
+    const isNoOperator = !m.op;
+    return isBreakdown || isMatShortage || isNoOperator;
+  }
+
   if(st === "RUNNING"){  
     return Object.keys(getMachineIssues(m)).length === 0;  
   }  
@@ -1168,7 +1181,6 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-/* LOGGING FUNCTION (EXCEL साठी मटेरियल संदर्भातील माहिती पूर्णपणे लॉग करण्यासाठी) */
 function logStatusAction(mc, action, detail, user, oldSt, newSt){  
   const m = machines[mc] || {};  
   const mat = m.materialDetails || {};  
@@ -1217,6 +1229,18 @@ function load(){
       missing.forEach(id=>{ updates["machines/"+id]=machines[id]; });  
       db.ref().update(updates);  
     }  
+
+    if(operator && machines[operator.machine]){
+      const currentMcOp = machines[operator.machine].op;
+      if(!currentMcOp || currentMcOp.id !== operator.id){
+        alert("⚠️ Session Terminated: Another operator has logged into Machine " + operator.machine + "!");
+        localStorage.removeItem("brembo_v7");
+        localStorage.removeItem("brembo_shift");
+        operator = null;
+        location.reload();
+        return;
+      }
+    }
 
     for(let id of ALL_MACHINES_LIST){  
       const stNow = getMachineStatusString(machines[id]);  
@@ -1316,15 +1340,16 @@ function doLogin(){
   const nm = document.getElementById("opName").value.trim();  
   const pin = document.getElementById("opPin").value.trim();  
   const mc = document.getElementById("opMachine").value;  
-  const sh = document.getElementById("opShift").value;  
+  const sh = getCurrentShift();  
 
-  if(!id || !nm || !pin || !mc || !sh){ alert("Please fill ID, Name, PIN, Machine and Shift!"); return; }  
+  if(!id || !nm || !pin || !mc){ alert("Please fill ID, Name, PIN, and Machine!"); return; }  
   if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
+  /* 2) STRICT SINGLE OPERATOR CHECK: पहिला ऑपरेटर लॉगआऊट होईपर्यंत दुसऱ्याला लॉगइन होऊ न देणे */
   const targetMc = machines[mc];  
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
-    alert("⛔ ACCESS DENIED: Machine "+mc+" currently has an active session by "+targetMc.op.name+" ("+targetMc.op.id+"). Multiple logins not allowed!");  
-    return;  
+    alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").\nSecond operator cannot login until the active operator logs out or the shift ends!");
+    return;
   }  
 
   operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };  
@@ -1362,8 +1387,8 @@ function applyOperator(isReload = false){
   renderAllDashboards();  
 }  
 
-function doLogout(){  
-  if(!confirm("Logout?")) return;  
+function doLogout(force = false){  
+  if(!force && !confirm("Logout?")) return;  
   if(operator && machines[operator.machine]){
     machines[operator.machine].op = null;
     saveMachine(operator.machine);
@@ -1417,7 +1442,7 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
   container.innerHTML = cardsToDisplay.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
-    const blinkClass = (item.key === "MATERIAL SHORTAGE") && count > 0 ? "blinkAlert" : "";
+    const blinkClass = (item.key === "MATERIAL SHORTAGE" || item.key === "MACHINE IDLE") && count > 0 ? "blinkAlert" : "";
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
@@ -1429,6 +1454,8 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
 function getStatusDisplayName(status){  
   if(status==="MATERIAL REQUIREMENT"){ return "📦 MAT REQ"; }  
   if(status==="MATERIAL SHORTAGE"){ return "⚠️ MAT SHORTAGE"; }  
+  if(status==="ACTIVE LOGINS"){ return "👥 ACTIVE LOGINS"; }  
+  if(status==="MACHINE IDLE"){ return "⏸️ MACHINE IDLE"; }  
   return status;  
 }  
 
@@ -1596,7 +1623,6 @@ function clearMaterialRequirement(){
   
   m.issues = issues;  
   
-  // Excel Log मध्ये Material Received बाबत सर्व डिटेल्स सेव्ह करण्यासाठी
   logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");
 
   m.materialDetails = null;  
@@ -1711,7 +1737,6 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
-/* STRICT EXCEL FILTERING: Material Requirement, Shortage आणि Received च्या सर्व केसेससाठी माहिती पुरवणे */
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
@@ -1767,7 +1792,6 @@ function downloadDepartmentExcel(){
 
       let rows = getFilteredLogsForDepartment(logsData);
 
-      // जर लॉग हिस्टरी नसेल तर लाइव्ह स्टेटसवरून डेटा तयार केला जाईल
       if(rows.length === 0){
         ALL_MACHINES_LIST.forEach(mcId => {
           const m = machines[mcId] || {};
@@ -1788,7 +1812,7 @@ function downloadDepartmentExcel(){
       }
 
       if(rows.length === 0){
-        alert("मटेरियल रेकॉर्ड्स (Material Requirement, Shortage, Received) ची कोणतीही माहिती उपलब्ध नाही.");
+        alert("मटेरियल रेकॉर्ड्स ची कोणतीही माहिती उपलब्ध नाही.");
         return;
       }
 
@@ -1810,7 +1834,6 @@ function downloadDepartmentExcel(){
   }  
 }  
 
-/* RESET EXCEL LOGS FUNCTION (STORE & SUPERVISOR ONLY) */
 function resetExcelFile(){
   if(department !== "store" && department !== "supervisor"){
     alert("Excel File Reset option only Store & Supervisor साठी उपलब्ध आहे.");
@@ -1980,7 +2003,9 @@ function renderDepartmentSelected(){
 
   if(op){  
     html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
-  }  
+  } else {
+    html += `<div style="font-size:12px;color:#ef4444;margin-bottom:12px;font-weight:700">⚠️ Operator Not Logged In</div>`;
+  }
 
   if(m.materialDetails){  
     html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
@@ -2062,7 +2087,6 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   saveMachine(deptSelectedMachine).then(()=>{  
     const newSt = getMachineStatusString(m);  
     
-    // Store किंवा Supervisor ने बदल केल्यास तो Excel Log मध्ये सेव्ह होईल
     if(department === "store" || department === "supervisor"){
       logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     }  
