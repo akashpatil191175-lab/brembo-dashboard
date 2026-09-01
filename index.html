@@ -635,8 +635,9 @@ button:disabled {
 }  
 .deptContent{  
   padding:0 0 20px;  
-  max-width:1450px;  
-  margin:auto  
+  max-width:1600px;  
+  margin:auto;
+  width: 100%;
 }  
 .deptStatusCards{  
   display:grid;  
@@ -651,20 +652,29 @@ button:disabled {
   padding:16px;  
   margin:10px 26px 14px  
 }  
+
+/* एकाच स्क्रीनवर २० कार्ड्स बसवण्यासाठी ५ Columns x 4 Rows CSS Grid Structure */
 .deptMachineGrid{  
   display:grid;  
-  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));  
-  gap:12px;  
-  max-height:600px;  
-  overflow:auto;  
+  grid-template-columns:repeat(5, 1fr);  
+  grid-template-rows:repeat(4, 1fr);
+  gap:10px;  
+  height: calc(100vh - 220px); 
+  overflow:hidden;  
   margin-top:12px  
 }  
+
+/* Card Box Style */
 .deptMachineCard{  
   background:#141414;  
   border:1px solid #333;  
-  padding:14px;  
-  border-radius:10px;  
+  padding:10px;  
+  border-radius:8px;  
   text-align:left;  
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
 }  
 .deptSelected{  
   background:#090909;  
@@ -750,11 +760,13 @@ button:disabled {
 @media(max-width:1200px){  
   .statusCards{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
+  .deptMachineGrid { grid-template-columns:repeat(4, 1fr); }
 }  
 @media(max-width:800px){  
   .statusCards{ grid-template-columns:repeat(3,1fr) }  
   .detailTop{ grid-template-columns:1fr }  
   .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
+  .deptMachineGrid { grid-template-columns:repeat(2, 1fr); overflow-y:auto; height:auto; }
 }  
 @media(max-width:700px){  
   .topBar{ padding:12px }  
@@ -775,6 +787,7 @@ button:disabled {
   .deptMachineBox{ margin:8px 10px 12px }  
   .deptTitle{ font-size:18px }  
   .infoGrid{ grid-template-columns:80px 1fr }  
+  .deptMachineGrid { grid-template-columns:1fr; }
 }  
 </style>  
 </head>  
@@ -1501,11 +1514,12 @@ function sel(id){
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin-top:10px;line-height:1.6">  
+    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:12px;margin-top:10px;line-height:1.5">  
         <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
         <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
         <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
-        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
+        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
+        <span style="color:#22c55e;font-size:11px;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span>
       </div>`;  
   }  
 
@@ -1634,6 +1648,7 @@ function closeMaterialModal(){
   document.getElementById("materialModal").style.display="none";  
 }  
 
+/* Material Submit करताना Date आणि Time आपोआप जोडण्यासाठी Update केलेले Function */
 function submitMaterialRequirement(){  
   const partNo=document.getElementById("matPartNo").value.trim();  
   const partName=document.getElementById("matPartName").value.trim();  
@@ -1643,7 +1658,18 @@ function submitMaterialRequirement(){
   if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
   if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
 
-  machines[curMachine].materialDetails={partNo,partName,qty};  
+  // तंतोतंत तारीख आणि वेळ जनरेट करा
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB'); 
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dateTimeStr = `${dateStr} | ${timeStr}`;
+
+  machines[curMachine].materialDetails={
+    partNo: partNo,
+    partName: partName,
+    qty: qty,
+    dateTime: dateTimeStr
+  };  
   closeMaterialModal();  
 
   executeStatusUpdate("MATERIAL REQUIREMENT");  
@@ -1680,7 +1706,7 @@ function executeStatusUpdate(s){
     let matInfo="";  
     if(machines[curMachine].materialDetails){  
       const d = machines[curMachine].materialDetails;  
-      matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty);  
+      matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty)+"%0ATime: "+encodeURIComponent(d.dateTime || date);  
     }  
 
     const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(newSt)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
@@ -1776,7 +1802,7 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Date and time": new Date().toLocaleString("en-IN"),
+              "Date and time": mat.dateTime || new Date().toLocaleString("en-IN"),
               "मशिन नाव": mcId,
               "action taken": stStr,
               "shift": getCurrentShift(),
@@ -1910,7 +1936,7 @@ function renderDepartmentDashboard(){
   renderDepartmentMachineGrid();  
 }  
 
-/* क्लिक न करता थेट मशिन डिटेल्स कार्ड्सच्या स्वरूपात दाखवणारे अपडेटेड फंक्शन */
+/* २० कार्ड्स एकाच स्क्रीनवर बसवण्यासाठी अपडेट केलेले renderDepartmentMachineGrid Function */
 function renderDepartmentMachineGrid(){  
   const grid = document.getElementById("deptMachineGrid");  
   if(!grid) return;  
@@ -1941,37 +1967,38 @@ function renderDepartmentMachineGrid(){
 
     let matInfoHtml = "";
     if(mat){
-      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:8px;font-size:12px;margin:10px 0;line-height:1.5">
-          <b style="color:#eab308">📦 MATERIAL DETAILS</b><br>
+      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:6px 8px;border-radius:6px;font-size:11px;margin:4px 0;line-height:1.4">
+          <b style="color:#eab308">📦 MATERIAL</b><br>
           <b>Part No:</b> ${escapeHtml(mat.partNo)}<br>
           <b>Part Name:</b> ${escapeHtml(mat.partName)}<br>
-          <b>Qty:</b> ${escapeHtml(String(mat.qty))}
+          <b>Qty:</b> ${escapeHtml(String(mat.qty))}<br>
+          <span style="color:#22c55e;font-size:10px;font-weight:bold;">🕒 ${escapeHtml(mat.dateTime || '-')}</span>
         </div>`;
     } else {
-      matInfoHtml = `<div style="color:#777;font-size:11px;margin:8px 0;">No specific material request form filled.</div>`;
+      matInfoHtml = `<div style="color:#777;font-size:10px;margin:4px 0;">No material details</div>`;
     }
 
     let actionBtnHtml = "";
     if(department === "supervisor"){
       const currentIssues = Object.keys(getMachineIssues(m));
       currentIssues.forEach(iss => {
-        actionBtnHtml += `<button disabled style="width:100%;margin-top:6px;padding:8px;border:1px solid #555;border-radius:6px;background:#222;color:#888;font-size:11px;font-weight:800">CLEAR ${iss} (VIEW ONLY)</button>`;
+        actionBtnHtml += `<button disabled style="width:100%;margin-top:4px;padding:4px;border:1px solid #555;border-radius:5px;background:#222;color:#888;font-size:10px;font-weight:800">CLEAR ${iss}</button>`;
       });
     } else if(config && config.actions && config.actions.length > 0){
       config.actions.forEach(a => {
         if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:6px;padding:10px;border:1px solid #ef4444;border-radius:8px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:12px;cursor:pointer">${a.label}</button>`;
+          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:4px;padding:6px;border:1px solid #ef4444;border-radius:6px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:11px;cursor:pointer">${a.label}</button>`;
         }
       });
     }
 
     return `<div class="deptMachineCard">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="font-size:20px;font-weight:900;">${id}</h3>
-        <span style="font-size:11px;font-weight:900;padding:4px 8px;border-radius:5px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
+        <h3 style="font-size:16px;font-weight:900;">${id}</h3>
+        <span style="font-size:9px;font-weight:900;padding:2px 6px;border-radius:4px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
       </div>
-      <div style="font-size:11px;color:#aaa;margin-top:4px;">
-        Operator: <b>${op ? escapeHtml(op.name) : "Not Logged In"}</b> ${op ? `(${escapeHtml(op.shift)})` : ""}
+      <div style="font-size:10px;color:#aaa;margin-top:2px;">
+        Op: <b>${op ? escapeHtml(op.name) : "N/A"}</b>
       </div>
       ${matInfoHtml}
       ${actionBtnHtml}
