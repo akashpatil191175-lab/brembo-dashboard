@@ -171,16 +171,17 @@ button:disabled {
   line-height:1.5  
 }  
 
+/* Top Bar CSS with Clock Adjustments */
 .topBar{  
-  min-height:96px;  
-  padding:16px 28px;  
+  min-height:85px;  
+  padding:10px 20px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
   display:flex;  
   align-items:center;  
   justify-content:space-between;  
-  gap:15px;  
+  gap:12px;  
   position:sticky;  
   top:0;  
   z-index:1000  
@@ -188,47 +189,47 @@ button:disabled {
 .topLeft{  
   display:flex;  
   align-items:center;  
-  gap:18px;  
+  gap:14px;  
   min-width:0  
 }  
 .topLogo{  
-  width:235px;  
-  height:62px;  
+  width:180px;  
+  height:50px;  
   object-fit:contain;  
   object-position:left center  
 }  
 .topDivider{  
   width:1px;  
-  height:42px;  
+  height:36px;  
   background:#333  
 }  
 .userName{  
-  font-size:17px;  
+  font-size:15px;  
   font-weight:800;  
   white-space:nowrap  
 }  
 .machineBadge{  
-  font-size:18px;  
+  font-size:15px;  
   font-weight:900;  
-  padding:10px 15px;  
+  padding:6px 12px;  
   border:1px solid #333;  
   background:#121212;  
-  border-radius:10px;  
+  border-radius:8px;  
   color:#fff  
 }  
 .shiftInfo{  
   line-height:1.2  
 }  
 .shiftMain{  
-  font-size:16px;  
+  font-size:14px;  
   font-weight:900;  
   color:#ffd000  
 }  
 .shiftRange{  
-  font-size:11px;  
+  font-size:10px;  
   color:#ffd000;  
   font-weight:700;  
-  margin-top:4px  
+  margin-top:2px  
 }  
 .topActions{  
   display:flex;  
@@ -237,9 +238,9 @@ button:disabled {
   flex-wrap:wrap  
 }  
 .pill{  
-  padding:10px 14px;  
-  border-radius:11px;  
-  font-size:12px;  
+  padding:8px 12px;  
+  border-radius:9px;  
+  font-size:11px;  
   font-weight:900;  
   border:1px solid #292929;  
   background:#0b0b0b  
@@ -247,14 +248,22 @@ button:disabled {
 .livePill{  
   color:#5cff64  
 }  
+.liveClockPill {
+  color: #00e5ff;
+  font-family: monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  border-color: #00e5ff44;
+  background: #001219;
+}
 .liveDot{  
   display:inline-block;  
-  width:10px;  
-  height:10px;  
+  width:8px;  
+  height:8px;  
   background:#25d366;  
   border-radius:50%;  
-  margin-right:7px;  
-  box-shadow:0 0 10px #25d366  
+  margin-right:6px;  
+  box-shadow:0 0 8px #25d366  
 }  
 .resetBtn{  
   color:#ff3340;  
@@ -268,17 +277,17 @@ button:disabled {
 
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
-  gap:10px;  
-  padding:16px 26px 10px;  
+  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));  
+  gap:8px;  
+  padding:12px 20px 8px;  
   background:#050505  
 }  
 .statusCard{  
-  min-height:118px;  
+  min-height:95px;  
   background:linear-gradient(180deg,#111,#080808);  
   border:1px solid #e50914;  
-  border-radius:13px;  
-  padding:14px 13px 12px;  
+  border-radius:10px;  
+  padding:10px;  
   cursor:pointer;  
   position:relative;  
   overflow:hidden;  
@@ -301,51 +310,51 @@ button:disabled {
 .statusCard::after{  
   content:"";  
   position:absolute;  
-  left:12px;  
-  right:12px;  
+  left:10px;  
+  right:10px;  
   bottom:0;  
-  height:4px;  
+  height:3px;  
   background:var(--accent);  
   border-radius:5px 5px 0 0;  
-  box-shadow:0 0 13px var(--accent)  
+  box-shadow:0 0 10px var(--accent)  
 }  
 .statusCardTitle{  
   display:flex;  
   align-items:center;  
-  gap:7px;  
+  gap:6px;  
   color:#bdbdbd;  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900;  
   line-height:1.2  
 }  
 .statusIcon{  
-  font-size:18px;  
+  font-size:15px;  
   line-height:1  
 }  
 .statusCardCount{  
-  font-size:38px;  
+  font-size:30px;  
   font-weight:900;  
   line-height:1;  
   color:var(--accent);  
-  margin-top:12px  
+  margin-top:6px  
 }  
 .statusCardHint{  
   font-size:8px;  
   color:#888;  
   font-weight:700;  
-  margin-top:7px  
+  margin-top:4px  
 }  
 .statusMachineArea{  
-  padding:8px 26px 15px  
+  padding:6px 20px 10px  
 }  
 .statusMachinePanel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
   border:1px solid #292929;  
-  border-radius:14px;  
+  border-radius:12px;  
   overflow:hidden  
 }  
 .statusMachineHeader{  
-  padding:14px 18px;  
+  padding:10px 14px;  
   border-bottom:1px solid #292929;  
   display:flex;  
   justify-content:space-between;  
@@ -354,7 +363,7 @@ button:disabled {
   flex-wrap:wrap  
 }  
 .statusMachineTitle{  
-  font-size:14px;  
+  font-size:13px;  
   font-weight:900;  
   color:#eee  
 }  
@@ -363,22 +372,22 @@ button:disabled {
   font-size:10px  
 }  
 .machineResultGrid{  
-  padding:12px;  
+  padding:10px;  
   display:grid;  
-  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
-  gap:8px;  
-  max-height:310px;  
+  grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));  
+  gap:6px;  
+  max-height:260px;  
   overflow:auto  
 }  
 .machineResult{  
   background:#131313;  
   border:1px solid #292929;  
-  border-radius:9px;  
-  padding:11px 7px;  
+  border-radius:8px;  
+  padding:8px 5px;  
   text-align:center;  
   cursor:pointer;  
   font-weight:900;  
-  min-height:62px  
+  min-height:55px  
 }  
 .machineResult:hover{  
   border-color:#666;  
@@ -393,52 +402,52 @@ button:disabled {
   display:block;  
   font-size:8px;  
   color:#777;  
-  margin-top:5px;  
+  margin-top:4px;  
   line-height:1.2  
 }  
 .mainBox{  
   display:grid;  
   grid-template-columns:1fr;  
-  gap:18px;  
-  padding:6px 26px 24px  
+  gap:15px;  
+  padding:4px 20px 20px  
 }  
 .panel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
   border:1px solid #292929;  
-  border-radius:14px;  
+  border-radius:12px;  
   overflow:hidden  
 }  
 .panelHeader{  
-  padding:15px 20px;  
+  padding:12px 16px;  
   border-bottom:1px solid #292929;  
-  font-size:14px;  
+  font-size:13px;  
   font-weight:900;  
   color:#888;  
   letter-spacing:1px  
 }  
 .detailPanel{  
-  padding:20px  
+  padding:16px  
 }  
 .detailTop{  
   display:grid;  
-  grid-template-columns:1fr 310px;  
-  gap:15px;  
-  padding-bottom:18px;  
+  grid-template-columns:1fr 280px;  
+  gap:12px;  
+  padding-bottom:14px;  
   border-bottom:1px solid #222  
 }  
 .machineTitle{  
-  font-size:34px;  
+  font-size:28px;  
   font-weight:900  
 }  
 .yours{  
   color:#e50914;  
-  font-size:13px;  
+  font-size:12px;  
   font-weight:900;  
-  margin-left:10px  
+  margin-left:8px  
 }  
 .statusLine{  
-  font-size:13px;  
-  margin-top:10px;  
+  font-size:12px;  
+  margin-top:8px;  
   color:#aaa;  
   display:flex;  
   align-items:center;  
@@ -447,40 +456,40 @@ button:disabled {
 }  
 .routeTop{  
   border-left:1px solid #222;  
-  padding-left:20px  
+  padding-left:16px  
 }  
 .routeTitle{  
   color:#e50914;  
-  font-size:12px;  
+  font-size:11px;  
   font-weight:900;  
-  margin-bottom:8px;  
+  margin-bottom:6px;  
   letter-spacing:1px  
 }  
 .routeLine{  
-  font-size:12px;  
-  margin:6px 0;  
+  font-size:11px;  
+  margin:4px 0;  
   color:#ccc  
 }  
 .infoBox{  
-  margin-top:16px;  
+  margin-top:14px;  
   background:#090909;  
   border:1px solid #222;  
-  border-radius:12px;  
-  padding:16px  
+  border-radius:10px;  
+  padding:12px  
 }  
 .infoTitle{  
   color:#22c55e;  
   font-weight:900;  
-  font-size:12px;  
-  margin-bottom:12px;  
+  font-size:11px;  
+  margin-bottom:10px;  
   letter-spacing:1px  
 }  
 .infoGrid{  
   display:grid;  
-  grid-template-columns:100px 1fr auto;  
-  gap:10px;  
+  grid-template-columns:90px 1fr auto;  
+  gap:8px;  
   align-items:center;  
-  font-size:13px  
+  font-size:12px  
 }  
 .label{  
   color:#777  
@@ -489,29 +498,29 @@ button:disabled {
   font-weight:700  
 }  
 .statusHeading{  
-  margin:18px 0 10px;  
+  margin:14px 0 8px;  
   color:#e50914;  
-  font-size:12px;  
+  font-size:11px;  
   font-weight:900;  
   letter-spacing:1px  
 }  
 .statusGrid{  
   display:grid;  
   grid-template-columns:repeat(3,1fr);  
-  gap:10px  
+  gap:8px  
 }  
 .statusBtn{  
-  min-height:50px;  
+  min-height:44px;  
   background:#0c0c0c;  
   border:1px solid #222;  
-  border-radius:9px;  
+  border-radius:8px;  
   color:#eee;  
-  padding:10px 14px;  
+  padding:8px 12px;  
   display:flex;  
   align-items:center;  
   justify-content:space-between;  
   font-weight:800;  
-  font-size:12px;  
+  font-size:11px;  
   text-align:left  
 }  
 .statusBtn:hover{  
@@ -524,8 +533,8 @@ button:disabled {
   border-color:#22c55e !important;  
   color:#fff !important;  
   grid-column: 1 / -1;  
-  font-size:14px !important;  
-  padding:14px !important;
+  font-size:13px !important;  
+  padding:10px !important;
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }  
 
@@ -540,33 +549,33 @@ button:disabled {
 }
 
 .routeInfo{  
-  margin-top:16px;  
-  padding:14px;  
+  margin-top:14px;  
+  padding:10px;  
   border:1px dashed #b58a00;  
   background:#141000;  
   border-radius:99px;  
-  font-size:13px;  
-  line-height:1.6  
+  font-size:12px;  
+  line-height:1.5  
 }  
 .waBtn{  
   width:100%;  
-  height:50px;  
+  height:44px;  
   border:1px solid #25d366;  
-  border-radius:9px;  
+  border-radius:8px;  
   background:linear-gradient(180deg,#168b3c,#0d5f29);  
   color:#fff;  
-  font-size:14px;  
+  font-size:13px;  
   font-weight:900;  
-  margin-top:12px;  
+  margin-top:10px;  
   letter-spacing:.5px  
 }  
 .viewBox{  
   background:#0d0d0d;  
   border:1px solid #222;  
-  border-radius:10px;  
-  padding:15px;  
-  margin-top:14px;  
-  line-height:1.7  
+  border-radius:8px;  
+  padding:12px;  
+  margin-top:12px;  
+  line-height:1.6  
 }  
 #notifBig{  
   position:fixed;  
@@ -575,10 +584,10 @@ button:disabled {
   transform:translate(-50%,-50%);  
   background:#c9000b;  
   color:#fff;  
-  padding:28px;  
-  border-radius:16px;  
+  padding:24px;  
+  border-radius:14px;  
   font-weight:900;  
-  font-size:20px;  
+  font-size:18px;  
   display:none;  
   z-index:99999;  
   text-align:center;  
@@ -600,16 +609,16 @@ button:disabled {
 .modalContent{  
   background:#111;  
   border:1px solid #eab308;  
-  border-radius:18px;  
-  padding:24px;  
-  width:400px;  
+  border-radius:16px;  
+  padding:20px;  
+  width:380px;  
   max-width:100%  
 }  
 #departmentDashboard{  
   display:none  
 }  
 .deptHeader{  
-  padding:18px 26px;  
+  padding:12px 20px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #252525;  
@@ -622,203 +631,202 @@ button:disabled {
   z-index:1000  
 }  
 .deptTitle{  
-  font-size:23px;  
+  font-size:20px;  
   font-weight:900  
 }  
 .deptBadge{  
-  padding:7px 13px;  
-  border-radius:20px;  
+  padding:5px 10px;  
+  border-radius:15px;  
   background:#e50914;  
   color:#fff;  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900  
 }  
 .deptContent{  
-  padding:0 0 20px;  
+  padding:0 0 10px;  
   max-width:1600px;  
   margin:auto;
   width: 100%;
 }  
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));  
-  gap:9px;  
-  padding:16px 26px 10px  
+  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));  
+  gap:8px;  
+  padding:10px 20px 6px  
 }  
 .deptMachineBox{  
   background:#0d0d0d;  
   border:1px solid #292929;  
-  border-radius:14px;  
-  padding:16px;  
-  margin:10px 26px 14px  
+  border-radius:12px;  
+  padding:12px;  
+  margin:6px 20px 10px  
 }  
 
+/* OPTIMIZED AUTO-FIT TWO SCREEN NO SCROLL GRID FOR STORE */
 .deptMachineGrid{  
   display:grid;  
-  grid-template-columns:repeat(5, 1fr);  
-  grid-template-rows:repeat(4, 1fr);
-  gap:10px;  
-  height: calc(100vh - 220px); 
-  overflow:hidden;  
-  margin-top:12px  
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  
+  gap:8px;  
+  width: 100%;
+  margin-top:8px;  
 }  
 
+/* COMPACT MEDIUM SIZED CARDS */
 .deptMachineCard{  
   background:#141414;  
   border:1px solid #333;  
-  padding:10px;  
+  padding:8px 10px;  
   border-radius:8px;  
   text-align:left;  
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
 }  
 .deptSelected{  
   background:#090909;  
   border:1px solid #303030;  
-  border-radius:12px;  
-  padding:16px;  
-  margin-top:12px  
+  border-radius:10px;  
+  padding:12px;  
+  margin-top:10px  
 }  
 .viewOnly{  
-  margin-top:14px;  
+  margin-top:10px;  
   background:#121212;  
   border:1px solid #555;  
-  border-radius:10px;  
-  padding:18px;  
+  border-radius:8px;  
+  padding:14px;  
   text-align:center  
 }  
 .firebaseStatus{  
   display:inline-flex;  
   align-items:center;  
-  gap:6px;  
-  padding:7px 10px;  
+  gap:5px;  
+  padding:5px 8px;  
   border-radius:99px;  
-  font-size:10px;  
+  font-size:9px;  
   font-weight:900;  
   border:1px solid #292929;  
   background:#0b0b0b  
 }  
 .firebaseDot{  
-  width:8px;  
-  height:8px;  
+  width:7px;  
+  height:7px;  
   border-radius:50%;  
   background:#eab308  
 }  
 .firebaseOnline .firebaseDot{  
   background:#22c55e;  
-  box-shadow:0 0 8px #22c55e  
+  box-shadow:0 0 6px #22c55e  
 }  
 .firebaseOffline .firebaseDot{  
   background:#ef4444;  
-  box-shadow:0 0 8px #ef4444  
+  box-shadow:0 0 6px #ef4444  
 }  
 .excelSmallBtn {
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #15803d;
   color: white;
-  border-radius: 8px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 800;
   border: 1px solid #22c55e;
 }
 .excelResetBtn {
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #991b1b;
   color: white;
-  border-radius: 8px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 800;
   border: 1px solid #ef4444;
 }
 .urgentBox {
-  margin-top: 15px;
+  margin-top: 12px;
   background: #1f0406;
   border: 1px solid #e50914;
-  padding: 12px 16px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
 }
 .urgentBox input {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   accent-color: #e50914;
   cursor: pointer;
 }
 .urgentBox label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   color: #ff4d4d;
   cursor: pointer;
 }
 
-/* NEW SUMMARY WIDGET STYLES */
+/* COMPACT SUMMARY WIDGET STYLES */
 .summaryWidget {
   background: linear-gradient(145deg, #141414, #080808);
   border: 1px solid #ffd000;
-  border-radius: 14px;
-  padding: 15px;
-  margin: 10px 26px 5px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 6px 20px 4px;
 }
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-top: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
 }
 .summaryBox {
   background: #090909;
   border: 1px solid #292929;
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 8px;
   text-align: center;
 }
 .summaryTitle {
-  font-size: 11px;
+  font-size: 10px;
   color: #888;
   font-weight: 800;
   text-transform: uppercase;
 }
 .summaryVal {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 @media(max-width:1200px){  
   .statusCards{ grid-template-columns:repeat(5,1fr) }  
   .topBar{ flex-wrap:wrap }  
-  .deptMachineGrid { grid-template-columns:repeat(4, 1fr); }
 }  
 @media(max-width:800px){  
   .statusCards{ grid-template-columns:repeat(3,1fr) }  
   .detailTop{ grid-template-columns:1fr }  
-  .routeTop{ border-left:0; border-top:1px solid #222; padding:12px 0 0 }  
-  .deptMachineGrid { grid-template-columns:repeat(2, 1fr); overflow-y:auto; height:auto; }
+  .routeTop{ border-left:0; border-top:1px solid #222; padding:10px 0 0 }  
+  .deptMachineGrid { grid-template-columns:repeat(2, 1fr); }
 }  
 @media(max-width:700px){  
-  .topBar{ padding:12px }  
-  .topLogo{ width:160px; height:48px }  
-  .topLeft{ flex-wrap:wrap; gap:8px }  
+  .topBar{ padding:10px }  
+  .topLogo{ width:140px; height:40px }  
+  .topLeft{ flex-wrap:wrap; gap:6px }  
   .topActions{ width:100%; justify-content:flex-end; flex-wrap:wrap }  
-  .statusCards{ padding:10px; gap:7px }  
-  .statusCard{ min-height:105px; padding:11px 9px }  
-  .statusCardTitle{ font-size:9px }  
-  .statusCardCount{ font-size:30px }  
-  .statusIcon{ font-size:15px }  
-  .statusMachineArea{ padding:6px 10px 12px }  
-  .mainBox{ padding:6px 10px 20px }  
-  .detailPanel{ padding:14px }  
+  .statusCards{ padding:8px; gap:6px }  
+  .statusCard{ min-height:85px; padding:8px 6px }  
+  .statusCardTitle{ font-size:8px }  
+  .statusCardCount{ font-size:24px }  
+  .statusIcon{ font-size:13px }  
+  .statusMachineArea{ padding:4px 8px 10px }  
+  .mainBox{ padding:4px 8px 16px }  
+  .detailPanel{ padding:10px }  
   .statusGrid{ grid-template-columns:1fr }  
-  .deptHeader{ padding:12px }  
-  .deptContent{ padding:0 0 15px }  
-  .deptMachineBox{ margin:8px 10px 12px }  
-  .deptTitle{ font-size:18px }  
-  .infoGrid{ grid-template-columns:80px 1fr }  
+  .deptHeader{ padding:10px }  
+  .deptContent{ padding:0 0 10px }  
+  .deptMachineBox{ margin:6px 8px 10px }  
+  .deptTitle{ font-size:16px }  
+  .infoGrid{ grid-template-columns:70px 1fr }  
   .deptMachineGrid { grid-template-columns:1fr; }
 }  
 </style>  
@@ -830,12 +838,12 @@ button:disabled {
 
   <div id="materialModal">    
     <div class="modalContent">  
-      <h2 style="color:#eab308;font-weight:900;font-size:18px;margin-bottom:15px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
+      <h2 style="color:#eab308;font-weight:900;font-size:16px;margin-bottom:12px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
       <input id="matPartNo" class="loginInput" placeholder="PART NO">  
       <input id="matPartName" class="loginInput" placeholder="PART NAME">  
       <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
       
-      <div style="margin: 10px 0; font-size: 11px; color: #22c55e; font-weight: bold; text-align: center; background: #09190e; padding: 8px; border-radius: 8px; border: 1px solid #166534;">
+      <div style="margin: 8px 0; font-size: 10px; color: #22c55e; font-weight: bold; text-align: center; background: #09190e; padding: 6px; border-radius: 6px; border: 1px solid #166534;">
         🕒 Current Date & Time will be auto-saved upon submission.
       </div>
 
@@ -899,6 +907,7 @@ button:disabled {
         </div>  
       </div>  
       <div class="topActions">  
+        <span id="opLiveClock" class="pill liveClockPill">🕒 --:--:--</span>
         <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
         <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
@@ -941,6 +950,7 @@ button:disabled {
         <div style="font-size:10px;color:#22c55e;margin-top:2px;font-weight:700">BREMBO • LIVE</div>  
       </div>  
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">  
+        <span id="deptLiveClock" class="pill liveClockPill">🕒 --:--:--</span>
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
@@ -953,8 +963,8 @@ button:disabled {
       <!-- SHIFT SUMMARY WIDGET (ONLY COUNTS) -->
       <div class="summaryWidget" id="shiftSummaryWidget">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="color:#ffd000; font-size:13px; letter-spacing:1px;">📊 SHIFT-WISE MATERIAL SUMMARY (COUNT ONLY)</b>
-          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;">
+          <b style="color:#ffd000; font-size:12px; letter-spacing:1px;">📊 SHIFT-WISE MATERIAL SUMMARY (COUNT ONLY)</b>
+          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:3px 6px; border-radius:5px; font-size:10px; font-weight:700;">
             <option value="CURRENT">Current Active Shift</option>
             <option value="Shift A">Shift A</option>
             <option value="Shift B">Shift B</option>
@@ -987,7 +997,7 @@ button:disabled {
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
           <div>  
             <b id="deptGridTitle">MATERIAL REQUIREMENTS OVERVIEW</b>  
-            <div style="font-size:11px;color:#777;margin-top:4px">सर्व मशिनच्या मटेरियलची माहिती खाली थेट दिसेल.</div>  
+            <div style="font-size:10px;color:#777;margin-top:2px">सर्व मशिनच्या मटेरियलची माहिती खाली थेट दिसेल.</div>  
           </div>  
           <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
@@ -1013,6 +1023,24 @@ const db = firebase.database();
 
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
+
+/* LIVE TIME CLOCK FUNCTIONALITY */
+function startLiveClock() {
+  function updateClock() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-IN', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    const fullDisplay = `🕒 ${dateStr} | ${timeStr}`;
+    
+    const opClock = document.getElementById("opLiveClock");
+    const deptClock = document.getElementById("deptLiveClock");
+    
+    if(opClock) opClock.innerText = fullDisplay;
+    if(deptClock) deptClock.innerText = fullDisplay;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+}
 
 /* DEPARTMENTS CONFIG */  
 const DEPARTMENT_CONFIG = {  
@@ -1588,13 +1616,13 @@ function sel(id){
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:12px;margin-top:10px;line-height:1.5">  
+    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:8px;font-size:11px;margin-top:8px;line-height:1.4">  
         <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
         <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
         <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
         <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
-        <span style="color:#22c55e;font-size:11px;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span><br>
-        <span style="color:#ffd000;font-size:11px;font-weight:bold;">📍 Shift Requested: ${escapeHtml(m.materialDetails.shift || '-')}</span>
+        <span style="color:#22c55e;font-size:10px;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span><br>
+        <span style="color:#ffd000;font-size:10px;font-weight:bold;">📍 Shift Requested: ${escapeHtml(m.materialDetails.shift || '-')}</span>
       </div>`;  
   }  
 
@@ -1608,10 +1636,10 @@ function sel(id){
       <div>  
         <div>  
           <span class="machineTitle">${id}</span>  
-          ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:12px;font-weight:800;margin-left:10px">VIEW ONLY</span>`}  
+          ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:11px;font-weight:800;margin-left:8px">VIEW ONLY</span>`}  
         </div>  
         <div class="statusLine">  
-          Status: <b style="background:${badgeBg};color:#fff;padding:6px 10px;border-radius:6px">${getStatusDisplayName(statusStr)}</b>  
+          Status: <b style="background:${badgeBg};color:#fff;padding:4px 8px;border-radius:5px">${getStatusDisplayName(statusStr)}</b>  
           ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
         </div>  
       </div>  
@@ -1670,7 +1698,7 @@ function sel(id){
       </div>`;  
     document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
   }else{  
-    document.getElementById("statusList").innerHTML=`<div style="margin-top:18px;padding:14px;border:1px dashed #444;border-radius:10px;color:#777;font-size:12px;font-weight:700;text-align:center">🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.</div>`;  
+    document.getElementById("statusList").innerHTML=`<div style="margin-top:14px;padding:10px;border:1px dashed #444;border-radius:8px;color:#777;font-size:11px;font-weight:700;text-align:center">🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.</div>`;  
     document.getElementById("lockMsg").innerText = "View only. Your assigned machine is: "+(operator ? operator.machine : "None");  
   }  
 }  
@@ -2068,7 +2096,7 @@ function renderDepartmentMachineGrid(){
   count.innerText = filtered.length+" MACHINES";  
 
   if(filtered.length===0){  
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:25px;color:#777;font-size:12px;font-weight:700">NO MATERIAL REQUIREMENTS AT THIS MOMENT</div>`;  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:20px;color:#777;font-size:11px;font-weight:700">NO MATERIAL REQUIREMENTS AT THIS MOMENT</div>`;  
     return;  
   }  
 
@@ -2085,38 +2113,36 @@ function renderDepartmentMachineGrid(){
 
     let matInfoHtml = "";
     if(mat){
-      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:6px 8px;border-radius:6px;font-size:11px;margin:4px 0;line-height:1.4">
+      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:5px 7px;border-radius:5px;font-size:10px;margin:3px 0;line-height:1.3">
           <b style="color:#eab308">📦 MATERIAL</b><br>
-          <b>Part No:</b> ${escapeHtml(mat.partNo)}<br>
-          <b>Part Name:</b> ${escapeHtml(mat.partName)}<br>
-          <b>Qty:</b> ${escapeHtml(String(mat.qty))}<br>
-          <span style="color:#22c55e;font-size:10px;font-weight:bold;">🕒 ${escapeHtml(mat.dateTime || '-')}</span><br>
-          <span style="color:#ffd000;font-size:10px;font-weight:bold;">📍 Shift Requested: ${escapeHtml(mat.shift || '-')}</span>
+          <b>Part No:</b> ${escapeHtml(mat.partNo)} | <b>Part Name:</b> ${escapeHtml(mat.partName)}<br>
+          <b>Qty:</b> ${escapeHtml(String(mat.qty))} | <span style="color:#22c55e;font-weight:bold;">🕒 ${escapeHtml(mat.dateTime || '-')}</span><br>
+          <span style="color:#ffd000;font-weight:bold;">📍 Shift: ${escapeHtml(mat.shift || '-')}</span>
         </div>`;
     } else {
-      matInfoHtml = `<div style="color:#777;font-size:10px;margin:4px 0;">No material details</div>`;
+      matInfoHtml = `<div style="color:#777;font-size:9px;margin:3px 0;">No material details</div>`;
     }
 
     let actionBtnHtml = "";
     if(department === "supervisor"){
       const currentIssues = Object.keys(getMachineIssues(m));
       currentIssues.forEach(iss => {
-        actionBtnHtml += `<button disabled style="width:100%;margin-top:4px;padding:4px;border:1px solid #555;border-radius:5px;background:#222;color:#888;font-size:10px;font-weight:800">CLEAR ${iss}</button>`;
+        actionBtnHtml += `<button disabled style="width:100%;margin-top:3px;padding:3px;border:1px solid #555;border-radius:4px;background:#222;color:#888;font-size:9px;font-weight:800">CLEAR ${iss}</button>`;
       });
     } else if(config && config.actions && config.actions.length > 0){
       config.actions.forEach(a => {
         if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:4px;padding:6px;border:1px solid #ef4444;border-radius:6px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:11px;cursor:pointer">${a.label}</button>`;
+          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:3px;padding:5px;border:1px solid #ef4444;border-radius:5px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:10px;cursor:pointer">${a.label}</button>`;
         }
       });
     }
 
     return `<div class="deptMachineCard">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="font-size:16px;font-weight:900;">${id}</h3>
-        <span style="font-size:9px;font-weight:900;padding:2px 6px;border-radius:4px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
+        <h3 style="font-size:14px;font-weight:900;">${id}</h3>
+        <span style="font-size:8px;font-weight:900;padding:2px 5px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
       </div>
-      <div style="font-size:10px;color:#aaa;margin-top:2px;">
+      <div style="font-size:9px;color:#aaa;margin-top:1px;">
         Op: <b>${op ? escapeHtml(op.name) : "N/A"}</b>
       </div>
       ${matInfoHtml}
@@ -2172,6 +2198,7 @@ function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue)
 }  
 
 window.onload = function(){  
+  startLiveClock();
   fillMachineDropdown();  
   checkExistingSession();  
   load();  
