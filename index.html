@@ -2,7 +2,7 @@
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width,initial-scale=1">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
 <link rel="icon" type="image/png" href="icon-512.png">  
 <link rel="apple-touch-icon" href="icon-512.png">  
 <link rel="manifest" href="manifest.json">  
@@ -21,6 +21,11 @@
   box-sizing:border-box;  
   font-family:'Segoe UI',Roboto,Arial,sans-serif  
 }  
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
 body{  
   background:#050505;  
   color:#f4f4f5;  
@@ -32,9 +37,12 @@ body{
 
 #appWrapper {
   width: 100%;
-  max-width: 1600px;
+  max-width: 100vw;
+  min-height: 100vh;
   margin: 0 auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 button{  
@@ -54,8 +62,8 @@ button:disabled {
 }
 
 ::-webkit-scrollbar{  
-  width:7px;  
-  height:7px  
+  width:6px;  
+  height:6px  
 }  
 ::-webkit-scrollbar-track{  
   background:#090909  
@@ -171,10 +179,10 @@ button:disabled {
   line-height:1.5  
 }  
 
-/* Top Bar CSS with Clock Adjustments */
+/* Top Bar CSS */
 .topBar{  
-  min-height:85px;  
-  padding:10px 20px;  
+  min-height:65px;  
+  padding:8px 16px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
@@ -193,25 +201,25 @@ button:disabled {
   min-width:0  
 }  
 .topLogo{  
-  width:180px;  
-  height:50px;  
+  width:140px;  
+  height:40px;  
   object-fit:contain;  
   object-position:left center  
 }  
 .topDivider{  
   width:1px;  
-  height:36px;  
+  height:30px;  
   background:#333  
 }  
 .userName{  
-  font-size:15px;  
+  font-size:14px;  
   font-weight:800;  
   white-space:nowrap  
 }  
 .machineBadge{  
-  font-size:15px;  
+  font-size:13px;  
   font-weight:900;  
-  padding:6px 12px;  
+  padding:4px 10px;  
   border:1px solid #333;  
   background:#121212;  
   border-radius:8px;  
@@ -221,7 +229,7 @@ button:disabled {
   line-height:1.2  
 }  
 .shiftMain{  
-  font-size:14px;  
+  font-size:13px;  
   font-weight:900;  
   color:#ffd000  
 }  
@@ -238,8 +246,8 @@ button:disabled {
   flex-wrap:wrap  
 }  
 .pill{  
-  padding:8px 12px;  
-  border-radius:9px;  
+  padding:6px 10px;  
+  border-radius:8px;  
   font-size:11px;  
   font-weight:900;  
   border:1px solid #292929;  
@@ -251,7 +259,7 @@ button:disabled {
 .liveClockPill {
   color: #00e5ff;
   font-family: monospace;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   border-color: #00e5ff44;
   background: #001219;
@@ -277,17 +285,17 @@ button:disabled {
 
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));  
-  gap:8px;  
-  padding:12px 20px 8px;  
+  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));  
+  gap:6px;  
+  padding:8px 16px;  
   background:#050505  
 }  
 .statusCard{  
-  min-height:95px;  
+  min-height:75px;  
   background:linear-gradient(180deg,#111,#080808);  
   border:1px solid #e50914;  
   border-radius:10px;  
-  padding:10px;  
+  padding:8px;  
   cursor:pointer;  
   position:relative;  
   overflow:hidden;  
@@ -310,8 +318,8 @@ button:disabled {
 .statusCard::after{  
   content:"";  
   position:absolute;  
-  left:10px;  
-  right:10px;  
+  left:8px;  
+  right:8px;  
   bottom:0;  
   height:3px;  
   background:var(--accent);  
@@ -321,31 +329,31 @@ button:disabled {
 .statusCardTitle{  
   display:flex;  
   align-items:center;  
-  gap:6px;  
+  gap:5px;  
   color:#bdbdbd;  
-  font-size:10px;  
+  font-size:9px;  
   font-weight:900;  
   line-height:1.2  
 }  
 .statusIcon{  
-  font-size:15px;  
+  font-size:13px;  
   line-height:1  
 }  
 .statusCardCount{  
-  font-size:30px;  
+  font-size:24px;  
   font-weight:900;  
   line-height:1;  
   color:var(--accent);  
-  margin-top:6px  
-}  
-.statusCardHint{  
-  font-size:8px;  
-  color:#888;  
-  font-weight:700;  
   margin-top:4px  
 }  
+.statusCardHint{  
+  font-size:7.5px;  
+  color:#888;  
+  font-weight:700;  
+  margin-top:2px  
+}  
 .statusMachineArea{  
-  padding:6px 20px 10px  
+  padding:4px 16px 8px  
 }  
 .statusMachinePanel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
@@ -354,7 +362,7 @@ button:disabled {
   overflow:hidden  
 }  
 .statusMachineHeader{  
-  padding:10px 14px;  
+  padding:8px 12px;  
   border-bottom:1px solid #292929;  
   display:flex;  
   justify-content:space-between;  
@@ -363,31 +371,31 @@ button:disabled {
   flex-wrap:wrap  
 }  
 .statusMachineTitle{  
-  font-size:13px;  
+  font-size:12px;  
   font-weight:900;  
   color:#eee  
 }  
 .statusMachineSub{  
   color:#777;  
-  font-size:10px  
+  font-size:9px  
 }  
 .machineResultGrid{  
-  padding:10px;  
+  padding:8px;  
   display:grid;  
-  grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));  
+  grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));  
   gap:6px;  
-  max-height:260px;  
+  max-height:220px;  
   overflow:auto  
 }  
 .machineResult{  
   background:#131313;  
   border:1px solid #292929;  
   border-radius:8px;  
-  padding:8px 5px;  
+  padding:6px 4px;  
   text-align:center;  
   cursor:pointer;  
   font-weight:900;  
-  min-height:55px  
+  min-height:50px  
 }  
 .machineResult:hover{  
   border-color:#666;  
@@ -402,14 +410,14 @@ button:disabled {
   display:block;  
   font-size:8px;  
   color:#777;  
-  margin-top:4px;  
+  margin-top:3px;  
   line-height:1.2  
 }  
 .mainBox{  
   display:grid;  
   grid-template-columns:1fr;  
-  gap:15px;  
-  padding:4px 20px 20px  
+  gap:12px;  
+  padding:4px 16px 16px  
 }  
 .panel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
@@ -418,36 +426,36 @@ button:disabled {
   overflow:hidden  
 }  
 .panelHeader{  
-  padding:12px 16px;  
+  padding:10px 14px;  
   border-bottom:1px solid #292929;  
-  font-size:13px;  
+  font-size:12px;  
   font-weight:900;  
   color:#888;  
   letter-spacing:1px  
 }  
 .detailPanel{  
-  padding:16px  
+  padding:14px  
 }  
 .detailTop{  
   display:grid;  
   grid-template-columns:1fr 280px;  
   gap:12px;  
-  padding-bottom:14px;  
+  padding-bottom:12px;  
   border-bottom:1px solid #222  
 }  
 .machineTitle{  
-  font-size:28px;  
+  font-size:24px;  
   font-weight:900  
 }  
 .yours{  
   color:#e50914;  
-  font-size:12px;  
+  font-size:11px;  
   font-weight:900;  
   margin-left:8px  
 }  
 .statusLine{  
-  font-size:12px;  
-  margin-top:8px;  
+  font-size:11px;  
+  margin-top:6px;  
   color:#aaa;  
   display:flex;  
   align-items:center;  
@@ -456,40 +464,40 @@ button:disabled {
 }  
 .routeTop{  
   border-left:1px solid #222;  
-  padding-left:16px  
+  padding-left:14px  
 }  
 .routeTitle{  
   color:#e50914;  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900;  
-  margin-bottom:6px;  
+  margin-bottom:4px;  
   letter-spacing:1px  
 }  
 .routeLine{  
-  font-size:11px;  
-  margin:4px 0;  
+  font-size:10px;  
+  margin:3px 0;  
   color:#ccc  
 }  
 .infoBox{  
-  margin-top:14px;  
+  margin-top:12px;  
   background:#090909;  
   border:1px solid #222;  
   border-radius:10px;  
-  padding:12px  
+  padding:10px  
 }  
 .infoTitle{  
   color:#22c55e;  
   font-weight:900;  
-  font-size:11px;  
-  margin-bottom:10px;  
+  font-size:10px;  
+  margin-bottom:8px;  
   letter-spacing:1px  
 }  
 .infoGrid{  
   display:grid;  
-  grid-template-columns:90px 1fr auto;  
-  gap:8px;  
+  grid-template-columns:80px 1fr auto;  
+  gap:6px;  
   align-items:center;  
-  font-size:12px  
+  font-size:11px  
 }  
 .label{  
   color:#777  
@@ -498,29 +506,29 @@ button:disabled {
   font-weight:700  
 }  
 .statusHeading{  
-  margin:14px 0 8px;  
+  margin:12px 0 6px;  
   color:#e50914;  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900;  
   letter-spacing:1px  
 }  
 .statusGrid{  
   display:grid;  
   grid-template-columns:repeat(3,1fr);  
-  gap:8px  
+  gap:6px  
 }  
 .statusBtn{  
-  min-height:44px;  
+  min-height:40px;  
   background:#0c0c0c;  
   border:1px solid #222;  
   border-radius:8px;  
   color:#eee;  
-  padding:8px 12px;  
+  padding:6px 10px;  
   display:flex;  
   align-items:center;  
   justify-content:space-between;  
   font-weight:800;  
-  font-size:11px;  
+  font-size:10px;  
   text-align:left  
 }  
 .statusBtn:hover{  
@@ -533,8 +541,8 @@ button:disabled {
   border-color:#22c55e !important;  
   color:#fff !important;  
   grid-column: 1 / -1;  
-  font-size:13px !important;  
-  padding:10px !important;
+  font-size:12px !important;  
+  padding:8px !important;
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }  
 
@@ -549,33 +557,33 @@ button:disabled {
 }
 
 .routeInfo{  
-  margin-top:14px;  
-  padding:10px;  
+  margin-top:12px;  
+  padding:8px;  
   border:1px dashed #b58a00;  
   background:#141000;  
   border-radius:99px;  
-  font-size:12px;  
-  line-height:1.5  
+  font-size:11px;  
+  line-height:1.4  
 }  
 .waBtn{  
   width:100%;  
-  height:44px;  
+  height:40px;  
   border:1px solid #25d366;  
   border-radius:8px;  
   background:linear-gradient(180deg,#168b3c,#0d5f29);  
   color:#fff;  
-  font-size:13px;  
+  font-size:12px;  
   font-weight:900;  
-  margin-top:10px;  
+  margin-top:8px;  
   letter-spacing:.5px  
 }  
 .viewBox{  
   background:#0d0d0d;  
   border:1px solid #222;  
   border-radius:8px;  
-  padding:12px;  
-  margin-top:12px;  
-  line-height:1.6  
+  padding:10px;  
+  margin-top:10px;  
+  line-height:1.5  
 }  
 #notifBig{  
   position:fixed;  
@@ -584,10 +592,10 @@ button:disabled {
   transform:translate(-50%,-50%);  
   background:#c9000b;  
   color:#fff;  
-  padding:24px;  
+  padding:20px;  
   border-radius:14px;  
   font-weight:900;  
-  font-size:18px;  
+  font-size:16px;  
   display:none;  
   z-index:99999;  
   text-align:center;  
@@ -615,10 +623,13 @@ button:disabled {
   max-width:100%  
 }  
 #departmentDashboard{  
-  display:none  
+  display:none;
+  flex: 1;
+  flex-direction: column;
+  height: 100vh;
 }  
 .deptHeader{  
-  padding:12px 20px;  
+  padding:8px 16px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #252525;  
@@ -631,87 +642,95 @@ button:disabled {
   z-index:1000  
 }  
 .deptTitle{  
-  font-size:20px;  
+  font-size:18px;  
   font-weight:900  
 }  
 .deptBadge{  
-  padding:5px 10px;  
-  border-radius:15px;  
+  padding:4px 8px;  
+  border-radius:12px;  
   background:#e50914;  
   color:#fff;  
-  font-size:10px;  
+  font-size:9px;  
   font-weight:900  
 }  
+
 .deptContent{  
-  padding:0 0 10px;  
-  max-width:1600px;  
-  margin:auto;
+  padding:8px 16px;  
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }  
+
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));  
-  gap:8px;  
-  padding:10px 20px 6px  
+  grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));  
+  gap:6px;  
+  padding:4px 0 6px  
 }  
 .deptMachineBox{  
   background:#0d0d0d;  
   border:1px solid #292929;  
   border-radius:12px;  
-  padding:12px;  
-  margin:6px 20px 10px  
+  padding:10px;  
+  margin-top:6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }  
 
-/* OPTIMIZED AUTO-FIT TWO SCREEN NO SCROLL GRID FOR STORE */
+/* DYNAMIC ULTRA RESPONSIBLE AUTO-FIT NO SCROLL GRID FOR ALL DASHBOARDS */
 .deptMachineGrid{  
   display:grid;  
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  
-  gap:8px;  
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));  
+  gap:6px;  
   width: 100%;
-  margin-top:8px;  
+  margin-top:6px;  
+  flex: 1;
+  align-content: start;
 }  
 
-/* COMPACT MEDIUM SIZED CARDS */
+/* COMPACT SMART CARDS WITH SCALED FONTS */
 .deptMachineCard{  
   background:#141414;  
   border:1px solid #333;  
-  padding:8px 10px;  
-  border-radius:8px;  
+  padding:6px 8px;  
+  border-radius:6px;  
   text-align:left;  
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }  
 .deptSelected{  
   background:#090909;  
   border:1px solid #303030;  
   border-radius:10px;  
-  padding:12px;  
-  margin-top:10px  
+  padding:10px;  
+  margin-top:8px  
 }  
 .viewOnly{  
-  margin-top:10px;  
+  margin-top:8px;  
   background:#121212;  
   border:1px solid #555;  
   border-radius:8px;  
-  padding:14px;  
+  padding:10px;  
   text-align:center  
 }  
 .firebaseStatus{  
   display:inline-flex;  
   align-items:center;  
-  gap:5px;  
-  padding:5px 8px;  
+  gap:4px;  
+  padding:4px 7px;  
   border-radius:99px;  
-  font-size:9px;  
+  font-size:8.5px;  
   font-weight:900;  
   border:1px solid #292929;  
   background:#0b0b0b  
 }  
 .firebaseDot{  
-  width:7px;  
-  height:7px;  
+  width:6px;  
+  height:6px;  
   border-radius:50%;  
   background:#eab308  
 }  
@@ -724,28 +743,28 @@ button:disabled {
   box-shadow:0 0 6px #ef4444  
 }  
 .excelSmallBtn {
-  padding: 6px 10px;
+  padding: 4px 8px;
   background: #15803d;
   color: white;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   border: 1px solid #22c55e;
 }
 .excelResetBtn {
-  padding: 6px 10px;
+  padding: 4px 8px;
   background: #991b1b;
   color: white;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   border: 1px solid #ef4444;
 }
 .urgentBox {
-  margin-top: 12px;
+  margin-top: 10px;
   background: #1f0406;
   border: 1px solid #e50914;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -753,13 +772,13 @@ button:disabled {
   cursor: pointer;
 }
 .urgentBox input {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   accent-color: #e50914;
   cursor: pointer;
 }
 .urgentBox label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   color: #ff4d4d;
   cursor: pointer;
@@ -769,65 +788,89 @@ button:disabled {
 .summaryWidget {
   background: linear-gradient(145deg, #141414, #080808);
   border: 1px solid #ffd000;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 6px 20px 4px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
 }
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
-  margin-top: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 6px;
+  margin-top: 4px;
 }
 .summaryBox {
   background: #090909;
   border: 1px solid #292929;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 6px;
   text-align: center;
 }
 .summaryTitle {
-  font-size: 10px;
+  font-size: 9px;
   color: #888;
   font-weight: 800;
   text-transform: uppercase;
 }
 .summaryVal {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 900;
   margin-top: 2px;
 }
 
+/* RESPONSIVE AUTO-FIT MEDIA QUERIES FOR TV, LAPTOP & MOBILE */
+
+/* 1. BIG TV & LARGE DISPLAY MONITOR FOCUS (Auto-fit without Scrolling) */
+@media screen and (min-width: 1600px) {
+  body, html {
+    overflow: hidden; /* Lock scroll on big displays */
+  }
+  .deptMachineGrid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 8px;
+  }
+  .deptMachineCard {
+    padding: 10px 12px;
+  }
+}
+
+/* 2. LAPTOP / DESKTOP FOCUS */
 @media(max-width:1200px){  
-  .statusCards{ grid-template-columns:repeat(5,1fr) }  
-  .topBar{ flex-wrap:wrap }  
+  .statusCards{ grid-template-columns:repeat(6,1fr); }  
+  .topBar{ flex-wrap:wrap; }  
+  .deptMachineGrid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }  
+
+/* 3. TABLETS & SMALL LAPTOPS */
 @media(max-width:800px){  
-  .statusCards{ grid-template-columns:repeat(3,1fr) }  
-  .detailTop{ grid-template-columns:1fr }  
-  .routeTop{ border-left:0; border-top:1px solid #222; padding:10px 0 0 }  
-  .deptMachineGrid { grid-template-columns:repeat(2, 1fr); }
+  .statusCards{ grid-template-columns:repeat(4,1fr); }  
+  .detailTop{ grid-template-columns:1fr; }  
+  .routeTop{ border-left:0; border-top:1px solid #222; padding:8px 0 0; }  
+  .deptMachineGrid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 }  
-@media(max-width:700px){  
-  .topBar{ padding:10px }  
-  .topLogo{ width:140px; height:40px }  
-  .topLeft{ flex-wrap:wrap; gap:6px }  
-  .topActions{ width:100%; justify-content:flex-end; flex-wrap:wrap }  
-  .statusCards{ padding:8px; gap:6px }  
-  .statusCard{ min-height:85px; padding:8px 6px }  
-  .statusCardTitle{ font-size:8px }  
-  .statusCardCount{ font-size:24px }  
-  .statusIcon{ font-size:13px }  
-  .statusMachineArea{ padding:4px 8px 10px }  
-  .mainBox{ padding:4px 8px 16px }  
-  .detailPanel{ padding:10px }  
-  .statusGrid{ grid-template-columns:1fr }  
-  .deptHeader{ padding:10px }  
-  .deptContent{ padding:0 0 10px }  
-  .deptMachineBox{ margin:6px 8px 10px }  
-  .deptTitle{ font-size:16px }  
-  .infoGrid{ grid-template-columns:70px 1fr }  
-  .deptMachineGrid { grid-template-columns:1fr; }
+
+/* 4. MOBILE SCREENS */
+@media(max-width:600px){  
+  .topBar{ padding:8px; }  
+  .topLogo{ width:120px; height:32px; }  
+  .topLeft{ flex-wrap:wrap; gap:4px; }  
+  .topActions{ width:100%; justify-content:flex-end; flex-wrap:wrap; }  
+  .statusCards{ padding:4px; gap:4px; grid-template-columns:repeat(3,1fr); }  
+  .statusCard{ min-height:65px; padding:6px; }  
+  .statusCardTitle{ font-size:8px; }  
+  .statusCardCount{ font-size:18px; }  
+  .statusIcon{ font-size:11px; }  
+  .statusMachineArea{ padding:4px 6px 8px; }  
+  .mainBox{ padding:4px 6px 12px; }  
+  .detailPanel{ padding:8px; }  
+  .statusGrid{ grid-template-columns:1fr; }  
+  .deptHeader{ padding:8px; }  
+  .deptContent{ padding:6px; }  
+  .deptMachineBox{ margin-top:4px; padding:6px; }  
+  .deptTitle{ font-size:14px; }  
+  .infoGrid{ grid-template-columns:65px 1fr; }  
+  .deptMachineGrid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 4px; }
+  .deptMachineCard { padding: 5px; font-size: 10px; }
+  .summaryVal { font-size: 15px; }
 }  
 </style>  
 </head>  
@@ -963,8 +1006,8 @@ button:disabled {
       <!-- SHIFT SUMMARY WIDGET (ONLY COUNTS) -->
       <div class="summaryWidget" id="shiftSummaryWidget">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="color:#ffd000; font-size:12px; letter-spacing:1px;">📊 SHIFT-WISE MATERIAL SUMMARY (COUNT ONLY)</b>
-          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:3px 6px; border-radius:5px; font-size:10px; font-weight:700;">
+          <b style="color:#ffd000; font-size:11px; letter-spacing:1px;">📊 SHIFT-WISE MATERIAL SUMMARY (COUNT ONLY)</b>
+          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:2px 5px; border-radius:5px; font-size:9px; font-weight:700;">
             <option value="CURRENT">Current Active Shift</option>
             <option value="Shift A">Shift A</option>
             <option value="Shift B">Shift B</option>
@@ -997,9 +1040,9 @@ button:disabled {
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
           <div>  
             <b id="deptGridTitle">MATERIAL REQUIREMENTS OVERVIEW</b>  
-            <div style="font-size:10px;color:#777;margin-top:2px">सर्व मशिनच्या मटेरियलची माहिती खाली थेट दिसेल.</div>  
+            <div style="font-size:9px;color:#777;margin-top:1px">सर्व मशिनच्या मटेरियलची माहिती खाली थेट दिसेल.</div>  
           </div>  
-          <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
+          <div id="deptGridCount" style="font-size:10px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
         <div id="deptMachineGrid" class="deptMachineGrid"></div>  
       </div>  
@@ -1040,6 +1083,25 @@ function startLiveClock() {
   }
   updateClock();
   setInterval(updateClock, 1000);
+}
+
+/* DYNAMIC SCALE CONTROLLER FOR DISPLAY SCREEN AUTO FIT */
+function autoAdjustScreenLayout() {
+  const grid = document.getElementById("deptMachineGrid");
+  if (!grid) return;
+  const cardCount = grid.children.length;
+  
+  if (window.innerWidth >= 1400) {
+    if (cardCount <= 6) {
+      grid.style.gridTemplateColumns = "repeat(auto-fit, minmax(320px, 1fr))";
+    } else if (cardCount <= 12) {
+      grid.style.gridTemplateColumns = "repeat(auto-fit, minmax(240px, 1fr))";
+    } else if (cardCount > 15) {
+      grid.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+    } else {
+      grid.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
+    }
+  }
 }
 
 /* DEPARTMENTS CONFIG */  
@@ -1385,7 +1447,7 @@ function checkExistingSession(){
     department = savedDept;  
     document.getElementById("login").style.display="none";  
     document.getElementById("operatorDashboard").style.display="none";  
-    document.getElementById("departmentDashboard").style.display="block";  
+    document.getElementById("departmentDashboard").style.display="flex";  
     renderDepartmentDashboard();  
     return true;  
   }  
@@ -1616,13 +1678,13 @@ function sel(id){
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:8px;font-size:11px;margin-top:8px;line-height:1.4">  
+    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:8px;border-radius:6px;font-size:10px;margin-top:6px;line-height:1.3">  
         <b style="color:#eab308">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
         <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
         <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
         <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
-        <span style="color:#22c55e;font-size:10px;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span><br>
-        <span style="color:#ffd000;font-size:10px;font-weight:bold;">📍 Shift Requested: ${escapeHtml(m.materialDetails.shift || '-')}</span>
+        <span style="color:#22c55e;font-size:9px;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span><br>
+        <span style="color:#ffd000;font-size:9px;font-weight:bold;">📍 Shift Requested: ${escapeHtml(m.materialDetails.shift || '-')}</span>
       </div>`;  
   }  
 
@@ -1639,7 +1701,7 @@ function sel(id){
           ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:11px;font-weight:800;margin-left:8px">VIEW ONLY</span>`}  
         </div>  
         <div class="statusLine">  
-          Status: <b style="background:${badgeBg};color:#fff;padding:4px 8px;border-radius:5px">${getStatusDisplayName(statusStr)}</b>  
+          Status: <b style="background:${badgeBg};color:#fff;padding:3px 6px;border-radius:4px">${getStatusDisplayName(statusStr)}</b>  
           ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
         </div>  
       </div>  
@@ -1698,7 +1760,7 @@ function sel(id){
       </div>`;  
     document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
   }else{  
-    document.getElementById("statusList").innerHTML=`<div style="margin-top:14px;padding:10px;border:1px dashed #444;border-radius:8px;color:#777;font-size:11px;font-weight:700;text-align:center">🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.</div>`;  
+    document.getElementById("statusList").innerHTML=`<div style="margin-top:12px;padding:8px;border:1px dashed #444;border-radius:8px;color:#777;font-size:10px;font-weight:700;text-align:center">🔒 VIEW ONLY — STATUS UPDATE IS AVAILABLE ONLY FOR THE OPERATOR'S ASSIGNED MACHINE.</div>`;  
     document.getElementById("lockMsg").innerText = "View only. Your assigned machine is: "+(operator ? operator.machine : "None");  
   }  
 }  
@@ -1978,7 +2040,7 @@ function departmentLogin(){
 
   document.getElementById("login").style.display="none";  
   document.getElementById("operatorDashboard").style.display="none";  
-  document.getElementById("departmentDashboard").style.display="block";  
+  document.getElementById("departmentDashboard").style.display="flex";  
   renderDepartmentDashboard();  
 
   const focusEl = document.getElementById("deptFocusArea");
@@ -2113,42 +2175,44 @@ function renderDepartmentMachineGrid(){
 
     let matInfoHtml = "";
     if(mat){
-      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:5px 7px;border-radius:5px;font-size:10px;margin:3px 0;line-height:1.3">
+      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:4px 6px;border-radius:4px;font-size:9.5px;margin:2px 0;line-height:1.2">
           <b style="color:#eab308">📦 MATERIAL</b><br>
           <b>Part No:</b> ${escapeHtml(mat.partNo)} | <b>Part Name:</b> ${escapeHtml(mat.partName)}<br>
           <b>Qty:</b> ${escapeHtml(String(mat.qty))} | <span style="color:#22c55e;font-weight:bold;">🕒 ${escapeHtml(mat.dateTime || '-')}</span><br>
           <span style="color:#ffd000;font-weight:bold;">📍 Shift: ${escapeHtml(mat.shift || '-')}</span>
         </div>`;
     } else {
-      matInfoHtml = `<div style="color:#777;font-size:9px;margin:3px 0;">No material details</div>`;
+      matInfoHtml = `<div style="color:#777;font-size:8.5px;margin:2px 0;">No material details</div>`;
     }
 
     let actionBtnHtml = "";
     if(department === "supervisor"){
       const currentIssues = Object.keys(getMachineIssues(m));
       currentIssues.forEach(iss => {
-        actionBtnHtml += `<button disabled style="width:100%;margin-top:3px;padding:3px;border:1px solid #555;border-radius:4px;background:#222;color:#888;font-size:9px;font-weight:800">CLEAR ${iss}</button>`;
+        actionBtnHtml += `<button disabled style="width:100%;margin-top:2px;padding:2px;border:1px solid #555;border-radius:4px;background:#222;color:#888;font-size:8.5px;font-weight:800">CLEAR ${iss}</button>`;
       });
     } else if(config && config.actions && config.actions.length > 0){
       config.actions.forEach(a => {
         if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:3px;padding:5px;border:1px solid #ef4444;border-radius:5px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:10px;cursor:pointer">${a.label}</button>`;
+          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:2px;padding:4px;border:1px solid #ef4444;border-radius:4px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:9.5px;cursor:pointer">${a.label}</button>`;
         }
       });
     }
 
     return `<div class="deptMachineCard">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="font-size:14px;font-weight:900;">${id}</h3>
-        <span style="font-size:8px;font-weight:900;padding:2px 5px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
+        <h3 style="font-size:13px;font-weight:900;">${id}</h3>
+        <span style="font-size:7.5px;font-weight:900;padding:2px 4px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
       </div>
-      <div style="font-size:9px;color:#aaa;margin-top:1px;">
+      <div style="font-size:8.5px;color:#aaa;margin-top:1px;">
         Op: <b>${op ? escapeHtml(op.name) : "N/A"}</b>
       </div>
       ${matInfoHtml}
       ${actionBtnHtml}
     </div>`;
   }).join("");  
+  
+  autoAdjustScreenLayout();
 }  
 
 function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue){  
@@ -2202,6 +2266,7 @@ window.onload = function(){
   fillMachineDropdown();  
   checkExistingSession();  
   load();  
+  window.addEventListener("resize", autoAdjustScreenLayout);
 };  
 </script>  
 </body>  
