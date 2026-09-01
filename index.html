@@ -653,32 +653,18 @@ button:disabled {
 }  
 .deptMachineGrid{  
   display:grid;  
-  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));  
-  gap:9px;  
-  max-height:430px;  
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));  
+  gap:12px;  
+  max-height:600px;  
   overflow:auto;  
   margin-top:12px  
 }  
-.deptMachine{  
+.deptMachineCard{  
   background:#141414;  
-  border:1px solid #292929;  
-  padding:13px 7px;  
-  border-radius:9px;  
-  text-align:center;  
-  font-weight:900;  
-  cursor:pointer  
-}  
-.deptMachine:hover{  
-  border-color:#666  
-}  
-.deptMachine.selected{  
-  border-color:#e50914;  
-  background:#30090b  
-}  
-.deptMachineStatus{  
-  display:block;  
-  font-size:9px;  
-  margin-top:5px  
+  border:1px solid #333;  
+  padding:14px;  
+  border-radius:10px;  
+  text-align:left;  
 }  
 .deptSelected{  
   background:#090909;  
@@ -919,18 +905,13 @@ button:disabled {
       <div class="deptMachineBox" id="deptFocusArea">  
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">  
           <div>  
-            <b id="deptGridTitle">SELECT STATUS</b>  
-            <div style="font-size:11px;color:#777;margin-top:4px">Click any status icon above to view machines.</div>  
+            <b id="deptGridTitle">MATERIAL REQUIREMENTS OVERVIEW</b>  
+            <div style="font-size:11px;color:#777;margin-top:4px">सर्व मशिनच्या मटेरियलची माहिती खाली थेट दिसेल.</div>  
           </div>  
           <div id="deptGridCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
         <div id="deptMachineGrid" class="deptMachineGrid"></div>  
       </div>  
-
-      <div class="deptMachineBox">  
-        <b>SELECTED MACHINE DETAILS</b>  
-        <div id="deptSelected" class="deptSelected">Please select a status and machine.</div>  
-      </div>
     </div>  
   </div>  
 
@@ -1052,7 +1033,6 @@ let prev = {};
 let lastWa = "";  
 let operatorStatusFilter = "TOTAL";  
 let departmentStatusFilter = "TOTAL";  
-let deptSelectedMachine = null;  
 
 function getCurrentShift(){  
   const now = new Date();  
@@ -1116,7 +1096,6 @@ function checkShiftAutoReset(){
   }  
 }  
 
-// ३० सेकंदांनी Shift End तपासा
 setInterval(checkShiftAutoReset, 30000);
 
 function getMachineIssues(m){  
@@ -1144,7 +1123,6 @@ function hasStatus(m, st){
     return !!(m.op && m.op.id);
   }  
   
-  /* 1) MATERIAL SHORTAGE सुधारणा: 'MATERIAL REQUIREMENT' हटवले आहे. आता फक्त SHORTAGE, BREAKDOWN किंवा OPERATOR LOGOUT असल्यास idle दिसेल */
   if(st === "MACHINE IDLE"){
     const isBreakdown = hasStatus(m, "BREAKDOWN");
     const isMatShortage = hasStatus(m, "MATERIAL SHORTAGE");
@@ -1345,7 +1323,6 @@ function doLogin(){
   if(!id || !nm || !pin || !mc){ alert("Please fill ID, Name, PIN, and Machine!"); return; }  
   if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
 
-  /* 2) STRICT SINGLE OPERATOR CHECK: पहिला ऑपरेटर लॉगआऊट होईपर्यंत दुसऱ्याला लॉगइन होऊ न देणे */
   const targetMc = machines[mc];  
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
     alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").\nSecond operator cannot login until the active operator logs out or the shift ends!");
@@ -1446,7 +1423,7 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
-        <div class="statusCardHint">CLICK TO VIEW MACHINES</div>  
+        <div class="statusCardHint">CLICK TO FILTER</div>  
       </div>`;  
   }).join("");  
 }  
@@ -1866,7 +1843,6 @@ function departmentLogin(){
   department=dep;  
   operator=null;  
   departmentStatusFilter = config.allowedStatuses[0] || "TOTAL";  
-  deptSelectedMachine=null;  
 
   localStorage.setItem("brembo_department", dep);  
   localStorage.removeItem("brembo_v7");  
@@ -1890,7 +1866,6 @@ function departmentLogout(){
 
 function setDepartmentStatusFilter(status){  
   departmentStatusFilter=status;  
-  deptSelectedMachine=null;  
   renderDepartmentDashboard();  
 }  
 
@@ -1935,6 +1910,7 @@ function renderDepartmentDashboard(){
   renderDepartmentMachineGrid();  
 }  
 
+/* क्लिक न करता थेट मशिन डिटेल्स कार्ड्सच्या स्वरूपात दाखवणारे अपडेटेड फंक्शन */
 function renderDepartmentMachineGrid(){  
   const grid = document.getElementById("deptMachineGrid");  
   if(!grid) return;  
@@ -1942,126 +1918,77 @@ function renderDepartmentMachineGrid(){
   const title = document.getElementById("deptGridTitle");  
   const count = document.getElementById("deptGridCount");  
 
-  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES"; }  
-  else{ title.innerText = "⚙️ "+getStatusDisplayName(departmentStatusFilter)+" MACHINES"; }  
+  if(departmentStatusFilter==="TOTAL"){ title.innerText = "⚙️ ALL MACHINES REQUIREMENTS"; }  
+  else{ title.innerText = "⚙️ "+getStatusDisplayName(departmentStatusFilter)+" LIST"; }  
 
   count.innerText = filtered.length+" MACHINES";  
 
   if(filtered.length===0){  
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:25px;color:#777;font-size:12px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
-    deptSelectedMachine=null;  
-    renderDepartmentSelected();  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:25px;color:#777;font-size:12px;font-weight:700">NO MATERIAL REQUIREMENTS AT THIS MOMENT</div>`;  
     return;  
   }  
 
-  if(!filtered.includes(deptSelectedMachine)){ deptSelectedMachine = filtered[0]; }  
+  const config = DEPARTMENT_CONFIG[department];
 
-  grid.innerHTML = filtered.map(id=>{  
+  grid.innerHTML = filtered.map(id => {  
     const m = machines[id] || getDefaultMachine();  
-    const selected = deptSelectedMachine===id ? "selected" : "";  
+    const op = m.op;  
     const stStr = getMachineStatusString(m);  
+    const mat = m.materialDetails;
 
-    let color="#ef4444";  
-    if(stStr==="RUNNING"){ color="#22c55e"; }  
+    let statusColor="#ef4444";  
+    if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
-    return `<div class="deptMachine ${selected}" onclick="selectDepartmentMachine('${id}')">${id}<span class="deptMachineStatus" style="color:${color}">${getStatusDisplayName(stStr)}</span></div>`;  
+    let matInfoHtml = "";
+    if(mat){
+      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:10px;border-radius:8px;font-size:12px;margin:10px 0;line-height:1.5">
+          <b style="color:#eab308">📦 MATERIAL DETAILS</b><br>
+          <b>Part No:</b> ${escapeHtml(mat.partNo)}<br>
+          <b>Part Name:</b> ${escapeHtml(mat.partName)}<br>
+          <b>Qty:</b> ${escapeHtml(String(mat.qty))}
+        </div>`;
+    } else {
+      matInfoHtml = `<div style="color:#777;font-size:11px;margin:8px 0;">No specific material request form filled.</div>`;
+    }
+
+    let actionBtnHtml = "";
+    if(department === "supervisor"){
+      const currentIssues = Object.keys(getMachineIssues(m));
+      currentIssues.forEach(iss => {
+        actionBtnHtml += `<button disabled style="width:100%;margin-top:6px;padding:8px;border:1px solid #555;border-radius:6px;background:#222;color:#888;font-size:11px;font-weight:800">CLEAR ${iss} (VIEW ONLY)</button>`;
+      });
+    } else if(config && config.actions && config.actions.length > 0){
+      config.actions.forEach(a => {
+        if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
+          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:6px;padding:10px;border:1px solid #ef4444;border-radius:8px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:12px;cursor:pointer">${a.label}</button>`;
+        }
+      });
+    }
+
+    return `<div class="deptMachineCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:20px;font-weight:900;">${id}</h3>
+        <span style="font-size:11px;font-weight:900;padding:4px 8px;border-radius:5px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px;">
+        Operator: <b>${op ? escapeHtml(op.name) : "Not Logged In"}</b> ${op ? `(${escapeHtml(op.shift)})` : ""}
+      </div>
+      ${matInfoHtml}
+      ${actionBtnHtml}
+    </div>`;
   }).join("");  
-  renderDepartmentSelected();  
 }  
 
-function selectDepartmentMachine(id){  
-  if(!machines[id]) return;  
-  deptSelectedMachine=id;  
-  renderDepartmentMachineGrid();  
-}  
-
-function renderDepartmentSelected(){  
-  const box = document.getElementById("deptSelected");  
-  if(!box) return;  
-
-  if(!deptSelectedMachine){  
-    box.innerHTML=`<div style="text-align:center;color:#777;padding:20px">Select a status and machine.</div>`;  
-    return;  
-  }  
-
-  const m = machines[deptSelectedMachine];  
-  if(!m){  
-    box.innerHTML = "Please select machine.";  
-    return;  
-  }  
-
-  const op = m.op;  
-  const config = DEPARTMENT_CONFIG[department];  
-  const stStr = getMachineStatusString(m);  
-  const oldStStr = m.oldStatus || "RUNNING";
-
-  let statusColor="#ef4444";  
-  if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
-
-  let html = `<h2 style="font-size:28px;font-weight:900">${deptSelectedMachine}</h2>  
-  <div style="margin:8px 0;font-size:13px">Old Status: <b style="color:#aaa">${getStatusDisplayName(oldStStr)}</b> | Current Status: <b style="color:${statusColor}">${getStatusDisplayName(stStr)}</b></div>`;  
-
-  if(op){  
-    html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px">Operator: ${escapeHtml(op.name)} (${escapeHtml(op.id)}) | Shift: ${escapeHtml(op.shift)}</div>`;  
-  } else {
-    html += `<div style="font-size:12px;color:#ef4444;margin-bottom:12px;font-weight:700">⚠️ Operator Not Logged In</div>`;
-  }
-
-  if(m.materialDetails){  
-    html += `<div style="background:#2a2508;border:1px dashed #eab308;padding:12px;border-radius:10px;font-size:13px;margin:12px 0;line-height:1.6">  
-        <b style="color:#eab308;font-size:14px">📦 MATERIAL REQUIREMENT DETAILS</b><br>  
-        <b>Part No:</b> ${escapeHtml(m.materialDetails.partNo)}<br>  
-        <b>Part Name:</b> ${escapeHtml(m.materialDetails.partName)}<br>  
-        <b>Quantity:</b> ${escapeHtml(String(m.materialDetails.qty))}  
-      </div>`;  
-  }  
-
-  let actionButtonsHtml = "";
-
-  if(department === "supervisor"){  
-    const currentIssues = Object.keys(getMachineIssues(m));  
-    actionButtonsHtml += `<div style="margin-top:14px;font-weight:900;color:#eab308">🔒 SUPERVISOR MODE (VIEW ONLY - ACTIONS DISABLED)</div>`;  
-    
-    currentIssues.forEach(iss => {  
-      actionButtonsHtml += `<button disabled style="width:100%;margin-top:10px;padding:12px;border:1px solid #777;border-radius:10px;background:#333;color:#888;font-weight:900;font-size:13px">CLEAR ${iss} (VIEW ONLY)</button>`;  
-    });  
-    actionButtonsHtml += `<button disabled style="width:100%;margin-top:10px;padding:14px;border:1px solid #777;border-radius:10px;background:#333;color:#888;font-weight:900;font-size:14px">RESET MACHINE TO RUNNING (VIEW ONLY)</button>`;  
-  } else if(config && config.actions && config.actions.length > 0){  
-    let hasDeptIssue = false;  
-    config.actions.forEach(a=>{  
-      if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
-        hasDeptIssue = true;  
-      }  
-    });  
-    if(hasDeptIssue){  
-      actionButtonsHtml += `<div style="margin-top:14px;font-weight:900">${config.name} ACTIONS</div>`;  
-      config.actions.forEach(a=>{  
-        if(a.clearsIssue && hasStatus(m, a.clearsIssue)){  
-          actionButtonsHtml += `<button onclick="updateDepartmentMachineStatus('${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;margin-top:10px;padding:15px;border:1px solid #ef4444;border-radius:10px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:14px;cursor:pointer">${a.label}</button>`;  
-        }  
-      });  
-    }  
-  }  
-
-  if(actionButtonsHtml){  
-    html += actionButtonsHtml;  
-  } else {  
-    html += `<div class="viewOnly"><b>VIEW ONLY</b><br><span style="font-size:11px;color:#777">Machine is currently RUNNING or no actions available for this department.</span></div>`;  
-  }  
-
-  box.innerHTML = html;  
-}  
-
-function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){  
+function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue){  
   if(department === "supervisor" || (DEPARTMENT_CONFIG[department] && DEPARTMENT_CONFIG[department].isViewOnly)){
     alert("Supervisor is in VIEW-ONLY mode! No changes allowed.");
     return;
   }
 
-  if(!deptSelectedMachine || !machines[deptSelectedMachine]) return;  
-  if(!confirm("Confirm action for "+deptSelectedMachine+"?")) return;  
+  if(!mcId || !machines[mcId]) return;  
+  if(!confirm("Confirm action for "+mcId+"?")) return;  
 
-  let m = machines[deptSelectedMachine];  
+  let m = machines[mcId];  
   const oldSt = getMachineStatusString(m);  
   m.oldStatus = oldSt; 
   let issues = getMachineIssues(m);  
@@ -2084,11 +2011,11 @@ function updateDepartmentMachineStatus(clearIssue1, clearIssue2, addIssue){
   m.issues = issues;  
   m.status = getMachineStatusString(m);  
 
-  saveMachine(deptSelectedMachine).then(()=>{  
+  saveMachine(mcId).then(()=>{  
     const newSt = getMachineStatusString(m);  
     
     if(department === "store" || department === "supervisor"){
-      logStatusAction(deptSelectedMachine, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
+      logStatusAction(mcId, "DEPT ACTION", (addIssue || ("Cleared "+clearIssue1)), DEPARTMENT_CONFIG[department].name, oldSt, newSt);  
     }  
     
     renderDepartmentDashboard();  
