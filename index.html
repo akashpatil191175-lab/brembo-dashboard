@@ -653,7 +653,6 @@ button:disabled {
   margin:10px 26px 14px  
 }  
 
-/* एकाच स्क्रीनवर २० कार्ड्स बसवण्यासाठी ५ Columns x 4 Rows CSS Grid Structure */
 .deptMachineGrid{  
   display:grid;  
   grid-template-columns:repeat(5, 1fr);  
@@ -664,7 +663,6 @@ button:disabled {
   margin-top:12px  
 }  
 
-/* Card Box Style */
 .deptMachineCard{  
   background:#141414;  
   border:1px solid #333;  
@@ -802,6 +800,12 @@ button:disabled {
       <input id="matPartNo" class="loginInput" placeholder="PART NO">  
       <input id="matPartName" class="loginInput" placeholder="PART NAME">  
       <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
+      
+      <!-- घड्याळ चा icon काढून सिस्टीमची ऑटो तारीख व वेळ जोडली जाईल -->
+      <div style="margin: 10px 0; font-size: 11px; color: #22c55e; font-weight: bold; text-align: center; background: #09190e; padding: 8px; border-radius: 8px; border: 1px solid #166534;">
+        🕒 Current Date & Time will be auto-saved upon submission.
+      </div>
+
       <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
       <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
     </div>  
@@ -1188,7 +1192,7 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
     partName: mat.partName || "-",  
     qty: mat.qty || "-",  
     timestamp: Date.now(),  
-    timeStr: new Date().toLocaleString("en-IN")  
+    timeStr: mat.dateTime || new Date().toLocaleString("en-IN")  
   });  
 }  
 
@@ -1648,7 +1652,7 @@ function closeMaterialModal(){
   document.getElementById("materialModal").style.display="none";  
 }  
 
-/* Material Submit करताना Date आणि Time आपोआप जोडण्यासाठी Update केलेले Function */
+/* Material Submit गर्ताना Date आणि Time ऑटोमॅटिक अपडेट करण्यासाठी सुधारित कोड */
 function submitMaterialRequirement(){  
   const partNo=document.getElementById("matPartNo").value.trim();  
   const partName=document.getElementById("matPartName").value.trim();  
@@ -1658,7 +1662,7 @@ function submitMaterialRequirement(){
   if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied. Please login to your assigned machine."); return; }  
   if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
 
-  // तंतोतंत तारीख आणि वेळ जनरेट करा
+  // सिस्टीम ची अचूक तारीख आणि वेळ आपोआप जनरेट करा
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB'); 
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -1702,14 +1706,14 @@ function executeStatusUpdate(s){
     
     const route = ROUTE_MAP[s] || ROUTE_MAP.RUNNING;  
     
-    let date = new Date().toLocaleString("en-IN");  
+    let currentSysTime = new Date().toLocaleString("en-IN");  
     let matInfo="";  
     if(machines[curMachine].materialDetails){  
       const d = machines[curMachine].materialDetails;  
-      matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty)+"%0ATime: "+encodeURIComponent(d.dateTime || date);  
+      matInfo = "%0A%0A*📦 MATERIAL DETAILS:*%0APart No: "+encodeURIComponent(d.partNo)+"%0APart Name: "+encodeURIComponent(d.partName)+"%0AQty: "+encodeURIComponent(d.qty)+"%0ATime: "+encodeURIComponent(d.dateTime || currentSysTime);  
     }  
 
-    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(newSt)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(date)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
+    const msg = "*🚨 BREMBO URGENT ALERT*%0A%0AMachine: "+encodeURIComponent(curMachine)+"%0AStatus: *"+encodeURIComponent(newSt)+"*"+matInfo+"%0AOperator: "+encodeURIComponent(operator.name)+"%0AID: "+encodeURIComponent(operator.id)+"%0AShift: "+operator.shift+" ("+encodeURIComponent(getShiftRange(operator.shift))+")%0ATime: "+encodeURIComponent(currentSysTime)+"%0A%0AAction Required By: "+encodeURIComponent(route.name);  
 
     lastWa = "https://wa.me/"+route.no+"?text="+msg;  
 
@@ -1936,7 +1940,6 @@ function renderDepartmentDashboard(){
   renderDepartmentMachineGrid();  
 }  
 
-/* २० कार्ड्स एकाच स्क्रीनवर बसवण्यासाठी अपडेट केलेले renderDepartmentMachineGrid Function */
 function renderDepartmentMachineGrid(){  
   const grid = document.getElementById("deptMachineGrid");  
   if(!grid) return;  
