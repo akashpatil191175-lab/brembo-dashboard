@@ -335,10 +335,13 @@ button:disabled {
   font-weight:900;  
   line-height:1.2  
 }  
+
+/* Icon Size reduced by 50% (originally 13px -> now 6.5px) */
 .statusIcon{  
-  font-size:13px;  
+  font-size:6.5px;  
   line-height:1  
 }  
+
 .statusCardCount{  
   font-size:24px;  
   font-weight:900;  
@@ -784,13 +787,15 @@ button:disabled {
   cursor: pointer;
 }
 
-/* COMPACT SUMMARY WIDGET STYLES */
+/* COMPACT SUMMARY WIDGET STYLES (Reduced Width) */
 .summaryWidget {
   background: linear-gradient(145deg, #141414, #080808);
   border: 1px solid #ffd000;
   border-radius: 8px;
   padding: 8px 12px;
-  margin-bottom: 6px;
+  margin: 0 auto 6px auto;
+  max-width: 600px; /* रुंदी कमी केली आहे */
+  width: 100%;
 }
 .summaryGrid {
   display: grid;
@@ -858,7 +863,7 @@ button:disabled {
   .statusCard{ min-height:65px; padding:6px; }  
   .statusCardTitle{ font-size:8px; }  
   .statusCardCount{ font-size:18px; }  
-  .statusIcon{ font-size:11px; }  
+  .statusIcon{ font-size:5px; } /* Mobile वर आयकॉन अधिक लहान दिसेल */
   .statusMachineArea{ padding:4px 6px 8px; }  
   .mainBox{ padding:4px 6px 12px; }  
   .detailPanel{ padding:8px; }  
@@ -1003,7 +1008,7 @@ button:disabled {
     </div>    
 
     <div class="deptContent">  
-      <!-- SHIFT SUMMARY WIDGET (ONLY COUNTS) -->
+      <!-- SHIFT SUMMARY WIDGET (REDUCED WIDTH) -->
       <div class="summaryWidget" id="shiftSummaryWidget">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="color:#ffd000; font-size:11px; letter-spacing:1px;">📊 SHIFT-WISE MATERIAL SUMMARY (COUNT ONLY)</b>
@@ -2270,4 +2275,4 @@ window.onload = function(){
 };  
 </script>  
 </body>  
-          </html>
+</html>
