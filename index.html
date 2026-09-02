@@ -927,8 +927,8 @@ button:disabled {
       </div>
     </div>    
 
-    <!-- Dynamic Show/Hide Delayed Cards Area -->
-    <div id="operatorStatusCards" class="statusCards" style="display:none;"></div>    
+    <!-- Dynamic Show/Hide Cards Area (Display immediately) -->
+    <div id="operatorStatusCards" class="statusCards" style="display:grid;"></div>    
 
     <div class="statusMachineArea" id="operatorFocusArea" style="display:none;">  
       <div class="statusMachinePanel">  
@@ -1517,11 +1517,9 @@ function applyOperator(isReload = false){
     });  
   }  
 
-  // Point 2 & 3 Fix: Hide all other status cards initially. Display after 5 sec delay.
-  setTimeout(() => {
-    const cardsEl = document.getElementById("operatorStatusCards");
-    if(cardsEl) cardsEl.style.display = "grid";
-  }, 5000);
+  // Point 1 Fix: Status Cards show immediately upon login without 5s delay
+  const cardsEl = document.getElementById("operatorStatusCards");
+  if(cardsEl) cardsEl.style.display = "grid";
 
   renderAllDashboards();  
 }  
@@ -2206,7 +2204,6 @@ function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue)
 
   if(clearIssue1 === "ALL"){  
     issues = {};  
-    m.materialDetails = null;  
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
