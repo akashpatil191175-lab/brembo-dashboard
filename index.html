@@ -569,15 +569,17 @@ button:disabled {
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
 }  
 
+/* BLINKING ANIMATION FOR MATERIAL SHORTAGE */
 .blinkAlert {
-  animation: blinkAnim 1s infinite alternate;
+  animation: blinkAnim 0.8s infinite alternate !important;
   border-color: #ff0000 !important;
-  background: rgba(229, 9, 20, 0.2) !important;
+  background: rgba(229, 9, 20, 0.35) !important;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6) !important;
 }
 
 @keyframes blinkAnim {
   0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.4; transform: scale(0.98); }
+  100% { opacity: 0.3; transform: scale(0.98); }
 }
 
 .routeInfo{  
@@ -834,6 +836,17 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.storeKPICard:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+}
+.storeKPICard.selectedFilter {
+  border: 2px solid #38bdf8 !important;
+  background: #111d33 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
 .storeKPIText {
   font-size: 9px;
@@ -1066,6 +1079,7 @@ button:disabled {
 
     <div class="deptContent">  
       
+      <!-- STORE DEPARTMENT REALTIME DASHBOARD WITH FILTER ICONS -->
       <div id="storeDepartmentView" class="storeDashboardUI" style="display:none;">
         <div class="storeTopHeader">
           <div class="storeTitleBox">
@@ -1077,34 +1091,35 @@ button:disabled {
           </div>
         </div>
 
+        <!-- 4 FILTER ICONS BAR -->
         <div class="storeKPIGrid">
-          <div class="storeKPICard">
+          <div class="storeKPICard selectedFilter" id="kpiCardALL" onclick="filterStoreView('ALL')">
             <div>
               <div class="storeKPIText">TOTAL REQUIREMENT</div>
               <div class="storeKPIVal" id="storeKpiTotal" style="color:#38bdf8">0</div>
             </div>
             <span style="font-size:20px;">📋</span>
           </div>
-          <div class="storeKPICard">
+          <div class="storeKPICard" id="kpiCardSHORTAGE" onclick="filterStoreView('SHORTAGE')">
+            <div>
+              <div class="storeKPIText">MAT. SHORTAGE</div>
+              <div class="storeKPIVal" id="storeKpiShortage" style="color:#ef4444">0</div>
+            </div>
+            <span style="font-size:20px;">⚠️</span>
+          </div>
+          <div class="storeKPICard" id="kpiCardONTIME" onclick="filterStoreView('ONTIME')">
             <div>
               <div class="storeKPIText">ON TIME</div>
               <div class="storeKPIVal" id="storeKpiOnTime" style="color:#22c55e">0</div>
             </div>
             <span style="font-size:20px;">✅</span>
           </div>
-          <div class="storeKPICard">
+          <div class="storeKPICard" id="kpiCardDELAYED" onclick="filterStoreView('DELAYED')">
             <div>
               <div class="storeKPIText">DELAYED</div>
-              <div class="storeKPIVal" id="storeKpiDelayed" style="color:#ef4444">0</div>
+              <div class="storeKPIVal" id="storeKpiDelayed" style="color:#facc15">0</div>
             </div>
             <span style="font-size:20px;">⏰</span>
-          </div>
-          <div class="storeKPICard">
-            <div>
-              <div class="storeKPIText">MAT. SHORTAGE</div>
-              <div class="storeKPIVal" id="storeKpiShortage" style="color:#facc15">0</div>
-            </div>
-            <span style="font-size:20px;">📦</span>
           </div>
         </div>
 
@@ -1161,6 +1176,8 @@ const db = firebase.database();
 
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
+
+let currentStoreFilter = "ALL"; // Store filter state
 
 function startLiveClock() {
   function updateClock() {
@@ -2196,6 +2213,18 @@ function formatTimeString(dateObj){
   return dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 }
 
+// STORE DASHBOARD ICON FILTER FUNCTION
+function filterStoreView(filterType){
+  currentStoreFilter = filterType;
+  
+  // Highlight active icon
+  document.querySelectorAll('.storeKPICard').forEach(card => card.classList.remove('selectedFilter'));
+  const activeCard = document.getElementById('kpiCard' + filterType);
+  if(activeCard) activeCard.classList.add('selectedFilter');
+
+  renderStoreDashboardTable();
+}
+
 function renderStoreDashboardTable(){
   const tbody = document.getElementById("storeExcelTableBody");
   if(!tbody) return;
@@ -2241,33 +2270,45 @@ function renderStoreDashboardTable(){
         shortageCount++;
       }
 
-      const padZero = (num) => String(num).padStart(2, '0');
-      const delayDisplay = isDelayed ? `${padZero(delayMins)} Mins` : "00:00 Mins";
-      const delayColorClass = isDelayed ? "color:#ef4444;" : "color:#22c55e;";
+      // Filter check based on selected icon
+      let showRow = false;
+      if(currentStoreFilter === "ALL") showRow = true;
+      else if(currentStoreFilter === "SHORTAGE" && isMatShortage) showRow = true;
+      else if(currentStoreFilter === "ONTIME" && !isDelayed) showRow = true;
+      else if(currentStoreFilter === "DELAYED" && isDelayed) showRow = true;
 
-      const shortageText = isMatShortage ? `<span class="badgeShortageYes">YES</span>` : `<span class="badgeShortageNo">NO</span>`;
-      const statusBadge = isDelayed ? `<span class="badgeDelayed">DELAYED</span>` : `<span class="badgeOnTime">ONTIME</span>`;
+      if(showRow){
+        const padZero = (num) => String(num).padStart(2, '0');
+        const delayDisplay = isDelayed ? `${padZero(delayMins)} Mins` : "00:00 Mins";
+        const delayColorClass = isDelayed ? "color:#ef4444;" : "color:#22c55e;";
 
-      const partNo = mat.partNo || "N/A";
-      const partName = mat.partName || "N/A";
+        const shortageText = isMatShortage ? `<span class="badgeShortageYes">YES</span>` : `<span class="badgeShortageNo">NO</span>`;
+        const statusBadge = isDelayed ? `<span class="badgeDelayed">DELAYED</span>` : `<span class="badgeOnTime">ONTIME</span>`;
 
-      rowsHtml += `<tr>
-        <td style="color:#38bdf8;">${escapeHtml(partNo)}</td>
-        <td>${escapeHtml(partName)}</td>
-        <td style="color:#facc15;">${id}</td>
-        <td>${scheduledStr}</td>
-        <td style="${delayColorClass}">${delayDisplay}</td>
-        <td>${shortageText}</td>
-        <td>${statusBadge}</td>
-        <td>
-          ${!isMatShortage ? `<button class="btnOutOfStock" onclick="markStoreOutOfStock('${id}')">OUT OF STOCK</button>` : ''}
-        </td>
-      </tr>`;
+        const partNo = mat.partNo || "N/A";
+        const partName = mat.partName || "N/A";
+
+        // Add blink class to rows that have Material Shortage
+        const rowBlinkClass = isMatShortage ? "blinkAlert" : "";
+
+        rowsHtml += `<tr class="${rowBlinkClass}">
+          <td style="color:#38bdf8;">${escapeHtml(partNo)}</td>
+          <td>${escapeHtml(partName)}</td>
+          <td style="color:#facc15; font-weight:900;">${id}</td>
+          <td>${scheduledStr}</td>
+          <td style="${delayColorClass}">${delayDisplay}</td>
+          <td>${shortageText}</td>
+          <td>${statusBadge}</td>
+          <td>
+            ${!isMatShortage ? `<button class="btnOutOfStock" onclick="markStoreOutOfStock('${id}')">OUT OF STOCK</button>` : ''}
+          </td>
+        </tr>`;
+      }
     }
   });
 
-  if(totalReq === 0){
-    rowsHtml = `<tr><td colspan="8" style="padding:20px; color:#64748b; font-weight:800;">NO PENDING MATERIAL REQUIREMENTS</td></tr>`;
+  if(rowsHtml === ""){
+    rowsHtml = `<tr><td colspan="8" style="padding:20px; color:#64748b; font-weight:800;">NO MATCHING MATERIAL REQUIREMENTS</td></tr>`;
   }
 
   tbody.innerHTML = rowsHtml;
@@ -2384,7 +2425,10 @@ function renderDepartmentMachineGrid(){
       });
     }
 
-    return `<div class="deptMachineCard">
+    // Blink alert for machine card if material shortage exists
+    const cardBlinkClass = hasStatus(m, "MATERIAL SHORTAGE") ? "blinkAlert" : "";
+
+    return `<div class="deptMachineCard ${cardBlinkClass}">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h3 style="font-size:13px;font-weight:900;color:#ffffff">${id}</h3>
         <span style="font-size:8px;font-weight:900;padding:2px 4px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
