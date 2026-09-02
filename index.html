@@ -573,6 +573,18 @@ button:disabled {
   border-color: #ff0000 !important;
   background: rgba(229, 9, 20, 0.2) !important;
 }
+
+/* 1 Hour Yellow Blink for Store Pending Material */
+.yellowBlinkAlert {
+  animation: yellowBlinkAnim 1s infinite alternate;
+  border-color: #facc15 !important;
+  background: rgba(234, 179, 8, 0.25) !important;
+}
+@keyframes yellowBlinkAnim {
+  0% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px #facc15; }
+  100% { opacity: 0.5; transform: scale(0.98); box-shadow: 0 0 2px #facc15; }
+}
+
 @keyframes blinkAnim {
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0.4; transform: scale(0.98); }
@@ -918,7 +930,7 @@ button:disabled {
       </div>  
       <div class="topActions">  
         <span id="opLiveClock" class="pill liveClockPill">🕒 --:--:--</span>
-        <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
+        <span id="liveShiftBadgeOp" class="pill liveShiftBadge" style="color:#ffd000">LIVE SHIFT: -</span>  
         <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
         <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>
@@ -927,7 +939,6 @@ button:disabled {
       </div>
     </div>    
 
-    <!-- Dynamic Show/Hide Cards Area (Display immediately) -->
     <div id="operatorStatusCards" class="statusCards" style="display:grid;"></div>    
 
     <div class="statusMachineArea" id="operatorFocusArea" style="display:none;">  
@@ -963,6 +974,7 @@ button:disabled {
       </div>  
       <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">  
         <span id="deptLiveClock" class="pill liveClockPill">🕒 --:--:--</span>
+        <span id="liveShiftBadgeDept" class="pill liveShiftBadge" style="color:#ffd000">LIVE SHIFT: -</span>  
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
@@ -973,7 +985,7 @@ button:disabled {
     </div>    
 
     <div class="deptContent">  
-      <div class="summaryWidget" id="shiftSummaryWidget">
+      <div class="summaryWidget" id="shiftSummaryWidget" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="color:#ffd000; font-size:9px; letter-spacing:0.5px;">📊 SHIFT-WISE MATERIAL SUMMARY</b>
           <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:1px 3px; border-radius:3px; font-size:7.5px; font-weight:700;">
@@ -1118,7 +1130,7 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"], 
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MORE_THAN_1_HOUR"], 
     actions:[{ label:"⚠️ OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
@@ -1174,6 +1186,7 @@ const MASTER_STATUS_CONFIG = [
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
   { key:"SIGN PENDING", title:"SIGN PENDING", icon:"📝", accent:"#38bdf8" },  
   { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"📦", accent:"#ffd000" },  
+  { key:"MORE_THAN_1_HOUR", title:"> 1 HR PENDING", icon:"⚠️", accent:"#facc15" }, 
   { key:"MATERIAL SHORTAGE", title:"SHORTAGE", icon:"⚠️", accent:"#ff0000" }  
 ];  
 
@@ -1200,6 +1213,15 @@ function getShiftRange(s){
   if(s==="Shift B" || s==="B"){ return "4:15 PM - 12:00 AM"; }  
   return "12:00 AM - 7:45 AM";  
 }  
+
+// Helper function to check if material requirement is delayed > 1 Hour
+function isMaterialDelayedMoreThanHour(m) {
+  if (!m || !m.materialDetails || !m.materialDetails.timestamp) return false;
+  if (!hasStatus(m, "MATERIAL REQUIREMENT") && !hasStatus(m, "MATERIAL SHORTAGE")) return false;
+  const reqTime = m.materialDetails.timestamp;
+  const now = Date.now();
+  return (now - reqTime) > (60 * 60 * 1000); // More than 1 Hour (3600000 ms)
+}
 
 function setFirebaseStatus(online){  
   const ids=["firebaseTopStatus","firebaseDeptStatus"];  
@@ -1239,8 +1261,13 @@ function handleShiftChange(newShift){
 function checkShiftAutoReset(){  
   const saved = localStorage.getItem("brembo_shift");  
   const live = getCurrentShift();  
-  const badge = document.getElementById("liveShiftBadge");  
-  if(badge){ badge.innerText = "SHIFT: "+live; }  
+  
+  // Update Live Shift Badges in Top Bars for All Departments & Operator
+  const badges = document.querySelectorAll(".liveShiftBadge");
+  badges.forEach(b => {
+    b.innerText = "LIVE SHIFT: " + live;
+  });
+
   const txt = document.getElementById("autoShiftTxt");  
   if(txt){ txt.innerText = "Auto Shift: "+live+" ("+getShiftRange(live)+")"; }  
 
@@ -1250,6 +1277,11 @@ function checkShiftAutoReset(){
 }  
 
 setInterval(checkShiftAutoReset, 30000);
+setInterval(() => {
+  if(department === "store") {
+    renderDepartmentDashboard();
+  }
+}, 60000); // Check 1 Hour Delay dynamic updates every 1 min
 
 function getMachineIssues(m){  
   if(!m) return {};  
@@ -1272,6 +1304,10 @@ function getMachineStatusString(m){
 function hasStatus(m, st){  
   if(!m) return false;  
   
+  if(st === "MORE_THAN_1_HOUR") {
+    return isMaterialDelayedMoreThanHour(m);
+  }
+
   if(st === "ACTIVE LOGINS"){
     return !!(m.op && m.op.id);
   }  
@@ -1335,7 +1371,7 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
 function load(){  
   db.ref("statusLogs").on("value", snap => {
     allStatusLogs = snap.val() || {};
-    if(department) renderShiftSummary();
+    if(department === "store") renderShiftSummary();
   });
 
   db.ref("machines").on("value",snap=>{  
@@ -1438,6 +1474,7 @@ function checkExistingSession(){
 }  
 
 function renderAllDashboards(){  
+  checkShiftAutoReset();
   if(operator){  
     renderOperatorStatusCards();  
     renderOperatorMachineList();  
@@ -1517,7 +1554,6 @@ function applyOperator(isReload = false){
     });  
   }  
 
-  // Point 1 Fix: Status Cards show immediately upon login without 5s delay
   const cardsEl = document.getElementById("operatorStatusCards");
   if(cardsEl) cardsEl.style.display = "grid";
 
@@ -1579,7 +1615,14 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
   container.innerHTML = cardsToDisplay.map(item=>{  
     const count = getStatusCount(item.key);  
     const active = activeStatus===item.key ? "active" : "";  
-    const blinkClass = (item.key === "MATERIAL SHORTAGE" || item.key === "MACHINE IDLE") && count > 0 ? "blinkAlert" : "";
+    
+    let blinkClass = "";
+    if((item.key === "MATERIAL SHORTAGE" || item.key === "MACHINE IDLE") && count > 0) {
+      blinkClass = "blinkAlert";
+    } else if(item.key === "MORE_THAN_1_HOUR" && count > 0) {
+      blinkClass = "yellowBlinkAlert"; // Yellow Blink for Delay Notification Icon
+    }
+
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
         <div class="statusCardTitle"><span class="statusIcon">${item.icon}</span><span>${item.title}</span></div>  
         <div class="statusCardCount">${count}</div>  
@@ -1593,6 +1636,7 @@ function getStatusDisplayName(status){
   if(status==="MATERIAL SHORTAGE"){ return "⚠️ MAT SHORTAGE"; }  
   if(status==="ACTIVE LOGINS"){ return "👥 ACTIVE LOGINS"; }  
   if(status==="MACHINE IDLE"){ return "⏸️ MACHINE IDLE"; }  
+  if(status==="MORE_THAN_1_HOUR"){ return "⚠️ > 1 HR PENDING"; }
   return status;  
 }  
 
@@ -1814,6 +1858,7 @@ function submitMaterialRequirement(){
     partName: partName,
     qty: qty,
     dateTime: dateTimeStr,
+    timestamp: Date.now(), // Saved precise timestamp for > 1 Hour calculation
     shift: getCurrentShift()
   };  
   closeMaterialModal();  
@@ -2054,6 +2099,8 @@ function getDepartmentFilteredMachines(){
 }  
 
 function renderShiftSummary(){
+  if(department !== "store") return; // Restriction Point 1: Only for Store Department
+
   const filterSelect = document.getElementById("summaryShiftFilter");
   const selectedVal = filterSelect ? filterSelect.value : "CURRENT";
   const targetShift = selectedVal === "CURRENT" ? getCurrentShift() : selectedVal;
@@ -2100,6 +2147,12 @@ function renderDepartmentDashboard(){
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD";  
   document.getElementById("deptBadge").innerText = config.name;  
 
+  // Point 1 Fix: Show Machine-wise Shift Summary ONLY for Store Department
+  const summaryWidget = document.getElementById("shiftSummaryWidget");
+  if(summaryWidget) {
+    summaryWidget.style.display = (department === "store") ? "block" : "none";
+  }
+
   const excelBtn = document.getElementById("deptExcelBtn");
   if(excelBtn){
     excelBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
@@ -2114,7 +2167,10 @@ function renderDepartmentDashboard(){
     departmentStatusFilter = config.allowedStatuses[0];
   }
 
-  renderShiftSummary();
+  if(department === "store"){
+    renderShiftSummary();
+  }
+  
   renderDepartmentStatusCards();  
   renderDepartmentMachineGrid();  
 }  
@@ -2144,6 +2200,10 @@ function renderDepartmentMachineGrid(){
     const stStr = getMachineStatusString(m);  
     const mat = m.materialDetails;
 
+    // Point 3 Fix: Store Department Yellow Blink Alert for > 1 Hour pending request
+    const isStoreDelay = (department === "store" && isMaterialDelayedMoreThanHour(m));
+    const cardBlinkClass = isStoreDelay ? "yellowBlinkAlert" : "";
+
     let statusColor="#ef4444";  
     if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
@@ -2155,6 +2215,7 @@ function renderDepartmentMachineGrid(){
           <div style="font-size:9px;font-weight:700;margin-top:2px;">
             <span style="color:#22c55e;">🕒 ${escapeHtml(mat.dateTime || '-')}</span> | <span style="color:#ffd000;">📍 ${escapeHtml(mat.shift || '-')}</span>
           </div>
+          ${isStoreDelay ? `<div style="color:#facc15;font-weight:900;font-size:9.5px;margin-top:3px;background:#3f2d00;padding:2px;border-radius:3px;text-align:center;">⚠️ PENDING FOR MORE THAN 1 HOUR</div>` : ''}
         </div>`;
     } else {
       matInfoHtml = `<div style="color:#555;font-size:9px;padding:4px 0;">No details</div>`;
@@ -2174,7 +2235,7 @@ function renderDepartmentMachineGrid(){
       });
     }
 
-    return `<div class="deptMachineCard">
+    return `<div class="deptMachineCard ${cardBlinkClass}">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h3 style="font-size:13px;font-weight:900;color:#ffffff">${id}</h3>
         <span style="font-size:8px;font-weight:900;padding:2px 4px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
