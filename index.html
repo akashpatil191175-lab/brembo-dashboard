@@ -912,16 +912,6 @@ button:disabled {
   font-size: 9px;
   font-weight: 800;
 }
-.btnReceiveMat {
-  background: #15803d;
-  border: 1px solid #22c55e;
-  color: #fff;
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 9px;
-  font-weight: 800;
-  margin-left: 4px;
-}
 
 @media(max-width:1200px){  
   .deptMachineGrid { grid-template-columns: repeat(3, 1fr); }
@@ -2271,7 +2261,6 @@ function renderStoreDashboardTable(){
         <td>${statusBadge}</td>
         <td>
           ${!isMatShortage ? `<button class="btnOutOfStock" onclick="markStoreOutOfStock('${id}')">OUT OF STOCK</button>` : ''}
-          <button class="btnReceiveMat" onclick="storeClearMaterial('${id}')">RECEIVE</button>
         </td>
       </tr>`;
     }
