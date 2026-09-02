@@ -73,6 +73,7 @@ button:disabled {
   background:#333;  
   border-radius:10px  
 }  
+
 #login{  
   position:fixed;  
   inset:0;  
@@ -574,17 +575,6 @@ button:disabled {
   background: rgba(229, 9, 20, 0.2) !important;
 }
 
-/* 1 Hour Yellow Blink for Store Pending Material */
-.yellowBlinkAlert {
-  animation: yellowBlinkAnim 1s infinite alternate;
-  border-color: #facc15 !important;
-  background: rgba(234, 179, 8, 0.25) !important;
-}
-@keyframes yellowBlinkAnim {
-  0% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px #facc15; }
-  100% { opacity: 0.5; transform: scale(0.98); box-shadow: 0 0 2px #facc15; }
-}
-
 @keyframes blinkAnim {
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0.4; transform: scale(0.98); }
@@ -682,12 +672,13 @@ button:disabled {
 }  
 
 .deptContent{  
-  padding:4px 8px;  
+  padding:6px;  
   width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #020617;
 }  
 
 .deptStatusCards{  
@@ -799,47 +790,146 @@ button:disabled {
   cursor: pointer;
 }
 
-.summaryWidget {
-  background: linear-gradient(145deg, #141414, #080808);
-  border: 1px solid #ffd000;
-  border-radius: 6px;
-  padding: 4px 6px;
-  margin-bottom: 2px;
-  flex-shrink: 0;
+/* STORE DEPARTMENT REALTIME DASHBOARD EXCEL STYLE */
+.storeDashboardUI {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #030712;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 8px;
+  overflow: hidden;
 }
-.summaryGrid {
+.storeTopHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1f2937;
+}
+.storeTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.storeTitleBox h2 {
+  font-size: 18px;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+.storeKPIGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin-top: 2px;
+  gap: 8px;
+  margin: 8px 0;
 }
-.summaryBox {
-  background: #090909;
-  border: 1px solid #292929;
-  border-radius: 4px;
-  padding: 2px 4px;
-  text-align: center;
+.storeKPICard {
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.summaryTitle {
-  font-size: 7.5px;
-  color: #888;
+.storeKPIText {
+  font-size: 9px;
   font-weight: 800;
+  color: #94a3b8;
   text-transform: uppercase;
 }
-.summaryVal {
-  font-size: 11px;
+.storeKPIVal {
+  font-size: 18px;
   font-weight: 900;
   line-height: 1;
-  margin-top: 1px;
 }
 
-/* RESPONSIVE LAYOUT FOR MOBILE */
+.storeTableContainer {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+.storeExcelTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 11px;
+}
+.storeExcelTable th {
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 8px 6px;
+  font-weight: 900;
+  border-bottom: 2px solid #1e293b;
+  white-space: nowrap;
+}
+.storeExcelTable td {
+  padding: 7px 6px;
+  border-bottom: 1px solid #1e293b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.storeExcelTable tr:hover {
+  background: #0f172a88;
+}
+.badgeOnTime {
+  background: #15803d;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 10px;
+}
+.badgeDelayed {
+  background: #b91c1c;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 10px;
+}
+.badgeShortageYes {
+  color: #ef4444;
+  font-weight: 900;
+}
+.badgeShortageNo {
+  color: #22c55e;
+  font-weight: 900;
+}
+.btnOutOfStock {
+  background: #7f1d1d;
+  border: 1px solid #ef4444;
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+}
+.btnReceiveMat {
+  background: #15803d;
+  border: 1px solid #22c55e;
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
 @media(max-width:1200px){  
   .deptMachineGrid { grid-template-columns: repeat(3, 1fr); }
 }  
 
 @media(max-width:800px){  
   .deptMachineGrid { grid-template-columns: repeat(2, 1fr); }
+  .storeKPIGrid { grid-template-columns: repeat(2, 1fr); }
 }  
 
 @media(max-width:600px){  
@@ -985,47 +1075,82 @@ button:disabled {
     </div>    
 
     <div class="deptContent">  
-      <div class="summaryWidget" id="shiftSummaryWidget" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="color:#ffd000; font-size:9px; letter-spacing:0.5px;">📊 SHIFT-WISE MATERIAL SUMMARY</b>
-          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:1px 3px; border-radius:3px; font-size:7.5px; font-weight:700;">
-            <option value="CURRENT">Current Active Shift</option>
-            <option value="Shift A">Shift A</option>
-            <option value="Shift B">Shift B</option>
-            <option value="Shift C">Shift C</option>
-          </select>
+      
+      <div id="storeDepartmentView" class="storeDashboardUI" style="display:none;">
+        <div class="storeTopHeader">
+          <div class="storeTitleBox">
+            <span style="font-size:22px;">🏪</span>
+            <h2>STORE DEPARTMENT DASHBOARD</h2>
+          </div>
+          <div style="text-align:right; font-size:11px; font-weight:800; color:#94a3b8;">
+            <span id="storeHeaderDateTime">--:--:--</span>
+          </div>
         </div>
-        <div class="summaryGrid">
-          <div class="summaryBox">
-            <div class="summaryTitle">Total Req</div>
-            <div class="summaryVal" id="cntTotalReq" style="color:#ffd000">0</div>
+
+        <div class="storeKPIGrid">
+          <div class="storeKPICard">
+            <div>
+              <div class="storeKPIText">TOTAL REQUIREMENT</div>
+              <div class="storeKPIVal" id="storeKpiTotal" style="color:#38bdf8">0</div>
+            </div>
+            <span style="font-size:20px;">📋</span>
           </div>
-          <div class="summaryBox">
-            <div class="summaryTitle">Received</div>
-            <div class="summaryVal" id="cntReceived" style="color:#22c55e">0</div>
+          <div class="storeKPICard">
+            <div>
+              <div class="storeKPIText">ON TIME</div>
+              <div class="storeKPIVal" id="storeKpiOnTime" style="color:#22c55e">0</div>
+            </div>
+            <span style="font-size:20px;">✅</span>
           </div>
-          <div class="summaryBox">
-            <div class="summaryTitle">Pending</div>
-            <div class="summaryVal" id="cntPending" style="color:#ef4444">0</div>
+          <div class="storeKPICard">
+            <div>
+              <div class="storeKPIText">DELAYED</div>
+              <div class="storeKPIVal" id="storeKpiDelayed" style="color:#ef4444">0</div>
+            </div>
+            <span style="font-size:20px;">⏰</span>
           </div>
-          <div class="summaryBox" style="border-color:#eab308;">
-            <div class="summaryTitle" style="color:#eab308">Carried Fwd</div>
-            <div class="summaryVal" id="cntCarryForward" style="color:#eab308">0</div>
+          <div class="storeKPICard">
+            <div>
+              <div class="storeKPIText">MAT. SHORTAGE</div>
+              <div class="storeKPIVal" id="storeKpiShortage" style="color:#facc15">0</div>
+            </div>
+            <span style="font-size:20px;">📦</span>
           </div>
+        </div>
+
+        <div class="storeTableContainer">
+          <table class="storeExcelTable">
+            <thead>
+              <tr>
+                <th>Part No</th>
+                <th>Part Name</th>
+                <th>Machine</th>
+                <th>Scheduled</th>
+                <th>Delay Time</th>
+                <th>Mat. Shortage</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="storeExcelTableBody">
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div id="departmentStatusCards" class="deptStatusCards"></div>  
-
-      <div class="deptMachineBox" id="deptFocusArea">  
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">  
-          <div>  
-            <b id="deptGridTitle" style="font-size:10px;">MATERIAL REQUIREMENTS OVERVIEW</b>  
+      <div id="otherDepartmentView" style="display:none; flex-direction:column; height:100%;">
+        <div id="departmentStatusCards" class="deptStatusCards"></div>  
+        <div class="deptMachineBox" id="deptFocusArea">  
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">  
+            <div>  
+              <b id="deptGridTitle" style="font-size:10px;">REQUIREMENTS OVERVIEW</b>  
+            </div>  
+            <div id="deptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>  
           </div>  
-          <div id="deptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>  
+          <div id="deptMachineGrid" class="deptMachineGrid"></div>  
         </div>  
-        <div id="deptMachineGrid" class="deptMachineGrid"></div>  
-      </div>  
+      </div>
+
     </div>  
   </div>  
 
@@ -1051,14 +1176,20 @@ function startLiveClock() {
   function updateClock() {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-IN', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     const fullDisplay = `🕒 ${dateStr} | ${timeStr}`;
     
     const opClock = document.getElementById("opLiveClock");
     const deptClock = document.getElementById("deptLiveClock");
+    const storeHeaderTime = document.getElementById("storeHeaderDateTime");
     
     if(opClock) opClock.innerText = fullDisplay;
     if(deptClock) deptClock.innerText = fullDisplay;
+    if(storeHeaderTime) storeHeaderTime.innerText = `📅 ${dateStr} | 🕒 ${timeStr}`;
+
+    if(department === "store"){
+      renderStoreDashboardTable();
+    }
   }
   updateClock();
   setInterval(updateClock, 1000);
@@ -1130,7 +1261,7 @@ const DEPARTMENT_CONFIG = {
   store:{ 
     name:"STORE DEPARTMENT", 
     pin:"2028", 
-    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MORE_THAN_1_HOUR"], 
+    allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"], 
     actions:[{ label:"⚠️ OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
   supervisor:{ 
@@ -1186,7 +1317,6 @@ const MASTER_STATUS_CONFIG = [
   { key:"LOT HOLD", title:"LOT HOLD", icon:"⚙️", accent:"#ffd000" },  
   { key:"SIGN PENDING", title:"SIGN PENDING", icon:"📝", accent:"#38bdf8" },  
   { key:"MATERIAL REQUIREMENT", title:"MAT REQ", icon:"📦", accent:"#ffd000" },  
-  { key:"MORE_THAN_1_HOUR", title:"> 1 HR PENDING", icon:"⚠️", accent:"#facc15" }, 
   { key:"MATERIAL SHORTAGE", title:"SHORTAGE", icon:"⚠️", accent:"#ff0000" }  
 ];  
 
@@ -1213,15 +1343,6 @@ function getShiftRange(s){
   if(s==="Shift B" || s==="B"){ return "4:15 PM - 12:00 AM"; }  
   return "12:00 AM - 7:45 AM";  
 }  
-
-// Helper function to check if material requirement is delayed > 1 Hour
-function isMaterialDelayedMoreThanHour(m) {
-  if (!m || !m.materialDetails || !m.materialDetails.timestamp) return false;
-  if (!hasStatus(m, "MATERIAL REQUIREMENT") && !hasStatus(m, "MATERIAL SHORTAGE")) return false;
-  const reqTime = m.materialDetails.timestamp;
-  const now = Date.now();
-  return (now - reqTime) > (60 * 60 * 1000); // More than 1 Hour (3600000 ms)
-}
 
 function setFirebaseStatus(online){  
   const ids=["firebaseTopStatus","firebaseDeptStatus"];  
@@ -1262,7 +1383,6 @@ function checkShiftAutoReset(){
   const saved = localStorage.getItem("brembo_shift");  
   const live = getCurrentShift();  
   
-  // Update Live Shift Badges in Top Bars for All Departments & Operator
   const badges = document.querySelectorAll(".liveShiftBadge");
   badges.forEach(b => {
     b.innerText = "LIVE SHIFT: " + live;
@@ -1277,11 +1397,6 @@ function checkShiftAutoReset(){
 }  
 
 setInterval(checkShiftAutoReset, 30000);
-setInterval(() => {
-  if(department === "store") {
-    renderDepartmentDashboard();
-  }
-}, 60000); // Check 1 Hour Delay dynamic updates every 1 min
 
 function getMachineIssues(m){  
   if(!m) return {};  
@@ -1303,22 +1418,15 @@ function getMachineStatusString(m){
 
 function hasStatus(m, st){  
   if(!m) return false;  
-  
-  if(st === "MORE_THAN_1_HOUR") {
-    return isMaterialDelayedMoreThanHour(m);
-  }
-
   if(st === "ACTIVE LOGINS"){
     return !!(m.op && m.op.id);
   }  
-  
   if(st === "MACHINE IDLE"){
     const isBreakdown = hasStatus(m, "BREAKDOWN");
     const isMatShortage = hasStatus(m, "MATERIAL SHORTAGE");
     const isNoOperator = !m.op;
     return isBreakdown || isMatShortage || isNoOperator;
   }
-
   if(st === "RUNNING"){  
     return Object.keys(getMachineIssues(m)).length === 0;  
   }  
@@ -1371,7 +1479,6 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
 function load(){  
   db.ref("statusLogs").on("value", snap => {
     allStatusLogs = snap.val() || {};
-    if(department === "store") renderShiftSummary();
   });
 
   db.ref("machines").on("value",snap=>{  
@@ -1619,8 +1726,6 @@ function renderStatusCards(containerId, activeStatus, clickFunction, filterList=
     let blinkClass = "";
     if((item.key === "MATERIAL SHORTAGE" || item.key === "MACHINE IDLE") && count > 0) {
       blinkClass = "blinkAlert";
-    } else if(item.key === "MORE_THAN_1_HOUR" && count > 0) {
-      blinkClass = "yellowBlinkAlert"; // Yellow Blink for Delay Notification Icon
     }
 
     return `<div class="statusCard ${active} ${blinkClass}" style="--accent:${item.accent}" onclick="${clickFunction}('${item.key}')">  
@@ -1636,7 +1741,6 @@ function getStatusDisplayName(status){
   if(status==="MATERIAL SHORTAGE"){ return "⚠️ MAT SHORTAGE"; }  
   if(status==="ACTIVE LOGINS"){ return "👥 ACTIVE LOGINS"; }  
   if(status==="MACHINE IDLE"){ return "⏸️ MACHINE IDLE"; }  
-  if(status==="MORE_THAN_1_HOUR"){ return "⚠️ > 1 HR PENDING"; }
   return status;  
 }  
 
@@ -1850,7 +1954,7 @@ function submitMaterialRequirement(){
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB'); 
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
   const dateTimeStr = `${dateStr} | ${timeStr}`;
 
   machines[curMachine].materialDetails={
@@ -1858,7 +1962,7 @@ function submitMaterialRequirement(){
     partName: partName,
     qty: qty,
     dateTime: dateTimeStr,
-    timestamp: Date.now(), // Saved precise timestamp for > 1 Hour calculation
+    timestamp: Date.now(), 
     shift: getCurrentShift()
   };  
   closeMaterialModal();  
@@ -2098,45 +2202,105 @@ function getDepartmentFilteredMachines(){
   });  
 }  
 
-function renderShiftSummary(){
-  if(department !== "store") return; // Restriction Point 1: Only for Store Department
+function formatTimeString(dateObj){
+  return dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+}
 
-  const filterSelect = document.getElementById("summaryShiftFilter");
-  const selectedVal = filterSelect ? filterSelect.value : "CURRENT";
-  const targetShift = selectedVal === "CURRENT" ? getCurrentShift() : selectedVal;
+function renderStoreDashboardTable(){
+  const tbody = document.getElementById("storeExcelTableBody");
+  if(!tbody) return;
 
-  let totalReqCount = 0;
-  let receivedCount = 0;
-  let pendingCount = 0;
-  let carryForwardCount = 0;
+  let totalReq = 0;
+  let onTimeCount = 0;
+  let delayedCount = 0;
+  let shortageCount = 0;
 
-  if(allStatusLogs){
-    Object.keys(allStatusLogs).forEach(k => {
-      const log = allStatusLogs[k];
-      if(log.shift === targetShift && (log.detail === "MATERIAL REQUIREMENT" || log.action === "OPERATOR UPDATE")){
-        totalReqCount++;
-      }
-      if(log.shift === targetShift && (log.detail === "Material Received" || log.action === "MATERIAL RECEIVED")){
-        receivedCount++;
-      }
-    });
-  }
+  let rowsHtml = "";
+  const now = Date.now();
 
   ALL_MACHINES_LIST.forEach(id => {
     const m = machines[id] || {};
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE")){
-      pendingCount++;
+    const isMatReq = hasStatus(m, "MATERIAL REQUIREMENT");
+    const isMatShortage = hasStatus(m, "MATERIAL SHORTAGE");
+
+    if(isMatReq || isMatShortage || m.materialDetails){
+      totalReq++;
+      const mat = m.materialDetails || {};
+      const reqTimestamp = mat.timestamp || now;
       
-      if(m.materialDetails && m.materialDetails.shift && m.materialDetails.shift !== targetShift){
-        carryForwardCount++;
+      const reqDate = new Date(reqTimestamp);
+      const targetDate = new Date(reqTimestamp + (60 * 60 * 1000));
+
+      const scheduledStr = `${formatTimeString(reqDate)} TO ${formatTimeString(targetDate)}`;
+
+      let delayMins = 0;
+      let isDelayed = false;
+
+      if(now > targetDate.getTime()){
+        isDelayed = true;
+        delayMins = Math.floor((now - targetDate.getTime()) / (1000 * 60));
       }
+
+      if(isDelayed){
+        delayedCount++;
+      } else {
+        onTimeCount++;
+      }
+
+      if(isMatShortage){
+        shortageCount++;
+      }
+
+      const padZero = (num) => String(num).padStart(2, '0');
+      const delayDisplay = isDelayed ? `${padZero(delayMins)} Mins` : "00:00 Mins";
+      const delayColorClass = isDelayed ? "color:#ef4444;" : "color:#22c55e;";
+
+      const shortageText = isMatShortage ? `<span class="badgeShortageYes">YES</span>` : `<span class="badgeShortageNo">NO</span>`;
+      const statusBadge = isDelayed ? `<span class="badgeDelayed">DELAYED</span>` : `<span class="badgeOnTime">ONTIME</span>`;
+
+      const partNo = mat.partNo || "N/A";
+      const partName = mat.partName || "N/A";
+
+      rowsHtml += `<tr>
+        <td style="color:#38bdf8;">${escapeHtml(partNo)}</td>
+        <td>${escapeHtml(partName)}</td>
+        <td style="color:#facc15;">${id}</td>
+        <td>${scheduledStr}</td>
+        <td style="${delayColorClass}">${delayDisplay}</td>
+        <td>${shortageText}</td>
+        <td>${statusBadge}</td>
+        <td>
+          ${!isMatShortage ? `<button class="btnOutOfStock" onclick="markStoreOutOfStock('${id}')">OUT OF STOCK</button>` : ''}
+          <button class="btnReceiveMat" onclick="storeClearMaterial('${id}')">RECEIVE</button>
+        </td>
+      </tr>`;
     }
   });
 
-  document.getElementById("cntTotalReq").innerText = totalReqCount;
-  document.getElementById("cntReceived").innerText = receivedCount;
-  document.getElementById("cntPending").innerText = pendingCount;
-  document.getElementById("cntCarryForward").innerText = carryForwardCount;
+  if(totalReq === 0){
+    rowsHtml = `<tr><td colspan="8" style="padding:20px; color:#64748b; font-weight:800;">NO PENDING MATERIAL REQUIREMENTS</td></tr>`;
+  }
+
+  tbody.innerHTML = rowsHtml;
+
+  document.getElementById("storeKpiTotal").innerText = totalReq;
+  document.getElementById("storeKpiOnTime").innerText = onTimeCount;
+  document.getElementById("storeKpiDelayed").innerText = delayedCount;
+  document.getElementById("storeKpiShortage").innerText = shortageCount;
+}
+
+function markStoreOutOfStock(mcId){
+  if(!mcId || !machines[mcId]) return;
+  if(!confirm("Mark Material Out of Stock for Machine "+mcId+"? Status will update to MATERIAL SHORTAGE.")) return;
+
+  updateDepartmentMachineStatus(mcId, "MATERIAL REQUIREMENT", "", "MATERIAL SHORTAGE");
+}
+
+function storeClearMaterial(mcId){
+  if(!mcId || !machines[mcId]) return;
+  if(!confirm("Confirm material supplied for "+mcId+"? Machine status will set to RUNNING.")) return;
+
+  updateDepartmentMachineStatus(mcId, "ALL", "", "");
 }
 
 function renderDepartmentDashboard(){  
@@ -2146,12 +2310,6 @@ function renderDepartmentDashboard(){
 
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD";  
   document.getElementById("deptBadge").innerText = config.name;  
-
-  // Point 1 Fix: Show Machine-wise Shift Summary ONLY for Store Department
-  const summaryWidget = document.getElementById("shiftSummaryWidget");
-  if(summaryWidget) {
-    summaryWidget.style.display = (department === "store") ? "block" : "none";
-  }
 
   const excelBtn = document.getElementById("deptExcelBtn");
   if(excelBtn){
@@ -2163,16 +2321,23 @@ function renderDepartmentDashboard(){
     excelResetBtn.style.display = (department === "store" || department === "supervisor") ? "inline-block" : "none";
   }
 
-  if(!config.allowedStatuses.includes(departmentStatusFilter)){
-    departmentStatusFilter = config.allowedStatuses[0];
-  }
+  const storeView = document.getElementById("storeDepartmentView");
+  const otherView = document.getElementById("otherDepartmentView");
 
   if(department === "store"){
-    renderShiftSummary();
+    storeView.style.display = "flex";
+    otherView.style.display = "none";
+    renderStoreDashboardTable();
+  } else {
+    storeView.style.display = "none";
+    otherView.style.display = "flex";
+    
+    if(!config.allowedStatuses.includes(departmentStatusFilter)){
+      departmentStatusFilter = config.allowedStatuses[0];
+    }
+    renderDepartmentStatusCards();  
+    renderDepartmentMachineGrid();  
   }
-  
-  renderDepartmentStatusCards();  
-  renderDepartmentMachineGrid();  
 }  
 
 function renderDepartmentMachineGrid(){  
@@ -2200,10 +2365,6 @@ function renderDepartmentMachineGrid(){
     const stStr = getMachineStatusString(m);  
     const mat = m.materialDetails;
 
-    // Point 3 Fix: Store Department Yellow Blink Alert for > 1 Hour pending request
-    const isStoreDelay = (department === "store" && isMaterialDelayedMoreThanHour(m));
-    const cardBlinkClass = isStoreDelay ? "yellowBlinkAlert" : "";
-
     let statusColor="#ef4444";  
     if(stStr==="RUNNING"){ statusColor="#22c55e"; }  
 
@@ -2215,7 +2376,6 @@ function renderDepartmentMachineGrid(){
           <div style="font-size:9px;font-weight:700;margin-top:2px;">
             <span style="color:#22c55e;">🕒 ${escapeHtml(mat.dateTime || '-')}</span> | <span style="color:#ffd000;">📍 ${escapeHtml(mat.shift || '-')}</span>
           </div>
-          ${isStoreDelay ? `<div style="color:#facc15;font-weight:900;font-size:9.5px;margin-top:3px;background:#3f2d00;padding:2px;border-radius:3px;text-align:center;">⚠️ PENDING FOR MORE THAN 1 HOUR</div>` : ''}
         </div>`;
     } else {
       matInfoHtml = `<div style="color:#555;font-size:9px;padding:4px 0;">No details</div>`;
@@ -2235,7 +2395,7 @@ function renderDepartmentMachineGrid(){
       });
     }
 
-    return `<div class="deptMachineCard ${cardBlinkClass}">
+    return `<div class="deptMachineCard">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h3 style="font-size:13px;font-weight:900;color:#ffffff">${id}</h3>
         <span style="font-size:8px;font-weight:900;padding:2px 4px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
@@ -2265,6 +2425,7 @@ function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue)
 
   if(clearIssue1 === "ALL"){  
     issues = {};  
+    m.materialDetails = null;
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
