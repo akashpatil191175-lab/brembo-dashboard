@@ -179,9 +179,10 @@ button:disabled {
   line-height:1.5  
 }  
 
+/* TOP BAR FIXES */
 .topBar{  
-  min-height:55px;  
-  padding:4px 12px;  
+  min-height:auto;  
+  padding:8px 12px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
@@ -191,29 +192,33 @@ button:disabled {
   gap:12px;  
   position:sticky;  
   top:0;  
-  z-index:1000  
+  z-index:1000;
+  flex-wrap: wrap; 
 }  
 .topLeft{  
   display:flex;  
   align-items:center;  
-  gap:14px;  
-  min-width:0  
+  gap:10px;  
+  flex-wrap: wrap; 
 }  
 .topLogo{  
-  width:120px;  
-  height:32px;  
+  width:100px;  
+  height:30px;  
   object-fit:contain;  
-  object-position:left center  
+  object-position:left center;
+  flex-shrink: 0;
 }  
 .topDivider{  
   width:1px;  
   height:25px;  
-  background:#333  
+  background:#333;
+  flex-shrink: 0;
 }  
 .userName{  
   font-size:13px;  
   font-weight:800;  
-  white-space:nowrap  
+  white-space:nowrap;
+  color: #ffffff;
 }  
 .machineBadge{  
   font-size:12px;  
@@ -222,10 +227,12 @@ button:disabled {
   border:1px solid #333;  
   background:#121212;  
   border-radius:6px;  
-  color:#fff  
+  color:#fff;
+  white-space:nowrap;
 }  
 .shiftInfo{  
-  line-height:1.1  
+  line-height:1.2;
+  white-space:nowrap;
 }  
 .shiftMain{  
   font-size:12px;  
@@ -808,6 +815,10 @@ button:disabled {
 }  
 
 @media(max-width:600px){  
+  .topBar { flex-direction: column; align-items: flex-start; }
+  .topLeft { width: 100%; justify-content: flex-start; }
+  .detailTop { grid-template-columns: 1fr; }
+  .routeTop { border-left: none; padding-left: 0; border-top: 1px solid #222; padding-top: 8px; margin-top: 8px; }
   .deptMachineGrid { grid-template-columns: repeat(1, 1fr); }
   html, body, #departmentDashboard { overflow: auto; height: auto; }
 }  
