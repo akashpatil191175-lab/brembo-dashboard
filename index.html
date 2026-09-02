@@ -179,10 +179,9 @@ button:disabled {
   line-height:1.5  
 }  
 
-/* TOP BAR FIXES */
 .topBar{  
-  min-height:auto;  
-  padding:8px 12px;  
+  min-height:55px;  
+  padding:4px 12px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
@@ -192,33 +191,29 @@ button:disabled {
   gap:12px;  
   position:sticky;  
   top:0;  
-  z-index:1000;
-  flex-wrap: wrap; 
+  z-index:1000  
 }  
 .topLeft{  
   display:flex;  
   align-items:center;  
-  gap:10px;  
-  flex-wrap: wrap; 
+  gap:14px;  
+  min-width:0  
 }  
 .topLogo{  
-  width:100px;  
-  height:30px;  
+  width:120px;  
+  height:32px;  
   object-fit:contain;  
-  object-position:left center;
-  flex-shrink: 0;
+  object-position:left center  
 }  
 .topDivider{  
   width:1px;  
   height:25px;  
-  background:#333;
-  flex-shrink: 0;
+  background:#333  
 }  
 .userName{  
   font-size:13px;  
   font-weight:800;  
-  white-space:nowrap;
-  color: #ffffff;
+  white-space:nowrap  
 }  
 .machineBadge{  
   font-size:12px;  
@@ -227,12 +222,10 @@ button:disabled {
   border:1px solid #333;  
   background:#121212;  
   border-radius:6px;  
-  color:#fff;
-  white-space:nowrap;
+  color:#fff  
 }  
 .shiftInfo{  
-  line-height:1.2;
-  white-space:nowrap;
+  line-height:1.1  
 }  
 .shiftMain{  
   font-size:12px;  
@@ -815,10 +808,6 @@ button:disabled {
 }  
 
 @media(max-width:600px){  
-  .topBar { flex-direction: column; align-items: flex-start; }
-  .topLeft { width: 100%; justify-content: flex-start; }
-  .detailTop { grid-template-columns: 1fr; }
-  .routeTop { border-left: none; padding-left: 0; border-top: 1px solid #222; padding-top: 8px; margin-top: 8px; }
   .deptMachineGrid { grid-template-columns: repeat(1, 1fr); }
   html, body, #departmentDashboard { overflow: auto; height: auto; }
 }  
@@ -1854,7 +1843,7 @@ function getFilteredLogsForDepartment(logsData) {
     if (isMatched) {
       filtered.unshift({
         "Date and time": l.timeStr || "-",
-        "मशिन नाव": l.machine || "-",
+        "Machine Name": l.machine || "-",
         "action taken": l.detail || l.action || "-",
         "shift": l.shift || "-",
         "part name": l.partName || "-",
@@ -1892,7 +1881,7 @@ function downloadDepartmentExcel(){
             const mat = m.materialDetails || {};
             rows.push({
               "Date and time": mat.dateTime || new Date().toLocaleString("en-IN"),
-              "मशिन नाव": mcId,
+              "Machine Name": mcId,
               "action taken": stStr,
               "shift": getCurrentShift(),
               "part name": mat.partName || "-",
@@ -1904,12 +1893,12 @@ function downloadDepartmentExcel(){
       }
 
       if(rows.length === 0){
-        alert("मटेरियल रेकॉर्ड्स ची कोणतीही माहिती उपलब्ध नाही.");
+        alert("Material Record Data Available नाही.");
         return;
       }
 
       const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:22},{wch:12},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
+      worksheet["!cols"] = [{wch:22},{wch:16},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
 
       const date = new Date().toISOString().slice(0,10);  
