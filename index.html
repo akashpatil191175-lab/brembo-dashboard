@@ -43,6 +43,7 @@ body{
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 button{  
@@ -78,7 +79,7 @@ button:disabled {
   background:#050505;  
   z-index:9999;  
   display:none;
-  align-items:flex-start;  
+  align-items:center;  
   justify-content:center;  
   padding:15px;
   overflow-y:auto;
@@ -86,18 +87,17 @@ button:disabled {
 .loginBox{  
   width:460px;  
   max-width:100%;  
-  max-height:90vh;
+  max-height:95vh;
   overflow-y:auto;
-  margin-top:auto;
-  margin-bottom:auto;
-  padding:24px 28px;  
+  margin:auto;
+  padding:20px 24px;  
   background:linear-gradient(145deg,#111,#060606);  
   border:1px solid #3a3a3a;  
-  border-radius:26px;  
+  border-radius:20px;  
   box-shadow:0 0 50px rgba(229,9,20,.2)  
 }  
 .brandLogo{  
-  width:200px;  
+  width:180px;  
   max-width:85%;  
   display:block;  
   margin:0 auto 8px  
@@ -184,77 +184,88 @@ button:disabled {
   line-height:1.5  
 }  
 
+#operatorDashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  width: 100%;
+}
+
 .topBar{  
-  min-height:55px;  
-  padding:4px 12px;  
+  min-height:50px;  
+  padding:4px 10px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #202020;  
   display:flex;  
   align-items:center;  
   justify-content:space-between;  
-  gap:12px;  
-  position:sticky;  
-  top:0;  
-  z-index:1000  
+  gap:8px;  
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }  
 .topLeft{  
   display:flex;  
   align-items:center;  
-  gap:14px;  
-  min-width:0  
+  gap:8px;  
+  min-width:0;
+  flex-wrap: wrap;
 }  
 .topLogo{  
-  width:120px;  
-  height:32px;  
+  width:100px;  
+  height:28px;  
   object-fit:contain;  
   object-position:left center  
 }  
 .topDivider{  
   width:1px;  
-  height:25px;  
+  height:20px;  
   background:#333  
 }  
 .userName{  
-  font-size:13px;  
+  font-size:12px;  
   font-weight:800;  
-  white-space:nowrap  
+  white-space:normal; 
+  word-break: break-word;
 }  
 .machineBadge{  
-  font-size:12px;  
+  font-size:11px;  
   font-weight:900;  
-  padding:3px 8px;  
+  padding:2px 6px;  
   border:1px solid #333;  
   background:#121212;  
   border-radius:6px;  
-  color:#fff  
+  color:#fff;
+  white-space: nowrap;
 }  
 .shiftInfo{  
   line-height:1.1  
 }  
 .shiftMain{  
-  font-size:12px;  
+  font-size:11px;  
   font-weight:900;  
   color:#ffd000  
 }  
 .shiftRange{  
-  font-size:9px;  
+  font-size:8.5px;  
   color:#ffd000;  
   font-weight:700;  
 }  
 .topActions{  
   display:flex;  
   align-items:center;  
-  gap:6px;  
+  gap:4px;  
   flex-wrap:wrap  
 }  
 .pill{  
-  padding:4px 8px;  
+  padding:3px 6px;  
   border-radius:6px;  
-  font-size:10px;  
+  font-size:9.5px;  
   font-weight:900;  
   border:1px solid #292929;  
-  background:#0b0b0b  
+  background:#0b0b0b;
+  white-space: nowrap;
 }  
 .livePill{  
   color:#5cff64  
@@ -262,7 +273,7 @@ button:disabled {
 .liveClockPill {
   color: #00e5ff;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.5px;
   border-color: #00e5ff44;
   background: #001219;
@@ -298,17 +309,18 @@ button:disabled {
 
 .statusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));  
+  grid-template-columns:repeat(auto-fit, minmax(85px, 1fr));  
   gap:4px;  
-  padding:4px 12px;  
-  background:#050505  
+  padding:4px 8px;  
+  background:#050505;
+  flex-shrink: 0;
 }  
 .statusCard{  
-  min-height:50px;  
+  min-height:42px;  
   background:linear-gradient(180deg,#111,#080808);  
   border:1px solid #e50914;  
   border-radius:6px;  
-  padding:4px 6px;  
+  padding:3px 5px;  
   cursor:pointer;  
   position:relative;  
   overflow:hidden;  
@@ -342,73 +354,74 @@ button:disabled {
 .statusCardTitle{  
   display:flex;  
   align-items:center;  
-  gap:4px;  
+  gap:3px;  
   color:#bdbdbd;  
-  font-size:8px;  
+  font-size:7.5px;  
   font-weight:900;  
   line-height:1  
 }  
 .statusIcon{  
-  font-size:10px;  
+  font-size:9px;  
   line-height:1  
 }  
 .statusCardCount{  
-  font-size:16px;  
+  font-size:14px;  
   font-weight:900;  
   line-height:1;  
   color:var(--accent);  
-  margin-top:2px  
+  margin-top:1px  
 }  
 .statusCardHint{  
-  font-size:6.5px;  
+  font-size:6px;  
   color:#777;  
   font-weight:700;  
 }  
 .statusMachineArea{  
-  padding:2px 12px 4px  
+  padding:2px 8px;
+  flex-shrink: 0;
 }  
 .statusMachinePanel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
   border:1px solid #292929;  
-  border-radius:8px;  
+  border-radius:6px;  
   overflow:hidden  
 }  
 .statusMachineHeader{  
-  padding:6px 10px;  
+  padding:4px 8px;  
   border-bottom:1px solid #292929;  
   display:flex;  
   justify-content:space-between;  
   align-items:center;  
-  gap:10px;  
+  gap:6px;  
   flex-wrap:wrap  
 }  
 .statusMachineTitle{  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900;  
   color:#eee  
 }  
 .statusMachineSub{  
   color:#777;  
-  font-size:8px  
+  font-size:7.5px  
 }  
 .machineResultGrid{  
-  padding:6px;  
+  padding:4px;  
   display:grid;  
-  grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));  
+  grid-template-columns:repeat(auto-fill, minmax(70px, 1fr));  
   gap:4px;  
-  max-height:180px;  
-  overflow:auto  
+  max-height:110px;  
+  overflow-y:auto  
 }  
 .machineResult{  
   background:#131313;  
   border:1px solid #292929;  
-  border-radius:6px;  
-  padding:4px 2px;  
+  border-radius:5px;  
+  padding:3px 2px;  
   text-align:center;  
   cursor:pointer;  
   font-weight:900;  
-  font-size:10px;
-  min-height:40px  
+  font-size:9px;
+  min-height:34px  
 }  
 .machineResult:hover{  
   border-color:#666;  
@@ -421,17 +434,18 @@ button:disabled {
 }  
 .machineResultStatus{  
   display:block;  
-  font-size:7px;  
+  font-size:6.5px;  
   color:#777;  
-  margin-top:2px;  
+  margin-top:1px;  
   line-height:1  
 }  
 .mainBox{  
   display:grid;  
   grid-template-columns:1fr;  
-  gap:8px;  
-  padding:2px 12px 12px;
-  overflow: auto;
+  gap:6px;  
+  padding:4px 8px 8px;
+  flex: 1;
+  overflow-y: auto;
 }  
 .panel{  
   background:linear-gradient(180deg,#0e0e0e,#070707);  
@@ -439,110 +453,104 @@ button:disabled {
   border-radius:8px;  
   overflow:hidden  
 }  
-.panelHeader{  
-  padding:8px 10px;  
-  border-bottom:1px solid #292929;  
-  font-size:11px;  
-  font-weight:900;  
-  color:#888;  
-  letter-spacing:1px  
-}  
 .detailPanel{  
-  padding:10px  
+  padding:8px  
 }  
 .detailTop{  
   display:grid;  
-  grid-template-columns:1fr 240px;  
-  gap:8px;  
-  padding-bottom:8px;  
+  grid-template-columns:1fr auto;  
+  gap:6px;  
+  padding-bottom:6px;  
   border-bottom:1px solid #222  
 }  
 .machineTitle{  
-  font-size:18px;  
+  font-size:16px;  
   font-weight:900  
 }  
 .yours{  
   color:#e50914;  
-  font-size:10px;  
+  font-size:9.5px;  
   font-weight:900;  
-  margin-left:6px  
+  margin-left:4px  
 }  
 .statusLine{  
-  font-size:10px;  
-  margin-top:4px;  
+  font-size:9.5px;  
+  margin-top:2px;  
   color:#aaa;  
   display:flex;  
   align-items:center;  
-  gap:6px;  
+  gap:4px;  
   flex-wrap:wrap  
 }  
 .routeTop{  
   border-left:1px solid #222;  
-  padding-left:10px  
+  padding-left:8px;
+  text-align: right;
 }  
 .routeTitle{  
   color:#e50914;  
-  font-size:9px;  
+  font-size:8px;  
   font-weight:900;  
   margin-bottom:2px;  
-  letter-spacing:1px  
+  letter-spacing:0.5px  
 }  
 .routeLine{  
-  font-size:9px;  
-  margin:2px 0;  
+  font-size:8.5px;  
+  margin:1px 0;  
   color:#ccc  
 }  
 .infoBox{  
-  margin-top:8px;  
+  margin-top:6px;  
   background:#090909;  
   border:1px solid #222;  
-  border-radius:8px;  
-  padding:8px  
+  border-radius:6px;  
+  padding:6px  
 }  
 .infoTitle{  
   color:#22c55e;  
   font-weight:900;  
-  font-size:9px;  
-  margin-bottom:6px;  
-  letter-spacing:1px  
+  font-size:8.5px;  
+  margin-bottom:4px;  
+  letter-spacing:0.5px  
 }  
 .infoGrid{  
   display:grid;  
-  grid-template-columns:70px 1fr auto;  
-  gap:4px;  
+  grid-template-columns:60px 1fr;  
+  gap:2px 4px;  
   align-items:center;  
-  font-size:10px  
+  font-size:9.5px  
 }  
 .label{  
   color:#777  
 }  
 .value{  
-  font-weight:700  
+  font-weight:700;
+  word-break: break-word;
 }  
 .statusHeading{  
-  margin:8px 0 4px;  
+  margin:6px 0 3px;  
   color:#e50914;  
-  font-size:9px;  
+  font-size:8.5px;  
   font-weight:900;  
-  letter-spacing:1px  
+  letter-spacing:0.5px  
 }  
 .statusGrid{  
   display:grid;  
-  grid-template-columns:repeat(3,1fr);  
+  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));  
   gap:4px  
 }  
 .statusBtn{  
-  min-height:34px;  
+  min-height:30px;  
   background:#0c0c0c;  
   border:1px solid #222;  
-  border-radius:6px;  
+  border-radius:5px;  
   color:#eee;  
-  padding:4px 8px;  
+  padding:3px 6px;  
   display:flex;  
   align-items:center;  
   justify-content:space-between;  
   font-weight:800;  
-  font-size:9px;  
+  font-size:8.5px;  
   text-align:left  
 }  
 .statusBtn:hover{  
@@ -555,8 +563,8 @@ button:disabled {
   border-color:#22c55e !important;  
   color:#fff !important;  
   grid-column: 1 / -1;  
-  font-size:11px !important;  
-  padding:6px !important;
+  font-size:10px !important;  
+  padding:5px !important;
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
 }  
 
@@ -571,24 +579,24 @@ button:disabled {
 }
 
 .routeInfo{  
-  margin-top:8px;  
-  padding:6px;  
+  margin-top:6px;  
+  padding:5px;  
   border:1px dashed #b58a00;  
   background:#141000;  
-  border-radius:99px;  
-  font-size:10px;  
-  line-height:1.3  
+  border-radius:10px;  
+  font-size:9px;  
+  line-height:1.2  
 }  
 .waBtn{  
   width:100%;  
-  height:34px;  
+  height:30px;  
   border:1px solid #25d366;  
-  border-radius:6px;  
+  border-radius:5px;  
   background:linear-gradient(180deg,#168b3c,#0d5f29);  
   color:#fff;  
-  font-size:11px;  
+  font-size:10px;  
   font-weight:900;  
-  margin-top:6px;  
+  margin-top:4px;  
   letter-spacing:.5px  
 }  
 
@@ -599,10 +607,10 @@ button:disabled {
   transform:translate(-50%,-50%);  
   background:#c9000b;  
   color:#fff;  
-  padding:20px;  
-  border-radius:14px;  
+  padding:16px;  
+  border-radius:12px;  
   font-weight:900;  
-  font-size:16px;  
+  font-size:14px;  
   display:none;  
   z-index:99999;  
   text-align:center;  
@@ -619,14 +627,14 @@ button:disabled {
   display:none;  
   align-items:center;  
   justify-content:center;  
-  padding:20px  
+  padding:15px  
 }  
 .modalContent{  
   background:#111;  
   border:1px solid #eab308;  
-  border-radius:16px;  
-  padding:20px;  
-  width:380px;  
+  border-radius:14px;  
+  padding:16px;  
+  width:360px;  
   max-width:100%  
 }  
 #departmentDashboard{  
@@ -637,26 +645,27 @@ button:disabled {
   overflow: hidden;
 }  
 .deptHeader{  
-  padding:4px 12px;  
+  padding:4px 10px;  
   background:rgba(5, 5, 5, 0.95);  
   backdrop-filter: blur(12px);
   border-bottom:1px solid #252525;  
   display:flex;  
   justify-content:space-between;  
   align-items:center;  
-  gap:8px;  
+  gap:6px;  
   flex-shrink: 0;
+  flex-wrap: wrap;
 }  
 .deptTitle{  
-  font-size:14px;  
+  font-size:13px;  
   font-weight:900  
 }  
 .deptBadge{  
-  padding:2px 6px;  
-  border-radius:8px;  
+  padding:2px 5px;  
+  border-radius:6px;  
   background:#e50914;  
   color:#fff;  
-  font-size:8px;  
+  font-size:7.5px;  
   font-weight:900  
 }  
 
@@ -671,7 +680,7 @@ button:disabled {
 
 .deptStatusCards{  
   display:grid;  
-  grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));  
+  grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));  
   gap:4px;  
   padding:2px 0;
   flex-shrink: 0;
@@ -688,7 +697,6 @@ button:disabled {
   overflow: hidden;
 }  
 
-/* OPTIMIZED GRID FOR SCREEN FIT WITHOUT SCROLL */
 .deptMachineGrid{  
   display:grid;  
   grid-template-columns: repeat(4, 1fr);  
@@ -697,13 +705,13 @@ button:disabled {
   margin-top:4px;  
   flex: 1;
   align-content: stretch;
-  overflow: hidden;
+  overflow-y: auto;
 }  
 
 .deptMachineCard{  
   background:#141414;  
   border:1px solid #333;  
-  padding:6px 8px;  
+  padding:6px;  
   border-radius:6px;  
   text-align:left;  
   display:flex;
@@ -716,9 +724,9 @@ button:disabled {
   display:inline-flex;  
   align-items:center;  
   gap:3px;  
-  padding:2px 5px;  
+  padding:2px 4px;  
   border-radius:99px;  
-  font-size:7.5px;  
+  font-size:7px;  
   font-weight:900;  
   border:1px solid #292929;  
   background:#0b0b0b  
@@ -756,11 +764,11 @@ button:disabled {
   border: 1px solid #ef4444;
 }
 .urgentBox {
-  margin-top: 8px;
+  margin-top: 6px;
   background: #1f0406;
   border: 1px solid #e50914;
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: 4px 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -773,7 +781,7 @@ button:disabled {
   cursor: pointer;
 }
 .urgentBox label {
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 900;
   color: #ff4d4d;
   cursor: pointer;
@@ -783,7 +791,7 @@ button:disabled {
   background: linear-gradient(145deg, #141414, #080808);
   border: 1px solid #ffd000;
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 4px 6px;
   margin-bottom: 2px;
   flex-shrink: 0;
 }
@@ -801,19 +809,19 @@ button:disabled {
   text-align: center;
 }
 .summaryTitle {
-  font-size: 8px;
+  font-size: 7.5px;
   color: #888;
   font-weight: 800;
   text-transform: uppercase;
 }
 .summaryVal {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
   line-height: 1;
   margin-top: 1px;
 }
 
-/* RESPONSIVE LAYOUT */
+/* RESPONSIVE LAYOUT FOR MOBILE */
 @media(max-width:1200px){  
   .deptMachineGrid { grid-template-columns: repeat(3, 1fr); }
 }  
@@ -824,7 +832,12 @@ button:disabled {
 
 @media(max-width:600px){  
   .deptMachineGrid { grid-template-columns: repeat(1, 1fr); }
-  html, body, #departmentDashboard { overflow: auto; height: auto; }
+  .topBar { padding: 4px 6px; }
+  .userName { font-size: 11px; max-width: 130px; }
+  .statusCards { grid-template-columns: repeat(4, 1fr); }
+  .statusGrid { grid-template-columns: 1fr 1fr; }
+  .detailTop { grid-template-columns: 1fr; gap: 4px; }
+  .routeTop { border-left: none; text-align: left; padding-left: 0; border-top: 1px dashed #333; pt: 4px; }
 }  
 </style>  
 </head>  
@@ -835,17 +848,17 @@ button:disabled {
 
   <div id="materialModal">    
     <div class="modalContent">  
-      <h2 style="color:#eab308;font-weight:900;font-size:16px;margin-bottom:12px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
+      <h2 style="color:#eab308;font-weight:900;font-size:14px;margin-bottom:10px;text-align:center">MATERIAL REQUIREMENT FORM</h2>  
       <input id="matPartNo" class="loginInput" placeholder="PART NO">  
       <input id="matPartName" class="loginInput" placeholder="PART NAME">  
       <input id="matQty" type="number" class="loginInput" placeholder="QUANTITY">  
       
-      <div style="margin: 8px 0; font-size: 10px; color: #22c55e; font-weight: bold; text-align: center; background: #09190e; padding: 6px; border-radius: 6px; border: 1px solid #166534;">
+      <div style="margin: 6px 0; font-size: 9px; color: #22c55e; font-weight: bold; text-align: center; background: #09190e; padding: 5px; border-radius: 5px; border: 1px solid #166534;">
         🕒 Current Date & Time will be auto-saved upon submission.
       </div>
 
-      <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none">SUBMIT REQUEST & NOTIFY STORE</button>  
-      <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none">CANCEL</button>
+      <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#eab308,#ca8a04);border-color:#facc15;color:#000;box-shadow:none;height:38px;font-size:12px">SUBMIT REQUEST & NOTIFY STORE</button>  
+      <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none;height:38px;font-size:12px">CANCEL</button>
     </div>  
   </div>  
 
@@ -869,7 +882,7 @@ button:disabled {
           <option value="Shift B">Shift B (4:15 PM - 12:00 AM)</option>  
           <option value="Shift C">Shift C (12:00 AM - 7:45 AM)</option>  
         </select>  
-        <p id="autoShiftTxt" style="font-size:11px;color:#22c55e;margin-top:8px;font-weight:700"></p>  
+        <p id="autoShiftTxt" style="font-size:10px;color:#22c55e;margin-top:6px;font-weight:700"></p>  
         <button onclick="doLogin()" class="loginBtn">OPERATOR LOGIN</button>  
       </div>  
 
@@ -887,7 +900,7 @@ button:disabled {
         <button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>  
         <div class="smallNote">Authorized department access only.</div>  
       </div>  
-      <p id="fbStat" style="font-size:11px;color:#eab308;margin-top:14px;font-weight:600">Connecting LIVE...</p>
+      <p id="fbStat" style="font-size:10px;color:#eab308;margin-top:10px;font-weight:600">Connecting LIVE...</p>
     </div>  
   </div>  
 
@@ -914,16 +927,17 @@ button:disabled {
       </div>
     </div>    
 
-    <div id="operatorStatusCards" class="statusCards"></div>    
+    <!-- Dynamic Show/Hide Delayed Cards Area -->
+    <div id="operatorStatusCards" class="statusCards" style="display:none;"></div>    
 
-    <div class="statusMachineArea" id="operatorFocusArea">  
+    <div class="statusMachineArea" id="operatorFocusArea" style="display:none;">  
       <div class="statusMachinePanel">  
         <div class="statusMachineHeader">  
           <div>  
             <div id="operatorStatusMachineTitle" class="statusMachineTitle">⚙️ SELECT STATUS</div>  
             <div id="operatorStatusMachineSub" class="statusMachineSub">Click a status card to view machines.</div>  
           </div>  
-          <div id="operatorStatusMachineCount" style="font-size:11px;color:#aaa;font-weight:900">0 MACHINES</div>  
+          <div id="operatorStatusMachineCount" style="font-size:10px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
         <div id="operatorMachineResultGrid" class="machineResultGrid"></div>  
       </div>  
@@ -934,7 +948,7 @@ button:disabled {
         <div id="machineDetail"></div>  
         <div id="operatorBox"></div>  
         <div id="statusList"></div>  
-        <div id="lockMsg" style="font-size:11px;color:#777;margin-top:8px"></div>  
+        <div id="lockMsg" style="font-size:10px;color:#777;margin-top:6px"></div>  
         <div id="routeInfo" class="routeInfo" style="display:none"></div>  
         <button id="waBtn" class="waBtn" onclick="openWA()" style="display:none">SEND WHATSAPP</button>  
       </div>
@@ -945,9 +959,9 @@ button:disabled {
     <div class="deptHeader">  
       <div>  
         <div class="deptTitle" id="deptTitle">DEPARTMENT</div>  
-        <div style="font-size:9px;color:#22c55e;margin-top:1px;font-weight:700">BREMBO • LIVE</div>  
+        <div style="font-size:8.5px;color:#22c55e;margin-top:1px;font-weight:700">BREMBO • LIVE</div>  
       </div>  
-      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">  
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">  
         <span id="deptLiveClock" class="pill liveClockPill">🕒 --:--:--</span>
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
@@ -961,8 +975,8 @@ button:disabled {
     <div class="deptContent">  
       <div class="summaryWidget" id="shiftSummaryWidget">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="color:#ffd000; font-size:9.5px; letter-spacing:0.5px;">📊 SHIFT-WISE MATERIAL SUMMARY</b>
-          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:1px 4px; border-radius:4px; font-size:8px; font-weight:700;">
+          <b style="color:#ffd000; font-size:9px; letter-spacing:0.5px;">📊 SHIFT-WISE MATERIAL SUMMARY</b>
+          <select id="summaryShiftFilter" onchange="renderShiftSummary()" style="background:#111; color:#fff; border:1px solid #444; padding:1px 3px; border-radius:3px; font-size:7.5px; font-weight:700;">
             <option value="CURRENT">Current Active Shift</option>
             <option value="Shift A">Shift A</option>
             <option value="Shift B">Shift B</option>
@@ -994,9 +1008,9 @@ button:disabled {
       <div class="deptMachineBox" id="deptFocusArea">  
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">  
           <div>  
-            <b id="deptGridTitle" style="font-size:11px;">MATERIAL REQUIREMENTS OVERVIEW</b>  
+            <b id="deptGridTitle" style="font-size:10px;">MATERIAL REQUIREMENTS OVERVIEW</b>  
           </div>  
-          <div id="deptGridCount" style="font-size:9px;color:#aaa;font-weight:900">0 MACHINES</div>  
+          <div id="deptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>  
         </div>  
         <div id="deptMachineGrid" class="deptMachineGrid"></div>  
       </div>  
@@ -1060,10 +1074,10 @@ function updateFullscreenButtons() {
   const btns = document.querySelectorAll(".fsBtnToggle");
   btns.forEach(btn => {
     if (isFs) {
-      btn.innerHTML = "Exit Screen 🗗";
+      btn.innerHTML = "Exit 🗗";
       btn.classList.add("activeFs");
     } else {
-      btn.innerHTML = "Full Screen ⛶";
+      btn.innerHTML = "Full ⛶";
       btn.classList.remove("activeFs");
     }
   });
@@ -1228,7 +1242,7 @@ function checkShiftAutoReset(){
   const badge = document.getElementById("liveShiftBadge");  
   if(badge){ badge.innerText = "SHIFT: "+live; }  
   const txt = document.getElementById("autoShiftTxt");  
-  if(txt){ txt.innerText = "Auto Connected Shift: "+live+" ("+getShiftRange(live)+")"; }  
+  if(txt){ txt.innerText = "Auto Shift: "+live+" ("+getShiftRange(live)+")"; }  
 
   if(saved && saved!==live){  
     handleShiftChange(live);  
@@ -1403,7 +1417,7 @@ function checkExistingSession(){
       operator = JSON.parse(savedOp);  
       curMachine = operator.machine;  
       document.getElementById("login").style.display="none";  
-      document.getElementById("operatorDashboard").style.display="block";  
+      document.getElementById("operatorDashboard").style.display="flex";  
       document.getElementById("departmentDashboard").style.display="none";  
       applyOperator(true);  
       return true;  
@@ -1469,7 +1483,7 @@ function doLogin(){
 
   const targetMc = machines[mc];  
   if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
-    alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").\nSecond operator cannot login until the active operator logs out or the shift ends!");
+    alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").");
     return;
   }  
 
@@ -1480,11 +1494,8 @@ function doLogin(){
   localStorage.setItem("brembo_shift", sh);  
 
   document.getElementById("login").style.display="none";  
-  document.getElementById("operatorDashboard").style.display="block";  
+  document.getElementById("operatorDashboard").style.display="flex";  
   applyOperator();  
-
-  const focusEl = document.getElementById("operatorFocusArea");
-  if(focusEl) focusEl.scrollIntoView({ behavior: 'smooth' });
 }  
 
 function applyOperator(isReload = false){  
@@ -1502,9 +1513,16 @@ function applyOperator(isReload = false){
       machine:operator.machine, shift:operator.shift  
     };  
     saveMachine(operator.machine).catch(err=>{  
-      console.error(err); alert("Firebase save failed. Please check Internet.");  
+      console.error(err); alert("Firebase save failed.");  
     });  
   }  
+
+  // Point 2 & 3 Fix: Hide all other status cards initially. Display after 5 sec delay.
+  setTimeout(() => {
+    const cardsEl = document.getElementById("operatorStatusCards");
+    if(cardsEl) cardsEl.style.display = "grid";
+  }, 5000);
+
   renderAllDashboards();  
 }  
 
@@ -1531,13 +1549,13 @@ function resetAll(){
     alert("All 69 machines are RUNNING!");  
     renderAllDashboards();  
   }).catch(err=>{  
-    console.error(err); alert("Reset failed. Check Firebase connection.");  
+    console.error(err); alert("Reset failed.");  
   });  
 }  
 
 function loudPopup(mid, st, who, routeTo){  
   const b = document.getElementById("notifBig");  
-  b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:13px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:11px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:8px 20px;border-radius:20px;border:none;font-weight:900">CLOSE</button>`;  
+  b.innerHTML=`🚨 ${mid}<br><br>${st}<br><br><span style="font-size:12px;color:#ffeb3b">To: ${routeTo.name}</span><br><span style="font-size:10px">By: ${who}</span><br><br><button onclick="this.parentElement.style.display='none'" style="padding:6px 16px;border-radius:15px;border:none;font-weight:900">CLOSE</button>`;  
   b.style.display="block";  
   if(navigator.vibrate){ navigator.vibrate([600,200,600,200,600]); }  
   setTimeout(()=>{ b.style.display="none"; },9000);  
@@ -1582,6 +1600,7 @@ function getStatusDisplayName(status){
 
 function setOperatorStatusFilter(status){  
   operatorStatusFilter=status;  
+  document.getElementById("operatorFocusArea").style.display = "block";
   renderOperatorStatusCards();  
   renderOperatorMachineList();  
 }  
@@ -1613,7 +1632,7 @@ function renderOperatorMachineList(){
 
   count.innerText = filtered.length+" MACHINES";  
   if(filtered.length===0){  
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:#777;padding:15px;font-size:11px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:#777;padding:10px;font-size:10px;font-weight:700">NO MACHINES IN THIS STATUS</div>`;  
     return;  
   }  
 
@@ -1645,9 +1664,9 @@ function sel(id){
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:8px;border-radius:6px;font-size:12px;margin-top:6px;line-height:1.4">  
-        <b style="color:#eab308;font-size:13px">📦 MATERIAL DETAILS</b><br>  
-        <b>Part No:</b> <span style="font-weight:900;color:#22c55e;font-size:13px">${escapeHtml(m.materialDetails.partNo)}</span> | <b>Name:</b> ${escapeHtml(m.materialDetails.partName)} | <b>Qty:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
+    matHtml=`<div style="background:#2a2508;border:1px dashed #eab308;padding:6px;border-radius:5px;font-size:11px;margin-top:4px;line-height:1.3">  
+        <b style="color:#eab308;font-size:11.5px">📦 MATERIAL DETAILS</b><br>  
+        <b>Part No:</b> <span style="font-weight:900;color:#22c55e;font-size:11.5px">${escapeHtml(m.materialDetails.partNo)}</span> | <b>Name:</b> ${escapeHtml(m.materialDetails.partName)} | <b>Qty:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
         <span style="color:#22c55e;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span> | 
         <span style="color:#ffd000;font-weight:bold;">📍 Shift: ${escapeHtml(m.materialDetails.shift || '-')}</span>
       </div>`;  
@@ -1663,11 +1682,11 @@ function sel(id){
       <div>  
         <div>  
           <span class="machineTitle">${id}</span>  
-          ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:10px;font-weight:800;margin-left:6px">VIEW ONLY</span>`}  
+          ${isOwnMachine ? `<span class="yours">☆ YOUR MACHINE</span>` : `<span style="color:#777;font-size:9px;font-weight:800;margin-left:4px">VIEW ONLY</span>`}  
         </div>  
         <div class="statusLine">  
-          Status: <b style="background:${badgeBg};color:#fff;padding:2px 4px;border-radius:4px">${getStatusDisplayName(statusStr)}</b>  
-          ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</b>` : ""}  
+          Status: <b style="background:${badgeBg};color:#fff;padding:1px 4px;border-radius:3px">${getStatusDisplayName(statusStr)}</b>  
+          ${isOwnMachine ? `&nbsp;|&nbsp; Shift: <b style="color:#ffd000">${operator.shift}</b>` : ""}  
         </div>  
       </div>  
       <div class="routeTop">  
@@ -1684,11 +1703,11 @@ function sel(id){
         <div class="infoBox">  
           <div class="infoTitle">YOUR DETAILS</div>  
           <div class="infoGrid">  
-            <div class="label">ID</div><div class="value">${escapeHtml(operator.id)}</div><div></div>  
-            <div class="label">Name</div><div class="value">${escapeHtml(operator.name)}</div><div></div>  
-            <div class="label">Machine</div><div class="value">${id}</div><div></div>  
-            <div class="label">Shift</div><div class="value" style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</div><div></div>  
-            <div class="label">Login Time</div><div class="value">${op ? op.time : operator.time}</div><div></div>  
+            <div class="label">ID</div><div class="value">${escapeHtml(operator.id)}</div>  
+            <div class="label">Name</div><div class="value">${escapeHtml(operator.name)}</div>  
+            <div class="label">Machine</div><div class="value">${id}</div>  
+            <div class="label">Shift</div><div class="value" style="color:#ffd000">${operator.shift} (${getShiftRange(operator.shift)})</div>  
+            <div class="label">Login Time</div><div class="value">${op ? op.time : operator.time}</div>  
           </div>  
         </div>`;  
     } else {  
@@ -1696,10 +1715,10 @@ function sel(id){
         <div class="infoBox">  
           <div class="infoTitle" style="color:#777">ASSIGNED OPERATOR DETAILS</div>  
           <div class="infoGrid">  
-            <div class="label">ID</div><div class="value">${op ? escapeHtml(op.id) : "-"}</div><div></div>  
-            <div class="label">Name</div><div class="value">${op ? escapeHtml(op.name) : "-"}</div><div></div>  
-            <div class="label">Machine</div><div class="value">${id}</div><div></div>  
-            <div class="label">Shift</div><div class="value">${op ? escapeHtml(op.shift) : "-"}</div><div></div>  
+            <div class="label">ID</div><div class="value">${op ? escapeHtml(op.id) : "-"}</div>  
+            <div class="label">Name</div><div class="value">${op ? escapeHtml(op.name) : "-"}</div>  
+            <div class="label">Machine</div><div class="value">${id}</div>  
+            <div class="label">Shift</div><div class="value">${op ? escapeHtml(op.shift) : "-"}</div>  
           </div>  
         </div>`;  
     }  
@@ -1725,7 +1744,7 @@ function sel(id){
       </div>`;  
     document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
   }else{  
-    document.getElementById("statusList").innerHTML=`<div style="margin-top:8px;padding:6px;border:1px dashed #444;border-radius:6px;color:#777;font-size:9px;font-weight:700;text-align:center">🔒 VIEW ONLY</div>`;  
+    document.getElementById("statusList").innerHTML=`<div style="margin-top:6px;padding:4px;border:1px dashed #444;border-radius:4px;color:#777;font-size:8.5px;font-weight:700;text-align:center">🔒 VIEW ONLY MODE</div>`;  
     document.getElementById("lockMsg").innerText = "View only. Your assigned machine is: "+(operator ? operator.machine : "None");  
   }  
 }  
@@ -2102,7 +2121,6 @@ function renderDepartmentDashboard(){
   renderDepartmentMachineGrid();  
 }  
 
-/* UPDATED DISPLAY CARDS: BIGGER, BOLD DETAILS & ZERO SCROLL FIT */
 function renderDepartmentMachineGrid(){  
   const grid = document.getElementById("deptMachineGrid");  
   if(!grid) return;  
@@ -2133,37 +2151,37 @@ function renderDepartmentMachineGrid(){
 
     let matInfoHtml = "";
     if(mat){
-      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:6px;border-radius:4px;font-size:11px;line-height:1.3;margin:4px 0;flex:1;display:flex;flex-direction:column;justify-content:center;">
-          <div style="font-size:13px;font-weight:900;color:#22c55e;margin-bottom:2px;"><b style="color:#eab308">P.No:</b> ${escapeHtml(mat.partNo)}</div>
-          <div style="font-size:11px;font-weight:800;color:#ffffff;"><b style="color:#eab308">Name:</b> ${escapeHtml(mat.partName)} | <b style="color:#eab308">Qty:</b> ${escapeHtml(String(mat.qty))}</div>
-          <div style="font-size:10px;font-weight:700;margin-top:2px;">
+      matInfoHtml = `<div style="background:#2a2508;border:1px dashed #eab308;padding:4px;border-radius:4px;font-size:10px;line-height:1.2;margin:3px 0;">
+          <div style="font-size:11px;font-weight:900;color:#22c55e;"><b style="color:#eab308">P.No:</b> ${escapeHtml(mat.partNo)}</div>
+          <div style="font-size:10px;font-weight:800;color:#ffffff;"><b style="color:#eab308">Name:</b> ${escapeHtml(mat.partName)} | <b style="color:#eab308">Qty:</b> ${escapeHtml(String(mat.qty))}</div>
+          <div style="font-size:9px;font-weight:700;margin-top:2px;">
             <span style="color:#22c55e;">🕒 ${escapeHtml(mat.dateTime || '-')}</span> | <span style="color:#ffd000;">📍 ${escapeHtml(mat.shift || '-')}</span>
           </div>
         </div>`;
     } else {
-      matInfoHtml = `<div style="color:#555;font-size:10px;padding:8px 0;">No details</div>`;
+      matInfoHtml = `<div style="color:#555;font-size:9px;padding:4px 0;">No details</div>`;
     }
 
     let actionBtnHtml = "";
     if(department === "supervisor"){
       const currentIssues = Object.keys(getMachineIssues(m));
       currentIssues.forEach(iss => {
-        actionBtnHtml += `<button disabled style="width:100%;padding:4px;border:1px solid #555;border-radius:4px;background:#222;color:#888;font-size:9px;font-weight:800">CLEAR ${iss}</button>`;
+        actionBtnHtml += `<button disabled style="width:100%;padding:3px;border:1px solid #555;border-radius:4px;background:#222;color:#888;font-size:8.5px;font-weight:800">CLEAR ${iss}</button>`;
       });
     } else if(config && config.actions && config.actions.length > 0){
       config.actions.forEach(a => {
         if(a.clearsIssue && hasStatus(m, a.clearsIssue)){
-          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;padding:5px;border:1px solid #ef4444;border-radius:4px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:10px;cursor:pointer">${a.label}</button>`;
+          actionBtnHtml += `<button onclick="updateDepartmentMachineStatus('${id}', '${a.clearsIssue}', '${a.clearsIssue2 || ''}', '${a.addIssue || ''}')" style="width:100%;padding:4px;border:1px solid #ef4444;border-radius:4px;background:#7f1d1d;color:#ffffff;font-weight:900;font-size:9.5px;cursor:pointer">${a.label}</button>`;
         }
       });
     }
 
     return `<div class="deptMachineCard">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 style="font-size:14px;font-weight:900;color:#ffffff">${id}</h3>
-        <span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
+        <h3 style="font-size:13px;font-weight:900;color:#ffffff">${id}</h3>
+        <span style="font-size:8px;font-weight:900;padding:2px 4px;border-radius:3px;background:#222;color:${statusColor}">${getStatusDisplayName(stStr)}</span>
       </div>
-      <div style="font-size:11px;color:#cccccc;font-weight:800;margin-top:2px;">
+      <div style="font-size:10px;color:#cccccc;font-weight:800;margin-top:1px;">
         Op: <b style="color:#ffffff">${op ? escapeHtml(op.name) : "N/A"}</b>
       </div>
       ${matInfoHtml}
