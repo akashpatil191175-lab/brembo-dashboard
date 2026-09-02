@@ -271,6 +271,16 @@ button:disabled {
   margin-right:4px;  
   box-shadow:0 0 6px #25d366  
 }  
+.fullscreenBtn {
+  color: #38bdf8;
+  border-color: #0284c7;
+  background: #0369a122;
+}
+.fullscreenBtn.activeFs {
+  color: #22c55e;
+  border-color: #16a34a;
+  background: #15803d22;
+}
 .resetBtn{  
   color:#ff3340;  
   border-color:#5a1116;  
@@ -893,6 +903,7 @@ button:disabled {
         <span id="liveShiftBadge" class="pill" style="color:#ffd000">SHIFT: -</span>  
         <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
+        <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>
         <button onclick="resetAll()" class="pill resetBtn">⟳ RESET ALL</button>  
         <button onclick="doLogout()" class="pill logoutBtn">⇥ LOGOUT</button>  
       </div>
@@ -936,6 +947,7 @@ button:disabled {
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
+        <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>
         <span class="deptBadge" id="deptBadge"></span>  
         <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
       </div>
@@ -1020,6 +1032,40 @@ function startLiveClock() {
   updateClock();
   setInterval(updateClock, 1000);
 }
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    const docEl = document.documentElement;
+    if (docEl.requestFullscreen) {
+      docEl.requestFullscreen();
+    } else if (docEl.webkitRequestFullscreen) {
+      docEl.webkitRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+}
+
+function updateFullscreenButtons() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const btns = document.querySelectorAll(".fsBtnToggle");
+  btns.forEach(btn => {
+    if (isFs) {
+      btn.innerHTML = "Exit Screen 🗗";
+      btn.classList.add("activeFs");
+    } else {
+      btn.innerHTML = "Full Screen ⛶";
+      btn.classList.remove("activeFs");
+    }
+  });
+}
+
+document.addEventListener("fullscreenchange", updateFullscreenButtons);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButtons);
 
 const DEPARTMENT_CONFIG = {  
   maintenance:{ 
@@ -2175,4 +2221,4 @@ window.onload = function(){
 };  
 </script>  
 </body>  
-</html>
+  </html>
