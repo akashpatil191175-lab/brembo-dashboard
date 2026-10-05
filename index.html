@@ -79,7 +79,7 @@ button:disabled {
   inset:0;  
   background:#000000;  
   z-index:9999;  
-  display:none;
+  display:flex;
   align-items:center;  
   justify-content:center;  
   padding:15px;
@@ -1215,7 +1215,20 @@ button:disabled {
 
 </div>
 
-<script>  
+<script>
+window.__SUTOM_STARTUP_OK__ = false;
+
+window.addEventListener("error", function(e){
+  console.error("SUTOM startup error:", e.error || e.message);
+  const login = document.getElementById("login");
+  if(login) login.style.display = "flex";
+  const fb = document.getElementById("fbStat");
+  if(fb){
+    fb.innerText = "STARTUP ERROR - Check Internet / Firebase";
+    fb.style.color = "#ef4444";
+  }
+});
+
 const firebaseConfig = {  
   apiKey:"AIzaSyCnkqCZwYgDkyFVoib8eeDCv3V9r6WbqQU",  
   authDomain:"brembo-dashboard.firebaseapp.com",  
@@ -1225,8 +1238,19 @@ const firebaseConfig = {
   messagingSenderId:"935783960863",  
   appId:"1:935783960863:web:115a5380ab005c50da602a"  
 };  
-firebase.initializeApp(firebaseConfig);  
-const db = firebase.database();  
+let db = null;
+try {
+  if (typeof firebase === "undefined") throw new Error("Firebase SDK did not load");
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+} catch (err) {
+  console.error("Firebase initialization failed:", err);
+  const fb = document.getElementById("fbStat");
+  if(fb){
+    fb.innerText = "OFFLINE - Firebase SDK unavailable";
+    fb.style.color = "#ef4444";
+  }
+}
 
 const ADMIN_PIN = "191197";  
 const OPERATOR_PIN = "1234";  
@@ -1427,9 +1451,11 @@ function setFirebaseStatus(online){
   }  
 }  
 
-db.ref(".info/connected").on("value",snap=>{  
-  setFirebaseStatus(snap.val()===true);  
-});  
+if(db){
+  db.ref(".info/connected").on("value",snap=>{  
+    setFirebaseStatus(snap.val()===true);  
+  });
+}  
 
 function handleShiftChange(newShift){  
   if(operator){  
@@ -1538,6 +1564,10 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt){
 }  
 
 function load(){  
+  if(!db){
+    console.warn("Firebase unavailable; dashboard remains in login mode.");
+    return;
+  }
   db.ref("statusLogs").on("value", snap => {
     allStatusLogs = snap.val() || {};
   });
@@ -2547,11 +2577,31 @@ function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue)
 }  
 
 window.onload = function(){  
-  startLiveClock();
-  fillMachineDropdown();  
-  checkExistingSession();  
-  load();  
+  try {
+    startLiveClock();
+    fillMachineDropdown();
+    checkExistingSession();
+    load();
+    window.__SUTOM_STARTUP_OK__ = true;
+  } catch(err) {
+    console.error("SUTOM startup failed:", err);
+    document.getElementById("login").style.display = "flex";
+    const fb = document.getElementById("fbStat");
+    if(fb){
+      fb.innerText = "STARTUP ERROR - " + (err.message || "Unknown error");
+      fb.style.color = "#ef4444";
+    }
+  }
 };  
+
+// PWA Service Worker — relative path works on GitHub Pages project sites.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" })
+      .then(reg => console.log("SUTOM Service Worker registered:", reg.scope))
+      .catch(err => console.warn("Service Worker registration failed:", err));
+  });
+}
 </script>  
 </body>  
-</html>
+  </html>
