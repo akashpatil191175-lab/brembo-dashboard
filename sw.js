@@ -1,59 +1,91 @@
-const CACHE_NAME = "brembo-dashboard-v3";
+const CACHE_NAME = "brembo-dashboard-v4";
 
 const APP_SHELL = [
-  "/brembo-dashboard/",
-  "/brembo-dashboard/index.html",
-  "/brembo-dashboard/manifest.json",
-  "/brembo-dashboard/icon-192.png",
-  "/brembo-dashboard/icon-512.png"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
-// INSTALL
-self.addEventListener("install", event => {
+self.addEventListener("install", function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+      .then(function(cache) {
+        return cache.addAll(APP_SHELL).catch(function(error) {
+          console.warn("Cache install warning:", error);
+        });
+      })
+      .then(function() {
+        return self.skipWaiting();
+      })
   );
 });
 
-// ACTIVATE
-self.addEventListener("activate", event => {
+self.addEventListener("activate", function(event) {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(function(keys) {
+        return Promise.all(
+          keys
+            .filter(function(key) {
+              return key !== CACHE_NAME;
+            })
+            .map(function(key) {
+              return caches.delete(key);
+            })
+        );
+      })
+      .then(function() {
+        return self.clients.claim();
+      })
   );
 });
 
-// FETCH — NETWORK FIRST
-self.addEventListener("fetch", event => {
+self.addEventListener("fetch", function(event) {
 
-  if (event.request.method !== "GET") return;
+  if (event.request.method !== "GET") {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
-      .then(response => {
+      .then(function(response) {
 
         if (response && response.status === 200) {
 
           const copy = response.clone();
 
           caches.open(CACHE_NAME)
-            .then(cache => {
+            .then(function(cache) {
               cache.put(event.request, copy);
+            })
+            .catch(function(error) {
+              console.warn("Cache update warning:", error);
             });
         }
 
         return response;
       })
+      .catch(function() {
 
-      .catch(() => {
-        return caches.match(event.request);
+        return caches.match(event.request)
+          .then(function(cachedResponse) {
+
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+
+            return new Response(
+              "Offline - Please check your internet connection.",
+              {
+                status: 503,
+                headers: {
+                  "Content-Type": "text/plain"
+                }
+              }
+            );
+          });
       })
   );
 
