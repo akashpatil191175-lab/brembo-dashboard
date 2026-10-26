@@ -1089,7 +1089,8 @@ button:disabled {
           <option value="quality">Quality</option>  
           <option value="toolroom">Tool Room</option>  
           <option value="store">Store Department</option>  
-          <option value="supervisor">Supervisor (View Only Mode)</option>  
+          <option value="supervisor">Supervisor (View Only Mode)</option>
+          <option value="admin">🛡️ Admin Department</option>  
         </select>  
         <input id="departmentPin" type="password" class="loginInput" placeholder="DEPARTMENT PIN">  
         <button onclick="departmentLogin()" class="loginBtn">DEPARTMENT LOGIN</button>  
@@ -1117,7 +1118,6 @@ button:disabled {
         <span id="firebaseTopStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <span class="pill livePill"><span class="liveDot"></span>LIVE</span>  
         <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>
-        <button onclick="resetAll()" class="pill resetBtn">⟳ RESET ALL</button>  
         <button onclick="doLogout()" class="pill logoutBtn">⇥ LOGOUT</button>  
       </div>
     </div>    
@@ -1162,6 +1162,7 @@ button:disabled {
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
         <button id="createKanbanBtn" class="kanbanBtn" onclick="openKanbanModal()" style="display:none">＋ CREATE KANBAN CARD</button>
+        <button id="adminResetAllBtn" onclick="resetAll()" class="pill resetBtn" style="display:none">⟳ RESET ALL</button>
         <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>  
         <span class="deptBadge" id="deptBadge"></span>  
         <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
@@ -1290,7 +1291,7 @@ try {
   }
 }
 
-const ADMIN_PIN = "191197";  
+const ADMIN_PIN = "Ak1975";  
 const OPERATOR_PIN = "1234";  
 
 let currentStoreFilter = "ALL"; // Store filter state
@@ -1387,6 +1388,13 @@ const DEPARTMENT_CONFIG = {
     allowedStatuses: ["MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"], 
     actions:[{ label:"⚠️ OUT OF STOCK", clearsIssue:"MATERIAL REQUIREMENT", addIssue:"MATERIAL SHORTAGE" }] 
   },  
+  admin:{
+    name:"ADMIN",
+    pin:"Ak1975",
+    isAdmin:true,
+    allowedStatuses:["TOTAL"],
+    actions:[]
+  },
   supervisor:{ 
     name:"SUPERVISOR", 
     pin:"Ampa123", 
@@ -2072,7 +2080,7 @@ function openMaterialModal(){
 // KANBAN MASTER: saved separately from machine status so RESET ALL (which only updates machines/*) leaves cards intact.
 let activeKanbanScanner = null;
 function openKanbanModal(){
-  if(department !== "supervisor"){ alert("Only Supervisor can create Kanban Cards."); return; }
+  if(department !== "admin"){ alert("Only Admin can create Kanban Cards."); return; }
   resetKanbanForm();
   document.getElementById("kanbanModal").style.display="flex";
 }
@@ -2084,7 +2092,7 @@ function resetKanbanForm(){
   document.getElementById("kanbanQr").innerHTML="";
 }
 function createKanbanCard(){
-  if(department !== "supervisor"){ alert("Access denied: Supervisor only."); return; }
+  if(department !== "admin"){ alert("Access denied: Admin only."); return; }
   if(!db){ alert("Firebase connection unavailable."); return; }
   const partNo=document.getElementById("kbPartNo").value.trim();
   const partName=document.getElementById("kbPartName").value.trim();
@@ -2542,7 +2550,11 @@ function renderDepartmentDashboard(){
   document.getElementById("deptBadge").innerText = config.name;  
 
   const createKanbanBtn = document.getElementById("createKanbanBtn");
-  if(createKanbanBtn) createKanbanBtn.style.display = department === "supervisor" ? "inline-block" : "none";
+  if(createKanbanBtn) createKanbanBtn.style.display = department === "admin" ? "inline-block" : "none";
+  const adminResetAllBtn = document.getElementById("adminResetAllBtn");
+  if(adminResetAllBtn) adminResetAllBtn.style.display = department === "admin" ? "inline-block" : "none";
+  const adminView = document.getElementById("adminDepartmentView");
+  if(adminView) adminView.style.display = department === "admin" ? "flex" : "none";
 
   const excelBtn = document.getElementById("deptExcelBtn");
   if(excelBtn){
@@ -2557,21 +2569,45 @@ function renderDepartmentDashboard(){
   const storeView = document.getElementById("storeDepartmentView");
   const otherView = document.getElementById("otherDepartmentView");
 
-  if(department === "store"){
+  if(department === "admin"){
+    storeView.style.display = "none";
+    otherView.style.display = "none";
+    const count = document.getElementById("adminAllMachineCount");
+    if(count) count.innerText = String(ALL_MACHINES_LIST.length);
+  } else if(department === "store"){
     storeView.style.display = "flex";
     otherView.style.display = "none";
     renderStoreDashboardTable();
   } else {
     storeView.style.display = "none";
     otherView.style.display = "flex";
-    
     if(!config.allowedStatuses.includes(departmentStatusFilter)){
       departmentStatusFilter = config.allowedStatuses[0];
     }
-    renderDepartmentStatusCards();  
-    renderDepartmentMachineGrid();  
+    renderDepartmentStatusCards();
+    renderDepartmentMachineGrid();
   }
 }  
+
+function adminShowAllMachines(){
+  if(department !== "admin"){ alert("Admin access only."); return; }
+  const adminView = document.getElementById("adminDepartmentView");
+  const otherView = document.getElementById("otherDepartmentView");
+  if(adminView) adminView.style.display = "none";
+  if(otherView) otherView.style.display = "flex";
+  departmentStatusFilter = "TOTAL";
+  renderStatusCards("departmentStatusCards", "TOTAL", "setDepartmentStatusFilter", ["TOTAL"]);
+  const grid = document.getElementById("deptMachineGrid");
+  const title = document.getElementById("deptGridTitle");
+  const count = document.getElementById("deptGridCount");
+  if(title) title.innerText = "📋 ALL MACHINES";
+  if(count) count.innerText = ALL_MACHINES_LIST.length + " MACHINES";
+  if(grid) grid.innerHTML = ALL_MACHINES_LIST.map(id => {
+    const m = machines[id] || getDefaultMachine();
+    const status = getMachineStatusString(m);
+    return `<div class="deptMachineCard"><b style="font-size:12px;color:#f59e0b">${escapeHtml(id)}</b><span style="font-size:10px;color:${status==="RUNNING"?"#22c55e":"#f87171"}">${escapeHtml(status)}</span></div>`;
+  }).join("");
+}
 
 function renderDepartmentMachineGrid(){  
   const grid = document.getElementById("deptMachineGrid");  
