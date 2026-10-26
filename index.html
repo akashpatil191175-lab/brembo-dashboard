@@ -1236,17 +1236,29 @@ button:disabled {
         </div>
       </div>
 
+      <div id="adminDepartmentView" style="display:none; flex-direction:column; height:100%; min-height:0; flex:1; overflow:hidden;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px;">
+          <button type="button" onclick="adminShowAllMachines()" style="background:#064e3b;color:#fff;border:1px solid #10b981;border-radius:8px;padding:7px 10px;font-weight:900;font-size:11px;">⚙️ ALL MACHINES</button>
+        </div>
+        <div id="adminDepartmentStatusCards" class="deptStatusCards"></div>
+        <div class="deptMachineBox" id="adminDeptFocusArea" style="min-height:160px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+            <div><b id="adminDeptGridTitle" style="font-size:10px;">⚙️ ALL MACHINES REQUIREMENTS</b></div>
+            <div id="adminDeptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>
+          </div>
+          <div id="adminDeptMachineGrid" class="deptMachineGrid"></div>
+        </div>
+      </div>
+
       <div id="otherDepartmentView" style="display:none; flex-direction:column; height:100%;">
-        <div id="departmentStatusCards" class="deptStatusCards"></div>  
-        <div class="deptMachineBox" id="deptFocusArea">  
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">  
-            <div>  
-              <b id="deptGridTitle" style="font-size:10px;">REQUIREMENTS OVERVIEW</b>  
-            </div>  
-            <div id="deptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>  
-          </div>  
-          <div id="deptMachineGrid" class="deptMachineGrid"></div>  
-        </div>  
+        <div id="departmentStatusCards" class="deptStatusCards"></div>
+        <div class="deptMachineBox" id="deptFocusArea">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+            <div><b id="deptGridTitle" style="font-size:10px;">REQUIREMENTS OVERVIEW</b></div>
+            <div id="deptGridCount" style="font-size:8.5px;color:#aaa;font-weight:900">0 MACHINES</div>
+          </div>
+          <div id="deptMachineGrid" class="deptMachineGrid"></div>
+        </div>
       </div>
 
     </div>  
@@ -1392,7 +1404,7 @@ const DEPARTMENT_CONFIG = {
     name:"ADMIN",
     pin:"Ak1975",
     isAdmin:true,
-    allowedStatuses:["TOTAL"],
+    allowedStatuses: ["TOTAL", "ACTIVE LOGINS", "MACHINE IDLE", "BREAKDOWN", "CMM NOT OK", "FIXTURE NOT OK", "LOT READY", "LOT HOLD", "SIGN PENDING", "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE"],
     actions:[]
   },
   supervisor:{ 
@@ -2393,9 +2405,14 @@ function departmentLogout(){
   location.reload();  
 }  
 
-function setDepartmentStatusFilter(status){  
-  departmentStatusFilter=status;  
-  renderDepartmentDashboard();  
+function setDepartmentStatusFilter(status){
+  departmentStatusFilter = status;
+  if(department === "admin"){
+    renderAdminDepartmentStatusCards();
+    renderAdminDepartmentMachineGrid();
+  } else {
+    renderDepartmentDashboard();
+  }
 }  
 
 function renderDepartmentStatusCards(){  
@@ -2572,8 +2589,9 @@ function renderDepartmentDashboard(){
   if(department === "admin"){
     storeView.style.display = "none";
     otherView.style.display = "none";
-    const count = document.getElementById("adminAllMachineCount");
-    if(count) count.innerText = String(ALL_MACHINES_LIST.length);
+    if(!config.allowedStatuses.includes(departmentStatusFilter)) departmentStatusFilter = "TOTAL";
+    renderAdminDepartmentStatusCards();
+    renderAdminDepartmentMachineGrid();
   } else if(department === "store"){
     storeView.style.display = "flex";
     otherView.style.display = "none";
@@ -2591,21 +2609,35 @@ function renderDepartmentDashboard(){
 
 function adminShowAllMachines(){
   if(department !== "admin"){ alert("Admin access only."); return; }
-  const adminView = document.getElementById("adminDepartmentView");
-  const otherView = document.getElementById("otherDepartmentView");
-  if(adminView) adminView.style.display = "none";
-  if(otherView) otherView.style.display = "flex";
   departmentStatusFilter = "TOTAL";
-  renderStatusCards("departmentStatusCards", "TOTAL", "setDepartmentStatusFilter", ["TOTAL"]);
-  const grid = document.getElementById("deptMachineGrid");
-  const title = document.getElementById("deptGridTitle");
-  const count = document.getElementById("deptGridCount");
-  if(title) title.innerText = "📋 ALL MACHINES";
-  if(count) count.innerText = ALL_MACHINES_LIST.length + " MACHINES";
-  if(grid) grid.innerHTML = ALL_MACHINES_LIST.map(id => {
+  renderAdminDepartmentStatusCards();
+  renderAdminDepartmentMachineGrid();
+}
+
+function renderAdminDepartmentStatusCards(){
+  if(department !== "admin") return;
+  renderStatusCards("adminDepartmentStatusCards", departmentStatusFilter, "setDepartmentStatusFilter", DEPARTMENT_CONFIG.admin.allowedStatuses);
+}
+
+function renderAdminDepartmentMachineGrid(){
+  const grid = document.getElementById("adminDeptMachineGrid");
+  if(!grid) return;
+  const filtered = getDepartmentFilteredMachines();
+  const title = document.getElementById("adminDeptGridTitle");
+  const count = document.getElementById("adminDeptGridCount");
+  if(title) title.innerText = departmentStatusFilter === "TOTAL" ? "⚙️ ALL MACHINES REQUIREMENTS" : "⚙️ " + getStatusDisplayName(departmentStatusFilter) + " LIST";
+  if(count) count.innerText = filtered.length + " MACHINES";
+  if(filtered.length === 0){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:18px;color:#777;font-size:11px;font-weight:700">NO REQUIREMENTS AT THIS MOMENT</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(id => {
     const m = machines[id] || getDefaultMachine();
-    const status = getMachineStatusString(m);
-    return `<div class="deptMachineCard"><b style="font-size:12px;color:#f59e0b">${escapeHtml(id)}</b><span style="font-size:10px;color:${status==="RUNNING"?"#22c55e":"#f87171"}">${escapeHtml(status)}</span></div>`;
+    const statusText = getMachineStatusString(m);
+    return `<div class="machineCard" style="border:1px solid #333;border-radius:8px;background:#111;padding:8px;color:#eee;">
+      <div style="font-weight:900;font-size:11px;">⚙️ ${id}</div>
+      <div style="font-size:10px;color:#aaa;margin-top:5px;">${statusText || "NO STATUS"}</div>
+    </div>`;
   }).join("");
 }
 
