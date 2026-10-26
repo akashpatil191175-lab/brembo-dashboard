@@ -13,7 +13,9 @@
 <script src="https://cdn.tailwindcss.com"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>  
 <style>  
 *{  
   margin:0;  
@@ -622,6 +624,16 @@ button:disabled {
   border:2px solid #fff;  
   max-width:90%  
 }  
+#kanbanModal,#kanbanScanModal{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1000001;display:none;align-items:center;justify-content:center;padding:14px;overflow:auto}
+.kanbanBox{width:min(520px,100%);max-height:94vh;overflow:auto;background:#111827;border:1px solid #f59e0b;border-radius:16px;padding:18px;box-shadow:0 15px 60px #000}
+.kanbanBtn{border:1px solid #fbbf24;background:linear-gradient(135deg,#f59e0b,#d97706);color:#111;font-weight:900;border-radius:9px;padding:9px 12px;cursor:pointer;font-size:11px}
+#kanbanPrintArea{background:#fff;color:#111;width:340px;max-width:100%;margin:14px auto;padding:0;border:2px solid #111;text-align:center;font-family:Arial,sans-serif}
+.kbBand{background:#e50914;color:white;font-size:28px;font-weight:900;letter-spacing:2px;padding:8px}
+#kanbanQr{display:flex;justify-content:center;padding:14px;min-height:150px;align-items:center}
+.kbField{display:flex;border-top:1px solid #222;text-align:left;font-weight:800;min-height:42px}
+.kbField b{width:36%;padding:10px;border-right:1px solid #222;font-size:12px}.kbField span{padding:10px;flex:1;overflow-wrap:anywhere;font-size:13px}
+.kbFooter{background:#111;color:#fff;font-size:17px;font-weight:900;letter-spacing:2px;padding:9px}
+@media print{body *{visibility:hidden!important}#kanbanPrintArea,#kanbanPrintArea *{visibility:visible!important}#kanbanPrintArea{position:fixed;left:0;top:0;width:340px;margin:0;border:2px solid #111;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 #materialModal{  
   position:fixed;  
   inset:0;  
@@ -1015,10 +1027,35 @@ button:disabled {
         🕒 Current Date & Time will be auto-saved upon submission.
       </div>
 
+      <button onclick="startKanbanScanner()" class="kanbanBtn" style="width:100%;margin:4px 0 8px">📷 SCAN KANBAN QR — AUTO FILL</button>
       <button onclick="submitMaterialRequirement()" class="loginBtn" style="background:linear-gradient(135deg,#f59e0b,#d97706);border-color:#fbbf24;color:#000;box-shadow:none;height:38px;font-size:12px">SUBMIT REQUEST & NOTIFY STORE</button>  
       <button onclick="closeMaterialModal()" class="loginBtn" style="background:#222;border-color:#444;box-shadow:none;height:38px;font-size:12px">CANCEL</button>
     </div>  
   </div>  
+
+  <div id="kanbanModal"><div class="kanbanBox">
+    <h2 style="color:#f59e0b;font-weight:900;text-align:center;margin-bottom:12px">CREATE KANBAN CARD — SUPERVISOR</h2>
+    <input id="kbPartNo" class="loginInput" placeholder="PART NO (Required)" maxlength="80">
+    <input id="kbPartName" class="loginInput" placeholder="PART NAME (Required)" maxlength="160">
+    <input id="kbQty" type="number" min="1" step="1" class="loginInput" placeholder="QTY (Required)">
+    <button class="loginBtn" onclick="createKanbanCard()">GENERATE & SAVE CARD</button>
+    <div id="kanbanPrintArea" style="display:none">
+      <div class="kbBand">KANBAN</div><div id="kanbanQr"></div>
+      <div class="kbField"><b>PART NO</b><span id="kbPrintPartNo"></span></div>
+      <div class="kbField"><b>PART NAME</b><span id="kbPrintPartName"></span></div>
+      <div class="kbField"><b>QTY</b><span id="kbPrintQty"></span></div>
+      <div class="kbFooter">KANBAN CARD</div>
+    </div>
+    <div id="kanbanSavedActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px"><button class="kanbanBtn" onclick="printKanbanCard()">🖨 PRINT CARD</button><button class="kanbanBtn" onclick="resetKanbanForm()">+ NEW CARD</button></div>
+    <button class="loginBtn" onclick="closeKanbanModal()" style="background:#222;border-color:#444;color:white;margin-top:10px">CLOSE</button>
+  </div></div>
+
+  <div id="kanbanScanModal"><div class="kanbanBox">
+    <h2 style="color:#f59e0b;font-weight:900;text-align:center;margin-bottom:10px">SCAN KANBAN QR</h2>
+    <p style="font-size:12px;color:#d1d5db;text-align:center;margin-bottom:10px">Camera permission allow करा. Scan केल्यावर Part No, Part Name आणि QTY Material Request Form मध्ये भरले जातील.</p>
+    <div id="kanbanReader" style="width:100%;background:#fff;border-radius:8px;overflow:hidden"></div>
+    <button class="loginBtn" onclick="stopKanbanScanner();document.getElementById('kanbanScanModal').style.display='none'" style="background:#222;border-color:#444;color:white;margin-top:10px">CANCEL SCAN</button>
+  </div></div>
 
   <div id="login">    
     <div class="loginBox">  
@@ -1124,6 +1161,7 @@ button:disabled {
         <span id="firebaseDeptStatus" class="firebaseStatus"><span class="firebaseDot"></span><span>CONNECTING</span></span>  
         <button id="deptExcelBtn" onclick="downloadDepartmentExcel()" class="excelSmallBtn" style="display:none">📥 EXCEL REPORT</button>  
         <button id="deptExcelResetBtn" onclick="resetExcelFile()" class="excelResetBtn" style="display:none">🚨 RESET EXCEL FILE</button>  
+        <button id="createKanbanBtn" class="kanbanBtn" onclick="openKanbanModal()" style="display:none">＋ CREATE KANBAN CARD</button>
         <button onclick="toggleFullScreen()" class="pill fullscreenBtn fsBtnToggle">Full Screen ⛶</button>  
         <span class="deptBadge" id="deptBadge"></span>  
         <button onclick="departmentLogout()" class="pill logoutBtn">LOGOUT</button>  
@@ -1537,6 +1575,7 @@ function saveMachine(id){
   return db.ref("machines/"+id).set(machines[id]);  
 }  
 
+// IMPORTANT: RESET ALL updates only machines/<id>; it must never remove the root or kanbanCards.
 function resetAllMachinesFirebase(){  
   const updates={};  
   ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null }; });  
@@ -2030,6 +2069,79 @@ function openMaterialModal(){
   document.getElementById("materialModal").style.display="flex";  
 }  
 
+// KANBAN MASTER: saved separately from machine status so RESET ALL (which only updates machines/*) leaves cards intact.
+let activeKanbanScanner = null;
+function openKanbanModal(){
+  if(department !== "supervisor"){ alert("Only Supervisor can create Kanban Cards."); return; }
+  resetKanbanForm();
+  document.getElementById("kanbanModal").style.display="flex";
+}
+function closeKanbanModal(){ document.getElementById("kanbanModal").style.display="none"; }
+function resetKanbanForm(){
+  ["kbPartNo","kbPartName","kbQty"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("kanbanPrintArea").style.display="none";
+  document.getElementById("kanbanSavedActions").style.display="none";
+  document.getElementById("kanbanQr").innerHTML="";
+}
+function createKanbanCard(){
+  if(department !== "supervisor"){ alert("Access denied: Supervisor only."); return; }
+  if(!db){ alert("Firebase connection unavailable."); return; }
+  const partNo=document.getElementById("kbPartNo").value.trim();
+  const partName=document.getElementById("kbPartName").value.trim();
+  const qty=Number(document.getElementById("kbQty").value);
+  if(!partNo || !partName || !Number.isFinite(qty) || qty<=0){ alert("Part No, Part Name आणि valid QTY भरा."); return; }
+  const cardId="KB-"+partNo.toUpperCase().replace(/[^A-Z0-9_-]/g,"-").slice(0,45);
+  const cardRef=db.ref("kanbanCards/"+encodeURIComponent(cardId));
+  cardRef.once("value").then(snap=>{
+    if(snap.exists()){
+      if(!confirm("या Part No चे Kanban Card आधीपासून आहे. Existing card ची माहिती update करायची?")) return;
+    }
+    const data={cardId,partNo,partName,qty,createdAt: snap.exists() && snap.val().createdAt ? snap.val().createdAt : Date.now(),updatedAt:Date.now(),createdBy:"supervisor"};
+    return cardRef.set(data).then(()=>{
+      document.getElementById("kbPrintPartNo").textContent=partNo;
+      document.getElementById("kbPrintPartName").textContent=partName;
+      document.getElementById("kbPrintQty").textContent=String(qty);
+      document.getElementById("kanbanPrintArea").style.display="block";
+      document.getElementById("kanbanSavedActions").style.display="flex";
+      const qrTarget=window.location.href.split(/[?#]/)[0]+"?kanban="+encodeURIComponent(cardId);
+      document.getElementById("kanbanQr").innerHTML="";
+      new QRCode(document.getElementById("kanbanQr"),{text:qrTarget,width:150,height:150,correctLevel:QRCode.CorrectLevel.M});
+      alert("Kanban Card Firebase मध्ये सेव्ह झाले. आता Print Card करा.");
+    });
+  }).catch(err=>{console.error(err);alert("Kanban Card सेव्ह झाले नाही. Firebase connection/rules तपासा.");});
+}
+function printKanbanCard(){
+  if(department!=="supervisor"){alert("Only Supervisor can print Kanban Cards.");return;}
+  if(document.getElementById("kanbanPrintArea").style.display==="none"){alert("आधी कार्ड तयार करा.");return;}
+  window.print();
+}
+function startKanbanScanner(){
+  if(!operator || !curMachine || curMachine!==operator.machine){alert("Operator login आवश्यक आहे.");return;}
+  if(typeof Html5Qrcode === "undefined"){alert("QR Scanner library load झाली नाही. Internet तपासा.");return;}
+  document.getElementById("kanbanScanModal").style.display="flex";
+  activeKanbanScanner=new Html5Qrcode("kanbanReader");
+  activeKanbanScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:230,height:230}},onKanbanQrScanned,()=>{}).catch(err=>{
+    console.error(err);alert("Camera सुरू होत नाही. Browser camera permission द्या आणि HTTPS वर App उघडा.");stopKanbanScanner();
+  });
+}
+function stopKanbanScanner(){
+  if(activeKanbanScanner){const scanner=activeKanbanScanner;activeKanbanScanner=null;scanner.stop().then(()=>scanner.clear()).catch(()=>{});}
+}
+function onKanbanQrScanned(decodedText){
+  stopKanbanScanner();document.getElementById("kanbanScanModal").style.display="none";
+  let cardId="";
+  try{const u=new URL(decodedText);cardId=u.searchParams.get("kanban")||"";}catch(e){}
+  if(!cardId){alert("हा QR Code Kanban Card साठी नाही.");return;}
+  if(!db){alert("Firebase उपलब्ध नाही.");return;}
+  db.ref("kanbanCards/"+encodeURIComponent(cardId)).once("value").then(snap=>{
+    const card=snap.val();if(!card){alert("या QR Code ची Kanban माहिती Firebase मध्ये सापडली नाही.");return;}
+    document.getElementById("matPartNo").value=card.partNo||"";
+    document.getElementById("matPartName").value=card.partName||"";
+    document.getElementById("matQty").value=card.qty||"";
+    document.getElementById("materialModal").style.display="flex";
+  }).catch(err=>{console.error(err);alert("Kanban माहिती वाचता आली नाही. Firebase Rules तपासा.");});
+}
+
 function closeMaterialModal(){  
   document.getElementById("materialModal").style.display="none";  
 }  
@@ -2428,6 +2540,9 @@ function renderDepartmentDashboard(){
 
   document.getElementById("deptTitle").innerText = config.name+" DASHBOARD";  
   document.getElementById("deptBadge").innerText = config.name;  
+
+  const createKanbanBtn = document.getElementById("createKanbanBtn");
+  if(createKanbanBtn) createKanbanBtn.style.display = department === "supervisor" ? "inline-block" : "none";
 
   const excelBtn = document.getElementById("deptExcelBtn");
   if(excelBtn){
