@@ -1034,7 +1034,7 @@ button:disabled {
   </div>  
 
   <div id="kanbanModal"><div class="kanbanBox">
-    <h2 style="color:#f59e0b;font-weight:900;text-align:center;margin-bottom:12px">CREATE KANBAN CARD — SUPERVISOR</h2>
+    <h2 style="color:#f59e0b;font-weight:900;text-align:center;margin-bottom:12px">CREATE KANBAN CARD — ADMIN</h2>
     <input id="kbPartNo" class="loginInput" placeholder="PART NO (Required)" maxlength="80">
     <input id="kbPartName" class="loginInput" placeholder="PART NAME (Required)" maxlength="160">
     <input id="kbQty" type="number" min="1" step="1" class="loginInput" placeholder="QTY (Required)">
@@ -2116,7 +2116,7 @@ function createKanbanCard(){
     if(snap.exists()){
       if(!confirm("या Part No चे Kanban Card आधीपासून आहे. Existing card ची माहिती update करायची?")) return;
     }
-    const data={cardId,partNo,partName,qty,createdAt: snap.exists() && snap.val().createdAt ? snap.val().createdAt : Date.now(),updatedAt:Date.now(),createdBy:"supervisor"};
+    const data={cardId,partNo,partName,qty,createdAt: snap.exists() && snap.val().createdAt ? snap.val().createdAt : Date.now(),updatedAt:Date.now(),createdBy:"admin"};
     return cardRef.set(data).then(()=>{
       document.getElementById("kbPrintPartNo").textContent=partNo;
       document.getElementById("kbPrintPartName").textContent=partName;
@@ -2131,7 +2131,7 @@ function createKanbanCard(){
   }).catch(err=>{console.error(err);alert("Kanban Card सेव्ह झाले नाही. Firebase connection/rules तपासा.");});
 }
 function printKanbanCard(){
-  if(department!=="supervisor"){alert("Only Supervisor can print Kanban Cards.");return;}
+  if(department!=="admin"){alert("Only Admin can print Kanban Cards.");return;}
   if(document.getElementById("kanbanPrintArea").style.display==="none"){alert("आधी कार्ड तयार करा.");return;}
   window.print();
 }
