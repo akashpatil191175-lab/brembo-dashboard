@@ -627,13 +627,20 @@ button:disabled {
 #kanbanModal,#kanbanScanModal{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1000001;display:none;align-items:center;justify-content:center;padding:14px;overflow:auto}
 .kanbanBox{width:min(520px,100%);max-height:94vh;overflow:auto;background:#111827;border:1px solid #f59e0b;border-radius:16px;padding:18px;box-shadow:0 15px 60px #000}
 .kanbanBtn{border:1px solid #fbbf24;background:linear-gradient(135deg,#f59e0b,#d97706);color:#111;font-weight:900;border-radius:9px;padding:9px 12px;cursor:pointer;font-size:11px}
-#kanbanPrintArea{background:#fff;color:#111;width:340px;max-width:100%;margin:14px auto;padding:0;border:2px solid #111;text-align:center;font-family:Arial,sans-serif}
-.kbBand{background:#e50914;color:white;font-size:28px;font-weight:900;letter-spacing:2px;padding:8px}
-#kanbanQr{display:flex;justify-content:center;padding:14px;min-height:150px;align-items:center}
-.kbField{display:flex;border-top:1px solid #222;text-align:left;font-weight:800;min-height:42px}
-.kbField b{width:36%;padding:10px;border-right:1px solid #222;font-size:12px}.kbField span{padding:10px;flex:1;overflow-wrap:anywhere;font-size:13px}
-.kbFooter{background:#111;color:#fff;font-size:17px;font-weight:900;letter-spacing:2px;padding:9px}
-@media print{body *{visibility:hidden!important}#kanbanPrintArea,#kanbanPrintArea *{visibility:visible!important}#kanbanPrintArea{position:fixed;left:0;top:0;width:340px;margin:0;border:2px solid #111;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+#kanbanPrintArea{background:#fff;color:#111;width:5.51in;height:8.27in;box-sizing:border-box;margin:14px auto;padding:0;border:2px solid #111;text-align:center;font-family:Arial,sans-serif;overflow:hidden;position:relative}
+.kbBand{background:#d8f5ee;color:#111;font-size:27pt;line-height:1.15;font-weight:900;letter-spacing:1px;padding:18px 8px;border-bottom:2px solid #111}
+.kbCardBody{display:grid;grid-template-columns:minmax(0,1fr) 0.7in;height:calc(100% - 68px)}
+.kbMain{display:flex;flex-direction:column;min-width:0}
+.kbField{display:flex;flex-direction:column;justify-content:center;border-top:1px solid #222;text-align:center;font-weight:800;flex:1;min-height:0;padding:8px;box-sizing:border-box}
+.kbField b{display:block;font-size:15pt;letter-spacing:.5px;margin-bottom:10px}.kbField span{display:block;overflow-wrap:anywhere;font-size:20pt;line-height:1.15;font-weight:900}
+.kbField.partname span{font-size:22pt}.kbField.quantity span{font-size:28pt}
+.kbSide{border-left:2px solid #111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.kbVertical{writing-mode:vertical-rl;transform:rotate(180deg);font-size:21pt;font-weight:900;letter-spacing:1px;overflow-wrap:anywhere;max-height:100%;padding:8px;box-sizing:border-box}
+.kbQrSection{border-top:2px solid #111;display:flex;align-items:center;justify-content:center;min-height:1.9in;padding:10px;box-sizing:border-box;background:#fff}
+#kanbanQr{display:flex;justify-content:center;align-items:center;padding:0;min-height:0;background:#fff}
+#kanbanQr img,#kanbanQr canvas{width:1.55in!important;height:1.55in!important;max-width:100%;image-rendering:pixelated}
+.kbFooter{background:#d8f5ee;color:#111;border-top:2px solid #111;font-size:16pt;font-weight:900;letter-spacing:1px;padding:10px}
+@media print{ @page{size:5.51in 8.27in;margin:0} html,body{width:5.51in!important;height:8.27in!important;margin:0!important;padding:0!important;background:#fff!important;overflow:hidden!important}body *{visibility:hidden!important}#kanbanPrintArea,#kanbanPrintArea *{visibility:visible!important}#kanbanPrintArea{position:fixed!important;left:0!important;top:0!important;width:5.51in!important;height:8.27in!important;margin:0!important;border:2px solid #111!important;box-sizing:border-box!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}#kanbanModal{position:static!important;display:block!important;background:#fff!important;padding:0!important}#kanbanModal .kanbanBox{width:auto!important;max-height:none!important;overflow:visible!important;background:#fff!important;border:0!important;padding:0!important;box-shadow:none!important}#kanbanModal h2,#kanbanModal input,#kanbanModal button,#kanbanSavedActions{display:none!important}}
 #materialModal{  
   position:fixed;  
   inset:0;  
@@ -1095,11 +1102,17 @@ button:disabled {
     <input id="kbQty" type="number" min="1" step="1" class="loginInput" placeholder="QTY (Required)">
     <button class="loginBtn" onclick="createKanbanCard()">GENERATE & SAVE CARD</button>
     <div id="kanbanPrintArea" style="display:none">
-      <div class="kbBand">KANBAN</div><div id="kanbanQr"></div>
-      <div class="kbField"><b>PART NO</b><span id="kbPrintPartNo"></span></div>
-      <div class="kbField"><b>PART NAME</b><span id="kbPrintPartName"></span></div>
-      <div class="kbField"><b>QTY</b><span id="kbPrintQty"></span></div>
-      <div class="kbFooter">KANBAN CARD</div>
+      <div class="kbBand">KANBAN CARD</div>
+      <div class="kbCardBody">
+        <div class="kbMain">
+          <div class="kbField partname"><b>PART NAME</b><span id="kbPrintPartName"></span></div>
+          <div class="kbField"><b>PART NO</b><span id="kbPrintPartNo"></span></div>
+          <div class="kbField quantity"><b>QUANTITY</b><span id="kbPrintQty"></span></div>
+          <div class="kbQrSection"><div id="kanbanQr"></div></div>
+        </div>
+        <div class="kbSide"><div class="kbVertical" id="kbPrintPartNoVertical"></div></div>
+      </div>
+      <div class="kbFooter">SCAN QR FOR KANBAN DETAILS</div>
     </div>
     <div id="kanbanSavedActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px"><button class="kanbanBtn" onclick="printKanbanCard()">🖨 PRINT CARD</button><button class="kanbanBtn" onclick="resetKanbanForm()">+ NEW CARD</button></div>
     <button class="loginBtn" onclick="closeKanbanModal()" style="background:#222;border-color:#444;color:white;margin-top:10px">CLOSE</button>
@@ -2174,6 +2187,7 @@ function createKanbanCard(){
     const data={cardId,partNo,partName,qty,createdAt: snap.exists() && snap.val().createdAt ? snap.val().createdAt : Date.now(),updatedAt:Date.now(),createdBy:"admin"};
     return cardRef.set(data).then(()=>{
       document.getElementById("kbPrintPartNo").textContent=partNo;
+      document.getElementById("kbPrintPartNoVertical").textContent=partNo;
       document.getElementById("kbPrintPartName").textContent=partName;
       document.getElementById("kbPrintQty").textContent=String(qty);
       document.getElementById("kanbanPrintArea").style.display="block";
