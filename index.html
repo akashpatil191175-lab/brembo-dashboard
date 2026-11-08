@@ -1137,7 +1137,8 @@ button:disabled {
 
       <div id="operatorLogin">  
         <input id="opId" class="loginInput" placeholder="EMPLOYEE ID">  
-        <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME">  
+        <input id="opName" class="loginInput" placeholder="EMPLOYEE NAME (AUTO)" readonly>
+        <p id="opEmployeeStatus" style="font-size:10px;color:#888;margin:2px 0 6px;font-weight:700">Enter registered Employee ID to load name.</p>  
         <input id="opPin" type="password" class="loginInput" placeholder="OPERATOR PIN">  
         <select id="opMachine" class="loginSelect"></select>  
         <select id="opShift" class="loginSelect" style="display:none;">  
@@ -1304,10 +1305,20 @@ button:disabled {
         </div>
       </div>
 
-      <div id="adminDepartmentView" style="display:none; flex-direction:column; height:100%; min-height:0; flex:1; overflow:hidden;">
+      <div id="adminDepartmentView" style="display:none; flex-direction:column; height:100%; min-height:0; flex:1; overflow-y:auto;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px;">
           <button type="button" onclick="adminShowAllMachines()" style="background:#064e3b;color:#fff;border:1px solid #10b981;border-radius:8px;padding:7px 10px;font-weight:900;font-size:11px;">⚙️ ALL MACHINES</button>
         </div>
+        <details id="adminEmployeeManager" style="background:#101010;border:1px solid #f59e0b;border-radius:8px;padding:8px;margin:2px 0 6px;flex-shrink:0;">
+          <summary style="cursor:pointer;color:#fbbf24;font-size:12px;font-weight:900;">👥 EMPLOYEE MASTER — ADD / DEACTIVATE ID</summary>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+            <input id="adminEmpId" class="loginInput" placeholder="EMPLOYEE ID" style="margin:0;">
+            <input id="adminEmpName" class="loginInput" placeholder="EMPLOYEE NAME" style="margin:0;">
+          </div>
+          <button type="button" onclick="saveEmployeeMaster()" class="kanbanBtn" style="width:100%;margin-top:7px;">＋ SAVE EMPLOYEE</button>
+          <div id="adminEmployeeMessage" style="font-size:10px;color:#aaa;margin:6px 0;"></div>
+          <div id="adminEmployeeList" style="max-height:180px;overflow:auto;"></div>
+        </details>
         <div id="adminDepartmentStatusCards" class="deptStatusCards"></div>
         <div class="deptMachineBox" id="adminDeptFocusArea" style="min-height:160px;">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
@@ -1833,32 +1844,135 @@ function fillMachineDropdown(){
   checkShiftAutoReset();  
 }  
 
-function doLogin(){  
-  const id = document.getElementById("opId").value.trim();  
-  const nm = document.getElementById("opName").value.trim();  
-  const pin = document.getElementById("opPin").value.trim();  
-  const mc = document.getElementById("opMachine").value;  
-  const sh = getCurrentShift();  
+// EMPLOYEE MASTER: Admin manages employee ID/name and active status in Firebase.
+function employeeMasterRef(id){
+  return db.ref("employeeMaster/" + encodeURIComponent(String(id).trim()));
+}
 
-  if(!id || !nm || !pin || !mc){ alert("Please fill ID, Name, PIN, and Machine!"); return; }  
-  if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }  
+function lookupOperatorEmployee(){
+  const id = document.getElementById("opId").value.trim();
+  const nameEl = document.getElementById("opName");
+  const statusEl = document.getElementById("opEmployeeStatus");
+  nameEl.value = "";
+  if(!id){ statusEl.textContent = "Enter registered Employee ID to load name."; statusEl.style.color="#888"; return; }
+  if(!db){ statusEl.textContent = "Firebase connection unavailable."; statusEl.style.color="#ef4444"; return; }
+  statusEl.textContent = "Checking Employee ID...";
+  statusEl.style.color = "#eab308";
+  employeeMasterRef(id).once("value").then(snap=>{
+    if(document.getElementById("opId").value.trim() !== id) return;
+    const emp = snap.val();
+    if(!emp){
+      statusEl.textContent = "Employee ID not registered. Contact Admin.";
+      statusEl.style.color = "#ef4444";
+      return;
+    }
+    if(emp.active === false){
+      statusEl.textContent = "This Employee ID is DEACTIVATED.";
+      statusEl.style.color = "#ef4444";
+      return;
+    }
+    nameEl.value = emp.name || "";
+    statusEl.textContent = "✓ Employee verified";
+    statusEl.style.color = "#22c55e";
+  }).catch(err=>{
+    console.error("Employee lookup failed:",err);
+    statusEl.textContent = "Could not verify ID. Check Firebase access.";
+    statusEl.style.color = "#ef4444";
+  });
+}
 
-  const targetMc = machines[mc];  
-  if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){  
-    alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").");
-    return;
-  }  
+function saveEmployeeMaster(){
+  if(department !== "admin"){ alert("Only Admin can manage employees."); return; }
+  if(!db){ alert("Firebase connection unavailable."); return; }
+  const id = document.getElementById("adminEmpId").value.trim();
+  const name = document.getElementById("adminEmpName").value.trim();
+  const msg = document.getElementById("adminEmployeeMessage");
+  if(!id || !name){ alert("Employee ID आणि Name दोन्ही भरा."); return; }
+  const ref = employeeMasterRef(id);
+  ref.once("value").then(snap=>{
+    const old = snap.val() || {};
+    return ref.set({id:id,name:name,active:true,createdAt:old.createdAt || Date.now(),updatedAt:Date.now(),updatedBy:"admin"});
+  }).then(()=>{
+    msg.textContent = "✓ Employee saved and active.";
+    msg.style.color="#22c55e";
+    document.getElementById("adminEmpId").value="";
+    document.getElementById("adminEmpName").value="";
+    renderEmployeeMaster();
+  }).catch(err=>{
+    console.error(err);
+    msg.textContent = "Save failed. Check Firebase Database Rules.";
+    msg.style.color="#ef4444";
+  });
+}
 
-  operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };  
-  department=null;  
+function setEmployeeActive(id, active){
+  if(department !== "admin"){ alert("Only Admin can manage employees."); return; }
+  if(!confirm((active ? "ACTIVATE" : "DEACTIVATE") + " Employee ID " + id + "?")) return;
+  employeeMasterRef(id).update({active:!!active,updatedAt:Date.now(),updatedBy:"admin"})
+    .then(()=>renderEmployeeMaster())
+    .catch(err=>{console.error(err);alert("Employee status update failed. Check Firebase Rules.");});
+}
 
-  localStorage.setItem("brembo_v7", JSON.stringify(operator));  
-  localStorage.setItem("brembo_shift", sh);  
+function renderEmployeeMaster(){
+  const list = document.getElementById("adminEmployeeList");
+  if(!list || department !== "admin" || !db) return;
+  db.ref("employeeMaster").once("value").then(snap=>{
+    if(department !== "admin") return;
+    const data = snap.val() || {};
+    const employees = Object.values(data).sort((a,b)=>String(a.id||"").localeCompare(String(b.id||"")));
+    if(!employees.length){
+      list.innerHTML='<div style="font-size:10px;color:#888;padding:8px;text-align:center;">No employees saved yet.</div>';
+      return;
+    }
+    list.innerHTML = employees.map(emp=>{
+      const id = String(emp.id || "");
+      const active = emp.active !== false;
+      const safeId = escapeHtml(id).replace(/'/g,"&#039;");
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px;border-top:1px solid #292929;font-size:10px;">
+        <div style="min-width:0;"><b style="color:#fff;">${escapeHtml(id)}</b> — ${escapeHtml(emp.name || "")}
+          <span style="color:${active?'#22c55e':'#ef4444'};font-weight:900;">${active?'ACTIVE':'DEACTIVATED'}</span></div>
+        <button type="button" onclick="setEmployeeActive('${safeId}',${!active})" style="flex-shrink:0;border:1px solid ${active?'#ef4444':'#22c55e'};background:${active?'#450a0a':'#064e3b'};color:#fff;border-radius:6px;padding:5px 7px;font-size:9px;font-weight:900;">${active?'DEACTIVATE':'ACTIVATE'}</button>
+      </div>`;
+    }).join("");
+  }).catch(err=>{
+    console.error(err);
+    list.innerHTML='<div style="color:#ef4444;font-size:10px;padding:6px;">Could not load employees. Check Firebase Rules.</div>';
+  });
+}
 
-  document.getElementById("login").style.display="none";  
-  document.getElementById("operatorDashboard").style.display="flex";  
-  applyOperator();  
-}  
+async function doLogin(){
+  const id = document.getElementById("opId").value.trim();
+  const pin = document.getElementById("opPin").value.trim();
+  const mc = document.getElementById("opMachine").value;
+  const sh = getCurrentShift();
+  if(!id || !pin || !mc){ alert("Please enter Employee ID, PIN, and Machine!"); return; }
+  if(pin!==OPERATOR_PIN){ alert("Wrong Operator PIN! Access Denied."); return; }
+  if(!db){ alert("Firebase connection unavailable. Employee verification required."); return; }
+  try{
+    const snap = await employeeMasterRef(id).once("value");
+    const emp = snap.val();
+    if(!emp){ alert("Employee ID not registered. Please contact Admin."); return; }
+    if(emp.active === false){ alert("This Employee ID is DEACTIVATED. Login denied."); return; }
+    const nm = String(emp.name || "").trim();
+    if(!nm){ alert("Employee name is missing in Admin Employee Master."); return; }
+    document.getElementById("opName").value = nm;
+    const targetMc = machines[mc];
+    if(targetMc && targetMc.op && targetMc.op.id && targetMc.op.id !== id){
+      alert("⚠️ Access Denied: Machine " + mc + " is currently active by " + targetMc.op.name + " (" + targetMc.op.id + ").");
+      return;
+    }
+    operator={ id:id, name:nm, machine:mc, shift:sh, time: new Date().toLocaleTimeString("en-IN") };
+    department=null;
+    localStorage.setItem("brembo_v7", JSON.stringify(operator));
+    localStorage.setItem("brembo_shift", sh);
+    document.getElementById("login").style.display="none";
+    document.getElementById("operatorDashboard").style.display="flex";
+    applyOperator();
+  }catch(err){
+    console.error("Operator employee verification failed:",err);
+    alert("Employee verification failed. Check Internet/Firebase Database Rules.");
+  }
+}
 
 function applyOperator(isReload = false){  
   if(!operator) return;  
@@ -2656,6 +2770,7 @@ function renderDepartmentDashboard(){
   const otherView = document.getElementById("otherDepartmentView");
 
   if(department === "admin"){
+    renderEmployeeMaster();
     storeView.style.display = "none";
     otherView.style.display = "none";
     if(!config.allowedStatuses.includes(departmentStatusFilter)) departmentStatusFilter = "TOTAL";
@@ -2832,6 +2947,8 @@ window.onload = function(){
   try {
     startLiveClock();
     fillMachineDropdown();
+    const opIdInput = document.getElementById("opId");
+    if(opIdInput) opIdInput.addEventListener("input", lookupOperatorEmployee);
     checkExistingSession();
     load();
     window.__SUTOM_STARTUP_OK__ = true;
