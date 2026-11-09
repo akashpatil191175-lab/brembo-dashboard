@@ -1310,14 +1310,18 @@ button:disabled {
           <button type="button" onclick="adminShowAllMachines()" style="background:#064e3b;color:#fff;border:1px solid #10b981;border-radius:8px;padding:7px 10px;font-weight:900;font-size:11px;">⚙️ ALL MACHINES</button>
         </div>
         <details id="adminEmployeeManager" style="background:#101010;border:1px solid #f59e0b;border-radius:8px;padding:8px;margin:2px 0 6px;flex-shrink:0;">
-          <summary style="cursor:pointer;color:#fbbf24;font-size:12px;font-weight:900;">👥 EMPLOYEE MASTER — ADD / DEACTIVATE ID</summary>
+          <summary style="cursor:pointer;color:#fbbf24;font-size:12px;font-weight:900;">👥 EMPLOYEE MASTER — ADD / MANAGE EMPLOYEES</summary>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
             <input id="adminEmpId" class="loginInput" placeholder="EMPLOYEE ID" style="margin:0;">
             <input id="adminEmpName" class="loginInput" placeholder="EMPLOYEE NAME" style="margin:0;">
           </div>
           <button type="button" onclick="saveEmployeeMaster()" class="kanbanBtn" style="width:100%;margin-top:7px;">＋ SAVE EMPLOYEE</button>
           <div id="adminEmployeeMessage" style="font-size:10px;color:#aaa;margin:6px 0;"></div>
-          <div id="adminEmployeeList" style="max-height:180px;overflow:auto;"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:8px 0 5px;">
+            <b style="font-size:11px;color:#fbbf24;">EMPLOYEE LIST <span id="adminEmployeeCount" style="color:#aaa;">(0)</span></b>
+          </div>
+          <input id="adminEmployeeSearch" class="loginInput" placeholder="🔍 Search by Employee ID or Name..." oninput="filterEmployeeMasterList()" style="margin:0 0 6px;width:100%;box-sizing:border-box;">
+          <div id="adminEmployeeList" style="max-height:280px;overflow-y:auto;border:1px solid #292929;border-radius:7px;"></div>
         </details>
         <div id="adminDepartmentStatusCards" class="deptStatusCards"></div>
         <div class="deptMachineBox" id="adminDeptFocusArea" style="min-height:160px;">
@@ -1913,31 +1917,65 @@ function setEmployeeActive(id, active){
     .catch(err=>{console.error(err);alert("Employee status update failed. Check Firebase Rules.");});
 }
 
+let employeeMasterCache = [];
+
+function filterEmployeeMasterList(){
+  const q = (document.getElementById("adminEmployeeSearch")?.value || "").trim().toLowerCase();
+  const filtered = employeeMasterCache.filter(emp =>
+    String(emp.id || "").toLowerCase().includes(q) || String(emp.name || "").toLowerCase().includes(q)
+  );
+  displayEmployeeMasterList(filtered);
+}
+
+function displayEmployeeMasterList(employees){
+  const list = document.getElementById("adminEmployeeList");
+  const count = document.getElementById("adminEmployeeCount");
+  if(!list) return;
+  if(count) count.textContent = `(${employees.length} shown / ${employeeMasterCache.length} total)`;
+  if(!employees.length){
+    list.innerHTML='<div style="font-size:10px;color:#888;padding:12px;text-align:center;">No matching employees found.</div>';
+    return;
+  }
+  list.innerHTML = employees.map(emp=>{
+    const id = String(emp.id || "");
+    const active = emp.active !== false;
+    const safeId = escapeHtml(id).replace(/'/g,"&#039;");
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;padding:8px;border-top:1px solid #292929;font-size:10px;">
+      <div style="min-width:0;flex:1;overflow-wrap:anywhere;"><b style="color:#fff;">${escapeHtml(id)}</b> — ${escapeHtml(emp.name || "")}
+        <span style="color:${active?'#22c55e':'#ef4444'};font-weight:900;white-space:nowrap;">${active?'ACTIVE':'DEACTIVATED'}</span></div>
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        <button type="button" onclick="setEmployeeActive('${safeId}',${!active})" style="border:1px solid ${active?'#ef4444':'#22c55e'};background:${active?'#450a0a':'#064e3b'};color:#fff;border-radius:6px;padding:6px 7px;font-size:9px;font-weight:900;">${active?'DEACTIVATE':'ACTIVATE'}</button>
+        <button type="button" onclick="deleteEmployeeMaster('${safeId}')" style="border:1px solid #f97316;background:#431407;color:#fff;border-radius:6px;padding:6px 7px;font-size:9px;font-weight:900;">DELETE</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
 function renderEmployeeMaster(){
   const list = document.getElementById("adminEmployeeList");
   if(!list || department !== "admin" || !db) return;
+  list.innerHTML='<div style="font-size:10px;color:#aaa;padding:10px;text-align:center;">Loading employees...</div>';
   db.ref("employeeMaster").once("value").then(snap=>{
     if(department !== "admin") return;
     const data = snap.val() || {};
-    const employees = Object.values(data).sort((a,b)=>String(a.id||"").localeCompare(String(b.id||"")));
-    if(!employees.length){
-      list.innerHTML='<div style="font-size:10px;color:#888;padding:8px;text-align:center;">No employees saved yet.</div>';
-      return;
-    }
-    list.innerHTML = employees.map(emp=>{
-      const id = String(emp.id || "");
-      const active = emp.active !== false;
-      const safeId = escapeHtml(id).replace(/'/g,"&#039;");
-      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px;border-top:1px solid #292929;font-size:10px;">
-        <div style="min-width:0;"><b style="color:#fff;">${escapeHtml(id)}</b> — ${escapeHtml(emp.name || "")}
-          <span style="color:${active?'#22c55e':'#ef4444'};font-weight:900;">${active?'ACTIVE':'DEACTIVATED'}</span></div>
-        <button type="button" onclick="setEmployeeActive('${safeId}',${!active})" style="flex-shrink:0;border:1px solid ${active?'#ef4444':'#22c55e'};background:${active?'#450a0a':'#064e3b'};color:#fff;border-radius:6px;padding:5px 7px;font-size:9px;font-weight:900;">${active?'DEACTIVATE':'ACTIVATE'}</button>
-      </div>`;
-    }).join("");
+    employeeMasterCache = Object.values(data).sort((a,b)=>String(a.id||"").localeCompare(String(b.id||""),undefined,{numeric:true,sensitivity:"base"}));
+    filterEmployeeMasterList();
   }).catch(err=>{
     console.error(err);
     list.innerHTML='<div style="color:#ef4444;font-size:10px;padding:6px;">Could not load employees. Check Firebase Rules.</div>';
   });
+}
+
+function deleteEmployeeMaster(id){
+  if(department !== "admin"){ alert("Only Admin can manage employees."); return; }
+  if(!confirm("Permanently DELETE Employee ID " + id + "? This employee will no longer be able to log in. This cannot be undone.")) return;
+  employeeMasterRef(id).remove()
+    .then(()=>{
+      const msg=document.getElementById("adminEmployeeMessage");
+      if(msg){msg.textContent="✓ Employee deleted permanently.";msg.style.color="#22c55e";}
+      renderEmployeeMaster();
+    })
+    .catch(err=>{console.error(err);alert("Employee delete failed. Check Firebase Database Rules.");});
 }
 
 async function doLogin(){
