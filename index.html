@@ -922,6 +922,41 @@ button:disabled {
 }
 
 /* CLASSIC HIGHLIGHT COLORS FOR STORE SHEET */
+.storeRequestSent td.storePartNo,
+.storeRequestSent td.storePartName,
+.storeRequestSent td .storeMatDetail {
+  background: #fef08a !important;
+  color: #713f12 !important;
+  border-color: #eab308 !important;
+  text-shadow: none !important;
+}
+.storeRequestSent td.storePartNo,
+.storeRequestSent td.storePartName {
+  padding: 7px 8px;
+  border-radius: 4px;
+}
+.storeRequestSent td .storeMatDetail {
+  display: inline-block;
+  box-shadow: none;
+}
+.btnSendMaterialRequest {
+  background: linear-gradient(180deg, #facc15, #eab308);
+  border: 1px solid #fef08a;
+  color: #422006;
+  padding: 5px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.btnSendMaterialRequest:disabled {
+  background: #854d0e;
+  border-color: #a16207;
+  color: #fef3c7;
+  cursor: default;
+}
+
 .storePartNo {
   color: #f59e0b; /* Classic Amber Gold */
   font-size: 16px;
@@ -1663,7 +1698,7 @@ function hasStatus(m, st){
 }  
 
 function getDefaultMachine(){  
-  return { status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null };  
+  return { status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false };  
 }  
 
 function getAllMachines(){  
@@ -1681,7 +1716,7 @@ function saveMachine(id){
 // IMPORTANT: RESET ALL updates only machines/<id>; it must never remove the root or kanbanCards.
 function resetAllMachinesFirebase(){  
   const updates={};  
-  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null }; });  
+  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false }; });  
   return db.ref().update(updates);  
 }  
 
@@ -2180,11 +2215,12 @@ function sel(id){
   let matHtml="";  
 
   if(m.materialDetails){  
-    matHtml=`<div style="background:#191203;border:1px dashed #f59e0b;padding:6px;border-radius:5px;font-size:11px;margin-top:4px;line-height:1.3">  
-        <b style="color:#f59e0b;font-size:11.5px">📦 MATERIAL DETAILS</b><br>  
-        <b>Part No:</b> <span style="font-weight:900;color:#f59e0b;font-size:11.5px">${escapeHtml(m.materialDetails.partNo)}</span> | <b>Name:</b> <span style="color:#fff;font-weight:900;">${escapeHtml(m.materialDetails.partName)}</span> | <b>Qty:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
-        <span style="color:#10b981;font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span> | 
-        <span style="color:#ffd000;font-weight:bold;">📍 Shift: ${escapeHtml(m.materialDetails.shift || '-')}</span>
+    const requestSent = m.materialRequestSent === true;
+    matHtml=`<div style="background:${requestSent ? '#fef08a' : '#191203'};border:1px dashed ${requestSent ? '#eab308' : '#f59e0b'};color:${requestSent ? '#713f12' : '#fff'};padding:6px;border-radius:5px;font-size:11px;margin-top:4px;line-height:1.3">  
+        <b style="color:${requestSent ? '#713f12' : '#f59e0b'};font-size:11.5px">📦 MATERIAL DETAILS${requestSent ? ' — REQUEST SENT' : ''}</b><br>  
+        <b>Part No:</b> <span style="font-weight:900;color:${requestSent ? '#713f12' : '#f59e0b'};font-size:11.5px">${escapeHtml(m.materialDetails.partNo)}</span> | <b>Name:</b> <span style="color:${requestSent ? '#713f12' : '#fff'};font-weight:900;">${escapeHtml(m.materialDetails.partName)}</span> | <b>Qty:</b> ${escapeHtml(String(m.materialDetails.qty))}<br>
+        <span style="color:${requestSent ? '#713f12' : '#10b981'};font-weight:bold;">🕒 Date & Time: ${escapeHtml(m.materialDetails.dateTime || '-')}</span> | 
+        <span style="color:${requestSent ? '#713f12' : '#ffd000'};font-weight:bold;">📍 Shift: ${escapeHtml(m.materialDetails.shift || '-')}</span>
       </div>`;  
   }  
 
@@ -2245,8 +2281,9 @@ function sel(id){
   if(operator && isOwnMachine){  
     let btns = statuses.map(s=>`<button class="statusBtn" onclick="upd('${s}')"><span>${s==="MATERIAL REQUIREMENT"?"📦 Request Material":s}</span><span>›</span></button>`).join("");  
     
-    if(hasStatus(m, "MATERIAL REQUIREMENT") || hasStatus(m, "MATERIAL SHORTAGE") || m.materialDetails){  
-      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED</span><span>✓</span></button>` + btns;  
+    // Operator can confirm receipt only after Store has sent the material request.
+    if(m.materialRequestSent === true){
+      btns = `<button class="statusBtn matRecvBtn" onclick="clearMaterialRequirement()"><span>✅ MATERIAL RECEIVED</span><span>✓</span></button>` + btns;
     }  
 
     document.getElementById("statusList").innerHTML=`  
@@ -2282,6 +2319,7 @@ function clearMaterialRequirement(){
   logStatusAction(curMachine, "MATERIAL RECEIVED", "Material Received", operator.name, oldSt, "RUNNING");
 
   m.materialDetails = null;  
+  m.materialRequestSent = false;
   m.status = getMachineStatusString(m);  
 
   saveMachine(curMachine).then(()=>{  
@@ -2401,6 +2439,7 @@ function submitMaterialRequirement(){
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
   const dateTimeStr = `${dateStr} | ${timeStr}`;
 
+  machines[curMachine].materialRequestSent = false;
   machines[curMachine].materialDetails={
     partNo: partNo,
     partName: partName,
@@ -2731,10 +2770,11 @@ function renderStoreDashboardTable(){
         const partName = mat.partName || "N/A";
         const qty = mat.qty || "0";
 
-        // Add blink class to rows that have Material Shortage
+        // Highlight material details yellow only after Store sends the request to the operator.
         const rowBlinkClass = isMatShortage ? "blinkAlert" : "";
+        const requestSentClass = m.materialRequestSent === true ? "storeRequestSent" : "";
 
-        rowsHtml += `<tr class="${rowBlinkClass}">
+        rowsHtml += `<tr class="${rowBlinkClass} ${requestSentClass}">
           <td class="storePartNo">${escapeHtml(partNo)}</td>
           <td class="storePartName">${escapeHtml(partName)}</td>
           <td class="storeMachine">${id}</td>
@@ -2747,6 +2787,9 @@ function renderStoreDashboardTable(){
           <td>${statusBadge}</td>
           <td>
             ${!isMatShortage ? `<button class="btnOutOfStock" onclick="markStoreOutOfStock('${id}')">OUT OF STOCK</button>` : ''}
+            ${m.materialRequestSent === true
+              ? `<button class="btnSendMaterialRequest" disabled>REQUEST SENT ✓</button>`
+              : `<button class="btnSendMaterialRequest" onclick="sendStoreMaterialRequest('${id}')">SEND MATERIAL REQUEST</button>`}
           </td>
         </tr>`;
       }
@@ -2770,6 +2813,28 @@ function markStoreOutOfStock(mcId){
   if(!confirm("Mark Material Out of Stock for Machine "+mcId+"? Status will update to MATERIAL SHORTAGE.")) return;
 
   updateDepartmentMachineStatus(mcId, "MATERIAL REQUIREMENT", "", "MATERIAL SHORTAGE");
+}
+
+function sendStoreMaterialRequest(mcId){
+  if(department !== "store"){ alert("Only Store Department can send the material request."); return; }
+  if(!mcId || !machines[mcId] || !machines[mcId].materialDetails){ return; }
+  if(machines[mcId].materialRequestSent === true){ alert("Material request already sent for "+mcId+"."); return; }
+  if(!confirm("Send material request to the operator of machine "+mcId+"?")) return;
+
+  const m = machines[mcId];
+  const oldSt = getMachineStatusString(m);
+  m.materialRequestSent = true;
+
+  saveMachine(mcId).then(()=>{
+    logStatusAction(mcId, "STORE MATERIAL REQUEST", "Material Request Sent to Operator", DEPARTMENT_CONFIG.store.name, oldSt, getMachineStatusString(m));
+    alert("Material request sent to machine "+mcId+" operator.");
+    renderAllDashboards();
+  }).catch(err=>{
+    m.materialRequestSent = false;
+    console.error(err);
+    alert("Material request could not be sent. Please check Firebase connection.");
+    renderAllDashboards();
+  });
 }
 
 function storeClearMaterial(mcId){
@@ -2952,11 +3017,13 @@ function updateDepartmentMachineStatus(mcId, clearIssue1, clearIssue2, addIssue)
   if(clearIssue1 === "ALL"){  
     issues = {};  
     m.materialDetails = null;
+    m.materialRequestSent = false;
   } else {  
     if(clearIssue1) delete issues[clearIssue1];  
     if(clearIssue2) delete issues[clearIssue2];  
     if((clearIssue1 === "MATERIAL REQUIREMENT" || clearIssue1 === "MATERIAL SHORTAGE") && !addIssue){  
-      m.materialDetails = null;  
+      m.materialDetails = null;
+      m.materialRequestSent = false;
     }  
   }  
 
