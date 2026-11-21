@@ -1066,6 +1066,85 @@ button:disabled {
   button, .no-print, #kanbanModal button { display:none!important; visibility:hidden!important; }
 }
 
+
+/* FINAL KANBAN PRINT OVERRIDE: prevent flex-centering from pushing the card down */
+@media print {
+  @page { size: 5.51in 8.27in; margin: 0; }
+  html, body {
+    display: block !important;
+    width: 5.51in !important;
+    height: 8.27in !important;
+    min-width: 5.51in !important;
+    min-height: 8.27in !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    align-items: initial !important;
+    justify-content: initial !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body * { visibility: hidden !important; }
+  #kanbanModal {
+    position: fixed !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 5.51in !important;
+    height: 8.27in !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+  #kanbanModal .kanbanBox {
+    position: static !important;
+    display: block !important;
+    width: 5.51in !important;
+    max-width: 5.51in !important;
+    height: 8.27in !important;
+    max-height: 8.27in !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+  #kanbanModal h2, #kanbanModal input, #kanbanModal button, #kanbanSavedActions { display: none !important; }
+  #kanbanPrintArea, #kanbanPrintArea * { visibility: visible !important; }
+  #kanbanPrintArea {
+    display: flex !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 5.51in !important;
+    min-width: 5.51in !important;
+    max-width: 5.51in !important;
+    height: 8.27in !important;
+    min-height: 8.27in !important;
+    max-height: 8.27in !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    border: 2px solid #111 !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  #kanbanQr img, #kanbanQr canvas {
+    width: 2.05in !important;
+    height: 2.05in !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    image-rendering: pixelated !important;
+  }
+}
+
 </style>  
 </head>  
 <body>  
