@@ -3055,55 +3055,66 @@ function getFilteredLogsForDepartment(logsData) {
   const grouped = {};
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED",
-    "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST",
-    "MATERIAL REQUIREMENT CANCELLED"
+    "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST"
   ];
 
-  // First collect matching events. Some older Store events were saved without
-  // requestNo, so correlate them with the Operator event using the original
-  // request timestamp + machine + part + quantity.
   const events = Object.keys(logsData).map(key => logsData[key] || {}).filter(l => {
     const haystack = [l.newStatus, l.oldStatus, l.action, l.detail].join(" ").toUpperCase();
     return ALLOWED_KEYWORDS.some(kw => haystack.includes(kw));
-  });
+  }).sort((a,b) => (Number(a.timestamp)||0) - (Number(b.timestamp)||0));
 
-  const makeRequestFingerprint = l => [
-    l.machine || "-", l.partNo || "-", l.partName || "-", l.qty || "-",
-    l.requestDateTime || "-", l.shift || "-"
-  ].map(v => String(v).trim()).join("|");
+  const norm = v => String(v ?? "-").trim().toLowerCase().replace(/\s+/g," ");
+  const dateOnly = v => {
+    const str = String(v || "");
+    const m = str.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
+    return m ? `${m[1].padStart(2,"0")}/${m[2].padStart(2,"0")}/${m[3].slice(-2)}` : norm(str).split("|")[0];
+  };
 
-  // Prefer the real daily serial if any event for the same request has one.
-  const serialByFingerprint = {};
+  // Each request is keyed by its unique daily serial. Older events without
+  // serials are attached to the matching machine/part/qty/shift request.
+  const requestGroups = [];
+  const requestByNo = {};
+  const baseKey = l => [l.machine, l.partNo, l.partName, l.qty, l.shift, dateOnly(l.requestDateTime || l.timeStr)].map(norm).join("|");
+
   events.forEach(l => {
-    if (l.requestNo) serialByFingerprint[makeRequestFingerprint(l)] = String(l.requestNo);
-  });
+    const requestNo = String(l.requestNo || "").trim();
+    let group = requestNo ? requestByNo[requestNo] : null;
+    const base = baseKey(l);
 
-  events.forEach(l => {
-    const machine = l.machine || "-";
-    const partNo = l.partNo || "-";
-    const partName = l.partName || "-";
-    const qty = l.qty || "-";
-    const requestDateTime = l.requestDateTime || l.timeStr || "-";
-    const fingerprint = makeRequestFingerprint(l);
-    const requestNo = l.requestNo || serialByFingerprint[fingerprint] || "";
-    // Fingerprint groups events even if one of the older Store/Receive logs
-    // did not carry the Request Number. The serial is displayed when available.
-    const groupKey = fingerprint;
+    if (!group && !requestNo) {
+      const candidates = requestGroups.filter(g => g._baseKey === base);
+      if (candidates.length === 1) group = candidates[0];
+      else if (candidates.length > 1) {
+        const t = Number(l.timestamp) || 0;
+        group = candidates.sort((a,b) =>
+          Math.abs((a._requestTimestamp||a._sortTime)-t) -
+          Math.abs((b._requestTimestamp||b._sortTime)-t)
+        )[0];
+      }
+    }
 
-    if (!grouped[groupKey]) {
-      grouped[groupKey] = {
-        "Machine Name": machine,
-        "Request Date & Time": requestDateTime,
+    if (!group) {
+      group = {
+        "Request Number": requestNo || "Legacy",
+        "Machine Name": l.machine || "-",
+        "Request Date & Time": l.requestDateTime || l.timeStr || "-",
         "Operator Material Requirement": "-",
         "Store Action": "-",
         "Operator Receive Action": "-",
         "Material Requirement Cancel Reason": "-",
         "Shift": l.shift || "-",
-        "Part Name": toExcelProperCase(partName),
-        "Part Number": partNo,
-        "Qty": qty,
-        _sortTime: Number(l.timestamp) || 0
+        "Part Name": toExcelProperCase(l.partName || "-"),
+        "Part Number": l.partNo || "-",
+        "Qty": l.qty || "-",
+        _baseKey: base,
+        _requestTimestamp: Number(l.timestamp)||0,
+        _sortTime: Number(l.timestamp)||0
       };
+      requestGroups.push(group);
+      if (requestNo) requestByNo[requestNo] = group;
+    } else if (requestNo) {
+      group["Request Number"] = requestNo;
+      requestByNo[requestNo] = group;
     }
 
     const eventTime = l.timeStr || (l.timestamp ? new Date(Number(l.timestamp)).toLocaleString("en-IN") : "-");
@@ -3112,27 +3123,26 @@ function getFilteredLogsForDepartment(logsData) {
     const eventDisplay = `${toExcelProperCase(actionText)}\n${eventTime}`;
 
     if (actionUpper.includes("MATERIAL REQUIREMENT CANCELLED")) {
-      const reasonMatch = actionText.match(/Reason:\\s*(.+)/i);
-      grouped[groupKey]["Material Requirement Cancel Reason"] =
-        `${toExcelProperCase(reasonMatch ? reasonMatch[1] : actionText)}\\n${eventTime}`;
+      const reasonMatch = actionText.match(/Reason:\s*(.+)/i);
+      group["Material Requirement Cancel Reason"] =
+        `${toExcelProperCase(reasonMatch ? reasonMatch[1] : actionText)}\n${eventTime}`;
     } else if (actionUpper.includes("MATERIAL RECEIVED")) {
-      grouped[groupKey]["Operator Receive Action"] = eventDisplay;
-    } else if (actionUpper.includes("STORE MATERIAL REQUEST") || actionUpper.includes("MATERIAL REQUEST SENT")) {
-      grouped[groupKey]["Store Action"] = eventDisplay;
+      group["Operator Receive Action"] = eventDisplay;
+    } else if (actionUpper.includes("MATERIAL REQUEST SENT") || actionUpper.includes("STORE MATERIAL REQUEST")) {
+      group["Store Action"] = eventDisplay;
     } else if (actionUpper.includes("MATERIAL REQUIREMENT")) {
-      grouped[groupKey]["Operator Material Requirement"] = eventDisplay;
-      if (!l.requestDateTime && l.timeStr) grouped[groupKey]["Request Date & Time"] = l.timeStr;
+      group["Operator Material Requirement"] = eventDisplay;
+      if (l.requestDateTime) group["Request Date & Time"] = l.requestDateTime;
+      if (l.requestNo) group["Request Number"] = String(l.requestNo);
+      group._requestTimestamp = Number(l.timestamp)||group._requestTimestamp;
     }
 
-    const eventTimestamp = Number(l.timestamp) || 0;
-    if (eventTimestamp && (!grouped[groupKey]._sortTime || eventTimestamp < grouped[groupKey]._sortTime)) {
-      grouped[groupKey]._sortTime = eventTimestamp;
-    }
+    const eventTimestamp = Number(l.timestamp)||0;
+    if (eventTimestamp && (!group._sortTime || eventTimestamp < group._sortTime)) group._sortTime = eventTimestamp;
   });
 
-  return Object.values(grouped)
-    .sort((a, b) => a._sortTime - b._sortTime)
-    .map(({_sortTime, ...row}) => row);
+  return requestGroups.sort((a,b)=>a._sortTime-b._sortTime)
+    .map(({_sortTime,_baseKey,_requestTimestamp,...row})=>row);
 }
 
 // Excel design follows the supplied Material Record reference image:
@@ -3140,22 +3150,22 @@ function getFilteredLogsForDepartment(logsData) {
 // filter arrows, clear borders and action-specific highlight colors.
 function buildMaterialRecordWorksheet(rows) {
   const headers = [
-    "Machine Name", "Request Date & Time",
+    "Request Number", "Machine Name", "Request Date & Time",
     "Operator Material Requirement", "Store Action", "Operator Receive Action",
     "Material Requirement Cancel Reason",
     "Shift", "Part Name", "Part Number", "Qty"
   ];
   const aoa = [
-    ["🏭  Material Record", "", "", "", "", "", "", "", "", ""],
+    ["🏭  Material Record", "", "", "", "", "", "", "", "", "", ""],
     headers,
     ...rows.map(row => headers.map(header => row[header] ?? "-"))
   ];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 9 } }];
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }];
   ws["!autofilter"] = { ref: `A2:J${rows.length + 2}` };
   ws["!cols"] = [
-    { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 }, { wch: 30 },
-    { wch: 28 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
+    { wch: 14 }, { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 },
+    { wch: 30 }, { wch: 28 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
   ];
   ws["!rows"] = [{ hpt: 38 }, { hpt: 32 }, ...rows.map(() => ({ hpt: 48 }))];
 
@@ -3240,6 +3250,7 @@ function downloadDepartmentExcel(){
               "Store Action": "-",
               "Operator Receive Action": "-",
               "Material Requirement Cancel Reason": "-",
+              "Request Number": mat.requestNo || "Legacy",
               "Shift": mat.shift || getCurrentShift(),
               "Part Name": toExcelProperCase(mat.partName || "-"),
               "Part Number": mat.partNo || "-",
