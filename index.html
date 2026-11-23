@@ -2070,9 +2070,9 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-function logStatusAction(mc, action, detail, user, oldSt, newSt){
+function logStatusAction(mc, action, detail, user, oldSt, newSt, materialOverride){
   const m = machines[mc] || {};
-  const mat = m.materialDetails || {};
+  const mat = materialOverride || m.materialDetails || {};
   const eventTime = Date.now();
   const eventDateTime = new Date(eventTime).toLocaleString("en-IN");
 
@@ -2720,7 +2720,7 @@ function confirmMaterialRequirementCancel(){
     saveMachine(curMachine),
     notificationRef.set(Object.assign({}, m.materialCancel))
   ]).then(()=>{
-    logStatusAction(curMachine, "MATERIAL REQUIREMENT CANCELLED", "Reason: " + reason, operator.name, oldSt, getMachineStatusString(m));
+    logStatusAction(curMachine, "MATERIAL REQUIREMENT CANCELLED", "Reason: " + reason, operator.name, oldSt, getMachineStatusString(m), cancelledMaterial);
     closeMaterialCancelModal();
     alert("Material Requirement cancel झाली. Store Department ला notification पाठवले आहे.");
     sel(curMachine);
@@ -3055,7 +3055,8 @@ function getFilteredLogsForDepartment(logsData) {
   const grouped = {};
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED",
-    "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST"
+    "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST",
+    "MATERIAL REQUIREMENT CANCELLED"
   ];
 
   // First collect matching events. Some older Store events were saved without
@@ -3091,20 +3092,18 @@ function getFilteredLogsForDepartment(logsData) {
 
     if (!grouped[groupKey]) {
       grouped[groupKey] = {
-        "Request Number": requestNo || "Legacy",
         "Machine Name": machine,
         "Request Date & Time": requestDateTime,
         "Operator Material Requirement": "-",
         "Store Action": "-",
         "Operator Receive Action": "-",
+        "Material Requirement Cancel Reason": "-",
         "Shift": l.shift || "-",
         "Part Name": toExcelProperCase(partName),
         "Part Number": partNo,
         "Qty": qty,
         _sortTime: Number(l.timestamp) || 0
       };
-    } else if (requestNo) {
-      grouped[groupKey]["Request Number"] = requestNo;
     }
 
     const eventTime = l.timeStr || (l.timestamp ? new Date(Number(l.timestamp)).toLocaleString("en-IN") : "-");
@@ -3112,7 +3111,11 @@ function getFilteredLogsForDepartment(logsData) {
     const actionUpper = (String(l.action || "") + " " + actionText + " " + String(l.newStatus || "")).toUpperCase();
     const eventDisplay = `${toExcelProperCase(actionText)}\n${eventTime}`;
 
-    if (actionUpper.includes("MATERIAL RECEIVED")) {
+    if (actionUpper.includes("MATERIAL REQUIREMENT CANCELLED")) {
+      const reasonMatch = actionText.match(/Reason:\\s*(.+)/i);
+      grouped[groupKey]["Material Requirement Cancel Reason"] =
+        `${toExcelProperCase(reasonMatch ? reasonMatch[1] : actionText)}\\n${eventTime}`;
+    } else if (actionUpper.includes("MATERIAL RECEIVED")) {
       grouped[groupKey]["Operator Receive Action"] = eventDisplay;
     } else if (actionUpper.includes("STORE MATERIAL REQUEST") || actionUpper.includes("MATERIAL REQUEST SENT")) {
       grouped[groupKey]["Store Action"] = eventDisplay;
@@ -3137,8 +3140,9 @@ function getFilteredLogsForDepartment(logsData) {
 // filter arrows, clear borders and action-specific highlight colors.
 function buildMaterialRecordWorksheet(rows) {
   const headers = [
-    "Request Number", "Machine Name", "Request Date & Time",
+    "Machine Name", "Request Date & Time",
     "Operator Material Requirement", "Store Action", "Operator Receive Action",
+    "Material Requirement Cancel Reason",
     "Shift", "Part Name", "Part Number", "Qty"
   ];
   const aoa = [
@@ -3150,8 +3154,8 @@ function buildMaterialRecordWorksheet(rows) {
   ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 9 } }];
   ws["!autofilter"] = { ref: `A2:J${rows.length + 2}` };
   ws["!cols"] = [
-    { wch: 15 }, { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 },
-    { wch: 30 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
+    { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 }, { wch: 30 },
+    { wch: 28 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
   ];
   ws["!rows"] = [{ hpt: 38 }, { hpt: 32 }, ...rows.map(() => ({ hpt: 48 }))];
 
@@ -3187,15 +3191,15 @@ function buildMaterialRecordWorksheet(rows) {
       ws[ref].s = {
         font: { name: "Aptos", sz: 10, color: { rgb: "161616" } },
         fill: { patternType: "solid", fgColor: { rgb: bandColor } },
-        alignment: { horizontal: c >= 3 && c <= 5 ? "left" : "center", vertical: "center", wrapText: true },
+        alignment: { horizontal: c >= 2 && c <= 5 ? "left" : "center", vertical: "center", wrapText: true },
         border
       };
     }
-    [3, 4, 5].forEach(c => {
+    [2, 3, 4, 5].forEach(c => {
       const ref = XLSX.utils.encode_cell({ r, c });
       const value = String(rows[r - 2][headers[c]] || "");
       if (!ws[ref] || value === "-") return;
-      const fill = c === 3 ? "FFE699" : c === 4 ? "E4C7F7" : "C6EFC0";
+      const fill = c === 2 ? "FFE699" : c === 3 ? "E4C7F7" : c === 4 ? "C6EFC0" : "F4CCCC";
       ws[ref].s = {
         ...ws[ref].s,
         font: { name: "Aptos", sz: 10, bold: true, color: { rgb: "161616" } },
@@ -3230,12 +3234,12 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Request Number": mat.requestNo || "Legacy",
               "Machine Name": mcId,
               "Request Date & Time": mat.dateTime || new Date().toLocaleString("en-IN"),
               "Operator Material Requirement": toExcelProperCase(stStr) + "\\n" + (mat.dateTime || "-"),
               "Store Action": "-",
               "Operator Receive Action": "-",
+              "Material Requirement Cancel Reason": "-",
               "Shift": mat.shift || getCurrentShift(),
               "Part Name": toExcelProperCase(mat.partName || "-"),
               "Part Number": mat.partNo || "-",
