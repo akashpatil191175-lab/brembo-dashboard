@@ -3057,10 +3057,18 @@ function getFilteredLogsForDepartment(logsData) {
     );
 
     if (isMatched) {
+      // Backward-compatible label correction for older Store action logs.
+      // New Store events are also saved with the corrected wording below.
+      const rawActionDetail = String(l.detail || l.action || "-");
+      const normalizedActionDetail = rawActionDetail.trim().toUpperCase();
+      const displayActionDetail = normalizedActionDetail === "MATERIAL REQUEST SENT TO OPERATOR"
+        ? "Material Request Sent to Store"
+        : rawActionDetail;
+
       filtered.unshift({
         "Date and Time": l.timeStr || "-",
         "Machine Name": l.machine || "-",
-        "Action Taken": toExcelProperCase(l.detail || l.action || "-"),
+        "Action Taken": toExcelProperCase(displayActionDetail),
         "Shift": l.shift || "-",
         "Part Name": toExcelProperCase(l.partName || "-"),
         "Part Number": l.partNo || "-",
@@ -3417,7 +3425,7 @@ function sendStoreMaterialRequest(mcId){
   m.materialRequestSent = true;
 
   saveMachine(mcId).then(()=>{
-    logStatusAction(mcId, "STORE MATERIAL REQUEST", "Material Request Sent to Operator", DEPARTMENT_CONFIG.store.name, oldSt, getMachineStatusString(m));
+    logStatusAction(mcId, "STORE MATERIAL REQUEST", "Material Request Sent to Store", DEPARTMENT_CONFIG.store.name, oldSt, getMachineStatusString(m));
     alert("Material request sent to machine "+mcId+" operator.");
     renderAllDashboards();
   }).catch(err=>{
