@@ -1033,6 +1033,35 @@ button:disabled {
   filter: brightness(1.2);
 }
 
+
+/* MATERIAL REQUIREMENT CANCELLATION */
+.cancelRequirementBtn{
+  width:100%;margin-top:7px;padding:9px 10px;border:1px solid #ef4444;border-radius:7px;
+  background:linear-gradient(180deg,#991b1b,#450a0a);color:#fff;font-size:11px;font-weight:900;
+}
+.cancelModalOverlay{
+  position:fixed;inset:0;z-index:1000005;display:none;align-items:center;justify-content:center;
+  padding:14px;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);
+}
+.cancelModalBox{
+  width:min(460px,100%);max-height:90vh;overflow:auto;background:#101010;border:1px solid #ef4444;
+  border-radius:14px;padding:16px;box-shadow:0 12px 50px #000;
+}
+.cancelModalBox select,.cancelModalBox textarea{
+  width:100%;margin-top:7px;padding:10px;border:1px solid #444;border-radius:8px;
+  background:#080808;color:#fff;font-size:13px;outline:none;
+}
+.cancelModalBox textarea{min-height:82px;resize:vertical;}
+.storeCancelNotifBtn{
+  position:relative;border:1px solid #ef4444;background:#2a0909;color:#fff;border-radius:7px;
+  padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap;
+}
+.storeCancelNotifBtn.hasUnread{animation:blinkAnim .8s infinite alternate;box-shadow:0 0 12px #ef444488;}
+.storeCancelNotifCount{display:inline-flex;min-width:17px;height:17px;align-items:center;justify-content:center;
+  margin-left:4px;padding:0 4px;border-radius:99px;background:#ef4444;color:#fff;font-size:9px;}
+.cancelNoticeItem{background:#1b1111;border:1px solid #5b2020;border-radius:9px;padding:11px;margin-top:8px;color:#eee;font-size:12px;}
+.cancelNoticeItem.unread{border-color:#ef4444;box-shadow:inset 3px 0 #ef4444;}
+
 @media(max-width:1200px){  
   .deptMachineGrid { grid-template-columns: repeat(3, 1fr); }
 }  
@@ -1409,6 +1438,35 @@ button:disabled {
 
 <div id="appWrapper">
 
+  <div id="materialCancelModal" class="cancelModalOverlay">
+    <div class="cancelModalBox">
+      <h2 style="color:#f87171;font-weight:900;font-size:15px;text-align:center;margin-bottom:8px;">CANCEL MATERIAL REQUIREMENT</h2>
+      <p style="font-size:11px;color:#aaa;text-align:center;margin-bottom:8px;">Store Department ला cancellation चे कारण पाठवले जाईल.</p>
+      <label style="display:block;color:#fbbf24;font-size:11px;font-weight:900;">SELECT REASON</label>
+      <select id="materialCancelReason" onchange="toggleMaterialCancelOther()">
+        <option value="">-- Select Reason --</option>
+        <option value="Setup Change">Setup Change</option>
+        <option value="Material Not Required">Material Not Required</option>
+        <option value="Machine Change">Machine Change</option>
+        <option value="Wrong Requirement">Wrong Requirement</option>
+        <option value="Quantity Change">Quantity Change</option>
+        <option value="Part Change">Part Change</option>
+        <option value="Other">Other (Type Manually)</option>
+      </select>
+      <textarea id="materialCancelOther" style="display:none;" maxlength="300" placeholder="Enter cancellation reason..."></textarea>
+      <button onclick="confirmMaterialRequirementCancel()" class="loginBtn" style="background:linear-gradient(180deg,#dc2626,#991b1b);border-color:#f87171;height:40px;font-size:12px;">CONFIRM CANCEL & NOTIFY STORE</button>
+      <button onclick="closeMaterialCancelModal()" class="loginBtn" style="background:#222;border-color:#444;height:38px;font-size:12px;">GO BACK</button>
+    </div>
+  </div>
+
+  <div id="storeCancelNotificationsModal" class="cancelModalOverlay">
+    <div class="cancelModalBox" style="border-color:#f59e0b;">
+      <h2 style="color:#fbbf24;font-weight:900;font-size:15px;text-align:center;margin-bottom:8px;">🔔 CANCELLED MATERIAL REQUIREMENTS</h2>
+      <div id="storeCancelNotificationsList" style="max-height:62vh;overflow:auto;"></div>
+      <button onclick="closeStoreCancelNotifications()" class="loginBtn" style="background:#222;border-color:#444;height:38px;font-size:12px;">CLOSE</button>
+    </div>
+  </div>
+
   <div id="materialModal">    
     <div class="modalContent">  
       <h2 style="color:#f59e0b;font-weight:900;font-size:14px;margin-bottom:10px;text-align:center;letter-spacing:1px;">MATERIAL REQUIREMENT FORM</h2>  
@@ -1578,7 +1636,8 @@ button:disabled {
             <span style="font-size:22px;">🏪</span>
             <h2>STORE DEPARTMENT DASHBOARD</h2>
           </div>
-          <div style="text-align:right; font-size:11px; font-weight:800; color:#a1a1aa;">
+          <div style="display:flex;align-items:center;gap:8px;text-align:right;font-size:11px;font-weight:800;color:#a1a1aa;">
+            <button id="storeCancelNotifBtn" class="storeCancelNotifBtn" onclick="openStoreCancelNotifications()">🔔 CANCEL ALERTS <span id="storeCancelNotifCount" class="storeCancelNotifCount">0</span></button>
             <span id="storeHeaderDateTime">--:--:--</span>
           </div>
         </div>
@@ -1886,6 +1945,7 @@ let lastWa = "";
 let operatorStatusFilter = "TOTAL";  
 let departmentStatusFilter = "MATERIAL REQUIREMENT";  
 let allStatusLogs = {};
+let allMaterialCancelNotifications = {};
 
 function getCurrentShift(){  
   const now = new Date();  
@@ -1994,7 +2054,7 @@ function hasStatus(m, st){
 }  
 
 function getDefaultMachine(){  
-  return { status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false };  
+  return { status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false, materialCancel:null };  
 }  
 
 function getAllMachines(){  
@@ -2012,7 +2072,7 @@ function saveMachine(id){
 // IMPORTANT: RESET ALL updates only machines/<id>; it must never remove the root or kanbanCards.
 function resetAllMachinesFirebase(){  
   const updates={};  
-  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false }; });  
+  ALL_MACHINES_LIST.forEach(id=>{ updates["machines/"+id]={ status:"RUNNING", oldStatus:"RUNNING", issues:{}, op:null, materialDetails:null, materialRequestSent:false, materialCancel:null }; });  
   return db.ref().update(updates);  
 }  
 
@@ -2043,6 +2103,10 @@ function load(){
   }
   db.ref("statusLogs").on("value", snap => {
     allStatusLogs = snap.val() || {};
+  });
+  db.ref("materialCancellationNotifications").on("value", snap => {
+    allMaterialCancelNotifications = snap.val() || {};
+    updateStoreCancelNotificationBadge();
   });
 
   db.ref("machines").on("value",snap=>{  
@@ -2590,13 +2654,158 @@ function sel(id){
       <div class="urgentBox">  
         <input type="checkbox" id="urgentWaCheck">  
         <label for="urgentWaCheck">🚨 URGENT? SEND WHATSAPP ALERT</label>  
-      </div>`;  
+      </div>
+      ${m.materialDetails && (hasStatus(m,"MATERIAL REQUIREMENT") || hasStatus(m,"MATERIAL SHORTAGE")) && !m.materialCancel ? `<button class="cancelRequirementBtn" onclick="openMaterialCancelModal()">❌ CANCEL MATERIAL REQUIREMENT</button>` : ""}`;  
     document.getElementById("lockMsg").innerText = "You can update only your assigned machine: "+operator.machine;  
   }else{  
     document.getElementById("statusList").innerHTML=`<div style="margin-top:6px;padding:4px;border:1px dashed #444;border-radius:4px;color:#777;font-size:8.5px;font-weight:700;text-align:center">🔒 VIEW ONLY MODE</div>`;  
     document.getElementById("lockMsg").innerText = "View only. Your assigned machine is: "+(operator ? operator.machine : "None");  
   }  
 }  
+
+function openMaterialCancelModal(){
+  if(!operator || !curMachine || curMachine !== operator.machine){ alert("Access denied."); return; }
+  const m = machines[curMachine];
+  if(!m || !m.materialDetails || m.materialCancel){ alert("Active Material Requirement सापडली नाही."); return; }
+  document.getElementById("materialCancelReason").value="";
+  document.getElementById("materialCancelOther").value="";
+  document.getElementById("materialCancelOther").style.display="none";
+  document.getElementById("materialCancelModal").style.display="flex";
+}
+
+function closeMaterialCancelModal(){
+  document.getElementById("materialCancelModal").style.display="none";
+}
+
+function toggleMaterialCancelOther(){
+  const isOther = document.getElementById("materialCancelReason").value === "Other";
+  const box = document.getElementById("materialCancelOther");
+  box.style.display = isOther ? "block" : "none";
+  if(!isOther) box.value="";
+}
+
+function confirmMaterialRequirementCancel(){
+  if(!operator || !curMachine || curMachine !== operator.machine){ alert("Access denied."); return; }
+  if(!db){ alert("Firebase connection unavailable."); return; }
+  const m = machines[curMachine];
+  if(!m || !m.materialDetails || m.materialCancel){ alert("Active Material Requirement उपलब्ध नाही."); closeMaterialCancelModal(); return; }
+
+  const selected = document.getElementById("materialCancelReason").value;
+  const typed = document.getElementById("materialCancelOther").value.trim();
+  if(!selected){ alert("कृपया cancellation reason निवडा."); return; }
+  if(selected === "Other" && !typed){ alert("कृपया cancellation reason type करा."); return; }
+  const reason = selected === "Other" ? typed : selected;
+  const oldSt = getMachineStatusString(m);
+  const now = Date.now();
+  const cancelledMaterial = Object.assign({}, m.materialDetails);
+
+  m.materialCancel = {
+    reason: reason,
+    reasonType: selected,
+    operatorName: operator.name,
+    operatorId: operator.id,
+    machine: curMachine,
+    partNo: cancelledMaterial.partNo || "-",
+    partName: cancelledMaterial.partName || "-",
+    qty: cancelledMaterial.qty || "-",
+    requestDateTime: cancelledMaterial.dateTime || "-",
+    shift: cancelledMaterial.shift || operator.shift || getCurrentShift(),
+    cancelledAt: now,
+    cancelledAtText: new Date(now).toLocaleString("en-IN"),
+    notificationRead: false
+  };
+
+  const issues = getMachineIssues(m);
+  delete issues["MATERIAL REQUIREMENT"];
+  delete issues["MATERIAL SHORTAGE"];
+  m.issues = issues;
+  m.materialDetails = null;
+  m.materialRequestSent = false;
+  m.status = getMachineStatusString(m);
+
+  const notificationRef = db.ref("materialCancellationNotifications").push();
+  m.materialCancel.notificationId = notificationRef.key;
+  Promise.all([
+    saveMachine(curMachine),
+    notificationRef.set(Object.assign({}, m.materialCancel))
+  ]).then(()=>{
+    logStatusAction(curMachine, "MATERIAL REQUIREMENT CANCELLED", "Reason: " + reason, operator.name, oldSt, getMachineStatusString(m));
+    closeMaterialCancelModal();
+    alert("Material Requirement cancel झाली. Store Department ला notification पाठवले आहे.");
+    sel(curMachine);
+    renderAllDashboards();
+  }).catch(err=>{
+    console.error(err);
+    alert("Cancellation Firebase मध्ये save झाली नाही. Internet/Firebase Rules तपासा.");
+  });
+}
+
+function getStoreCancellationNotices(){
+  return Object.keys(allMaterialCancelNotifications || {}).map(notificationId=>{
+    const notice = allMaterialCancelNotifications[notificationId] || {};
+    return {notificationId, machine:notice.machine || "-", notice};
+  }).sort((a,b)=>(b.notice.cancelledAt||0)-(a.notice.cancelledAt||0));
+}
+
+function updateStoreCancelNotificationBadge(){
+  const btn = document.getElementById("storeCancelNotifBtn");
+  const countEl = document.getElementById("storeCancelNotifCount");
+  if(!btn || !countEl) return;
+  const unread = getStoreCancellationNotices().filter(x=>x.notice.notificationRead !== true).length;
+  countEl.innerText = String(unread);
+  btn.classList.toggle("hasUnread", unread > 0);
+}
+
+function openStoreCancelNotifications(){
+  if(department !== "store"){ alert("Only Store Department can view cancellation alerts."); return; }
+  const list = document.getElementById("storeCancelNotificationsList");
+  const notices = getStoreCancellationNotices();
+  if(!notices.length){
+    list.innerHTML = '<div style="padding:18px;text-align:center;color:#aaa;font-size:12px;">No cancelled material requirements.</div>';
+  } else {
+    list.innerHTML = notices.map(({machine,notice})=>{
+      const unread = notice.notificationRead !== true;
+      return `<div class="cancelNoticeItem ${unread ? "unread" : ""}">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+          <b style="color:#f87171;">❌ MACHINE ${escapeHtml(machine)} — CANCELLED</b>
+          <span style="font-size:9px;color:${unread ? "#fbbf24" : "#777"};font-weight:900;">${unread ? "NEW" : "READ"}</span>
+        </div>
+        <div style="margin-top:7px;line-height:1.6;">
+          <b>Part No:</b> ${escapeHtml(notice.partNo || "-")}<br>
+          <b>Part Name:</b> ${escapeHtml(notice.partName || "-")}<br>
+          <b>Quantity:</b> ${escapeHtml(String(notice.qty || "-"))}<br>
+          <b>Operator:</b> ${escapeHtml(notice.operatorName || "-")} (${escapeHtml(notice.operatorId || "-")})<br>
+          <b>Shift:</b> ${escapeHtml(notice.shift || "-")}<br>
+          <b>Reason:</b> <span style="color:#fbbf24;font-weight:900;">${escapeHtml(notice.reason || "-")}</span><br>
+          <b>Cancelled At:</b> ${escapeHtml(notice.cancelledAtText || "-")}
+        </div>
+        ${unread ? `<button onclick="markStoreCancellationRead('${notificationId}')" style="margin-top:8px;width:100%;padding:7px;border-radius:6px;background:#14532d;border:1px solid #22c55e;color:#fff;font-weight:900;">✓ ACKNOWLEDGE / MARK READ</button>` : ""}
+      </div>`;
+    }).join("");
+  }
+  document.getElementById("storeCancelNotificationsModal").style.display="flex";
+}
+
+function markStoreCancellationRead(notificationId){
+  if(department !== "store"){ alert("Store Department access only."); return; }
+  const notice = allMaterialCancelNotifications[notificationId];
+  if(!notice) return;
+  const updates = {notificationRead:true, readAt:Date.now(), readBy:DEPARTMENT_CONFIG.store.name};
+  db.ref("materialCancellationNotifications/"+notificationId).update(updates).then(()=>{
+    const m = machines[notice.machine];
+    if(m && m.materialCancel && m.materialCancel.notificationId === notificationId){
+      m.materialCancel.notificationRead = true;
+      return saveMachine(notice.machine);
+    }
+  }).then(()=>{
+    openStoreCancelNotifications();
+    updateStoreCancelNotificationBadge();
+  }).catch(err=>{ console.error(err); alert("Notification status update failed."); });
+}
+
+function closeStoreCancelNotifications(){
+  document.getElementById("storeCancelNotificationsModal").style.display="none";
+}
 
 function clearMaterialRequirement(){  
   if(!operator){ alert("Operator login required."); return; }  
@@ -2736,6 +2945,7 @@ function submitMaterialRequirement(){
   const dateTimeStr = `${dateStr} | ${timeStr}`;
 
   machines[curMachine].materialRequestSent = false;
+  machines[curMachine].materialCancel = null;
   machines[curMachine].materialDetails={
     partNo: partNo,
     partName: partName,
@@ -3018,8 +3228,9 @@ function renderStoreDashboardTable(){
     const m = machines[id] || {};
     const isMatReq = hasStatus(m, "MATERIAL REQUIREMENT");
     const isMatShortage = hasStatus(m, "MATERIAL SHORTAGE");
+    const isCancelled = !!m.materialCancel;
 
-    if(isMatReq || isMatShortage || m.materialDetails){
+    if(!isCancelled && (isMatReq || isMatShortage || m.materialDetails)){
       totalReq++;
       const mat = m.materialDetails || {};
       const reqTimestamp = mat.timestamp || now;
@@ -3102,6 +3313,7 @@ function renderStoreDashboardTable(){
   document.getElementById("storeKpiOnTime").innerText = onTimeCount;
   document.getElementById("storeKpiDelayed").innerText = delayedCount;
   document.getElementById("storeKpiShortage").innerText = shortageCount;
+  updateStoreCancelNotificationBadge();
 }
 
 function markStoreOutOfStock(mcId){
