@@ -2463,6 +2463,8 @@ function logStatusAction(mc, action, detail, user, oldSt, newSt, materialOverrid
     action: action,
     detail: detail,
     user: user || "System",
+    operatorId: mat.operatorId || (operator && operator.id) || "",
+    operatorName: mat.operatorName || (operator && operator.name) || "",
     shift: mat.shift || getCurrentShift(),
     partNo: mat.partNo || "-",
     partName: mat.partName || "-",
@@ -3340,6 +3342,8 @@ async function submitMaterialRequirement(){
     machines[curMachine].materialCancel = null;
     machines[curMachine].materialDetails={
       requestNo: requestNo,
+      operatorId: operator.id || "",
+      operatorName: operator.name || "",
       partNo: partNo,
       partName: partName,
       qty: qty,
@@ -3490,6 +3494,7 @@ function getFilteredLogsForDepartment(logsData) {
     if (!group) {
       group = {
         "Request Number": requestNo || "Legacy",
+        "Operator ID": l.operatorId || "-",
         "Machine Name": l.machine || "-",
         "Request Date & Time": l.requestDateTime || l.timeStr || "-",
         "Operator Material Requirement": "-",
@@ -3514,6 +3519,7 @@ function getFilteredLogsForDepartment(logsData) {
       group["Request Number"] = requestNo;
       requestByNo[requestNo] = group;
     }
+    if ((group["Operator ID"] === "-" || !group["Operator ID"]) && l.operatorId) group["Operator ID"] = l.operatorId;
     if (group["Machine Name"] === "-" && l.machine) group["Machine Name"] = l.machine;
     if (group["Request Date & Time"] === "-" && l.requestDateTime) group["Request Date & Time"] = l.requestDateTime;
     if (group["Part Number"] === "-" && l.partNo) group["Part Number"] = l.partNo;
@@ -3553,21 +3559,21 @@ function getFilteredLogsForDepartment(logsData) {
 // filter arrows, clear borders and action-specific highlight colors.
 function buildMaterialRecordWorksheet(rows) {
   const headers = [
-    "Request Number", "Machine Name", "Request Date & Time",
+    "Request Number", "Operator ID", "Machine Name", "Request Date & Time",
     "Operator Material Requirement", "Store Action", "Operator Receive Action",
     "Material Requirement Cancel Reason",
     "Shift", "Part Name", "Part Number", "Qty"
   ];
   const aoa = [
-    ["🏭  Material Record", "", "", "", "", "", "", "", "", "", ""],
+    ["🏭  Material Record", "", "", "", "", "", "", "", "", "", "", ""],
     headers,
     ...rows.map(row => headers.map(header => row[header] ?? "-"))
   ];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }];
-  ws["!autofilter"] = { ref: `A2:J${rows.length + 2}` };
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }];
+  ws["!autofilter"] = { ref: `A2:L${rows.length + 2}` };
   ws["!cols"] = [
-    { wch: 14 }, { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 },
+    { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 },
     { wch: 30 }, { wch: 28 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
   ];
   ws["!rows"] = [{ hpt: 38 }, { hpt: 32 }, ...rows.map(() => ({ hpt: 48 }))];
@@ -3604,15 +3610,15 @@ function buildMaterialRecordWorksheet(rows) {
       ws[ref].s = {
         font: { name: "Aptos", sz: 10, color: { rgb: "161616" } },
         fill: { patternType: "solid", fgColor: { rgb: bandColor } },
-        alignment: { horizontal: c >= 2 && c <= 5 ? "left" : "center", vertical: "center", wrapText: true },
+        alignment: { horizontal: c >= 3 && c <= 6 ? "left" : "center", vertical: "center", wrapText: true },
         border
       };
     }
-    [2, 3, 4, 5].forEach(c => {
+    [3, 4, 5, 6].forEach(c => {
       const ref = XLSX.utils.encode_cell({ r, c });
       const value = String(rows[r - 2][headers[c]] || "");
       if (!ws[ref] || value === "-") return;
-      const fill = c === 2 ? "FFE699" : c === 3 ? "E4C7F7" : c === 4 ? "C6EFC0" : "F4CCCC";
+      const fill = c === 3 ? "FFE699" : c === 4 ? "E4C7F7" : c === 5 ? "C6EFC0" : "F4CCCC";
       ws[ref].s = {
         ...ws[ref].s,
         font: { name: "Aptos", sz: 10, bold: true, color: { rgb: "161616" } },
@@ -3648,6 +3654,7 @@ function downloadDepartmentExcel(){
             const mat = m.materialDetails || {};
             rows.push({
               "Machine Name": mcId,
+              "Operator ID": mat.operatorId || "-",
               "Request Date & Time": mat.dateTime || new Date().toLocaleString("en-IN"),
               "Operator Material Requirement": toExcelProperCase(stStr) + "\\n" + (mat.dateTime || "-"),
               "Store Action": "-",
