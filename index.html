@@ -1443,17 +1443,11 @@ button:disabled {
       <h2 style="color:#f87171;font-weight:900;font-size:15px;text-align:center;margin-bottom:8px;">CANCEL MATERIAL REQUIREMENT</h2>
       <p style="font-size:11px;color:#aaa;text-align:center;margin-bottom:8px;">Store Department ला cancellation चे कारण पाठवले जाईल.</p>
       <label style="display:block;color:#fbbf24;font-size:11px;font-weight:900;">SELECT REASON</label>
-      <select id="materialCancelReason" onchange="toggleMaterialCancelOther()">
+      <select id="materialCancelReason">
         <option value="">-- Select Reason --</option>
         <option value="Setup Change">Setup Change</option>
-        <option value="Material Not Required">Material Not Required</option>
-        <option value="Machine Change">Machine Change</option>
         <option value="Wrong Requirement">Wrong Requirement</option>
-        <option value="Quantity Change">Quantity Change</option>
-        <option value="Part Change">Part Change</option>
-        <option value="Other">Other (Type Manually)</option>
       </select>
-      <textarea id="materialCancelOther" style="display:none;" maxlength="300" placeholder="Enter cancellation reason..."></textarea>
       <button onclick="confirmMaterialRequirementCancel()" class="loginBtn" style="background:linear-gradient(180deg,#dc2626,#991b1b);border-color:#f87171;height:40px;font-size:12px;">CONFIRM CANCEL & NOTIFY STORE</button>
       <button onclick="closeMaterialCancelModal()" class="loginBtn" style="background:#222;border-color:#444;height:38px;font-size:12px;">GO BACK</button>
     </div>
@@ -2668,20 +2662,11 @@ function openMaterialCancelModal(){
   const m = machines[curMachine];
   if(!m || !m.materialDetails || m.materialCancel){ alert("Active Material Requirement सापडली नाही."); return; }
   document.getElementById("materialCancelReason").value="";
-  document.getElementById("materialCancelOther").value="";
-  document.getElementById("materialCancelOther").style.display="none";
   document.getElementById("materialCancelModal").style.display="flex";
 }
 
 function closeMaterialCancelModal(){
   document.getElementById("materialCancelModal").style.display="none";
-}
-
-function toggleMaterialCancelOther(){
-  const isOther = document.getElementById("materialCancelReason").value === "Other";
-  const box = document.getElementById("materialCancelOther");
-  box.style.display = isOther ? "block" : "none";
-  if(!isOther) box.value="";
 }
 
 function confirmMaterialRequirementCancel(){
@@ -2691,10 +2676,12 @@ function confirmMaterialRequirementCancel(){
   if(!m || !m.materialDetails || m.materialCancel){ alert("Active Material Requirement उपलब्ध नाही."); closeMaterialCancelModal(); return; }
 
   const selected = document.getElementById("materialCancelReason").value;
-  const typed = document.getElementById("materialCancelOther").value.trim();
   if(!selected){ alert("कृपया cancellation reason निवडा."); return; }
-  if(selected === "Other" && !typed){ alert("कृपया cancellation reason type करा."); return; }
-  const reason = selected === "Other" ? typed : selected;
+  if(!["Setup Change", "Wrong Requirement"].includes(selected)){
+    alert("कृपया उपलब्ध असलेले दोनच कारण निवडा.");
+    return;
+  }
+  const reason = selected;
   const oldSt = getMachineStatusString(m);
   const now = Date.now();
   const cancelledMaterial = Object.assign({}, m.materialDetails);
