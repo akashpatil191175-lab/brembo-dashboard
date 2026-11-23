@@ -2741,10 +2741,13 @@ function confirmMaterialRequirementCancel(){
 }
 
 function getStoreCancellationNotices(){
+  // Show only pending/unacknowledged cancellation alerts in the Store alert window.
+  // Acknowledged records remain saved in Firebase as history, but are hidden here.
   return Object.keys(allMaterialCancelNotifications || {}).map(notificationId=>{
     const notice = allMaterialCancelNotifications[notificationId] || {};
     return {notificationId, machine:notice.machine || "-", notice};
-  }).sort((a,b)=>(b.notice.cancelledAt||0)-(a.notice.cancelledAt||0));
+  }).filter(item=>item.notice.notificationRead !== true)
+    .sort((a,b)=>(b.notice.cancelledAt||0)-(a.notice.cancelledAt||0));
 }
 
 function updateStoreCancelNotificationBadge(){
@@ -2792,6 +2795,8 @@ function markStoreCancellationRead(notificationId){
   if(!notice) return;
   const updates = {notificationRead:true, readAt:Date.now(), readBy:DEPARTMENT_CONFIG.store.name};
   db.ref("materialCancellationNotifications/"+notificationId).update(updates).then(()=>{
+    // Update the local cache immediately so the acknowledged alert disappears at once.
+    allMaterialCancelNotifications[notificationId] = Object.assign({}, notice, updates);
     const m = machines[notice.machine];
     if(m && m.materialCancel && m.materialCancel.notificationId === notificationId){
       m.materialCancel.notificationRead = true;
