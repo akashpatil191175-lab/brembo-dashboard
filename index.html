@@ -3437,8 +3437,16 @@ function getFilteredLogsForDepartment(logsData) {
     const base = baseKey(l);
     let group = requestNo ? requestByNo[requestNo] : null;
 
-    if (!group) {
-      const candidates = requestGroups.filter(g => g._baseKey === base);
+    // IMPORTANT:
+    // A fresh Request Number always represents a NEW material request row.
+    // Only events with the SAME Request Number may be grouped together.
+    // The legacy fallback is used only for old log entries that have no
+    // Request Number; otherwise a later request for the same machine/part
+    // could accidentally be merged into the previous Excel row.
+    if (!group && !requestNo) {
+      const candidates = requestGroups.filter(g =>
+        !g._requestNo && g._baseKey === base
+      );
       if (candidates.length === 1) {
         group = candidates[0];
       } else if (candidates.length > 1) {
@@ -3464,6 +3472,7 @@ function getFilteredLogsForDepartment(logsData) {
         "Part Number": l.partNo || "-",
         "Qty": l.qty || "-",
         _baseKey: base,
+        _requestNo: requestNo,
         _requestTimestamp: Number(l.timestamp)||0,
         _sortTime: Number(l.timestamp)||0
       };
