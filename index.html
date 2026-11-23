@@ -3052,7 +3052,6 @@ function toExcelProperCase(value) {
 function getFilteredLogsForDepartment(logsData) {
   if (!logsData) return [];
 
-  const grouped = {};
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED",
     "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST"
@@ -3070,25 +3069,30 @@ function getFilteredLogsForDepartment(logsData) {
     return m ? `${m[1].padStart(2,"0")}/${m[2].padStart(2,"0")}/${m[3].slice(-2)}` : norm(str).split("|")[0];
   };
 
-  // Each request is keyed by its unique daily serial. Older events without
-  // serials are attached to the matching machine/part/qty/shift request.
+  // Match all actions belonging to the same material request. Request number
+  // is the primary key; machine + part + quantity + shift + request date is
+  // the fallback for older log entries where requestNo was not saved.
   const requestGroups = [];
   const requestByNo = {};
-  const baseKey = l => [l.machine, l.partNo, l.partName, l.qty, l.shift, dateOnly(l.requestDateTime || l.timeStr)].map(norm).join("|");
+  const baseKey = l => [
+    l.machine, l.partNo, l.partName, l.qty, l.shift,
+    dateOnly(l.requestDateTime || l.timeStr)
+  ].map(norm).join("|");
 
   events.forEach(l => {
     const requestNo = String(l.requestNo || "").trim();
-    let group = requestNo ? requestByNo[requestNo] : null;
     const base = baseKey(l);
+    let group = requestNo ? requestByNo[requestNo] : null;
 
-    if (!group && !requestNo) {
+    if (!group) {
       const candidates = requestGroups.filter(g => g._baseKey === base);
-      if (candidates.length === 1) group = candidates[0];
-      else if (candidates.length > 1) {
+      if (candidates.length === 1) {
+        group = candidates[0];
+      } else if (candidates.length > 1) {
         const t = Number(l.timestamp) || 0;
         group = candidates.sort((a,b) =>
-          Math.abs((a._requestTimestamp||a._sortTime)-t) -
-          Math.abs((b._requestTimestamp||b._sortTime)-t)
+          Math.abs((a._requestTimestamp || a._sortTime) - t) -
+          Math.abs((b._requestTimestamp || b._sortTime) - t)
         )[0];
       }
     }
@@ -3111,11 +3115,19 @@ function getFilteredLogsForDepartment(logsData) {
         _sortTime: Number(l.timestamp)||0
       };
       requestGroups.push(group);
-      if (requestNo) requestByNo[requestNo] = group;
-    } else if (requestNo) {
+    }
+
+    // If this event contains a request number, promote the matched legacy
+    // group to that number so subsequent actions join the same Excel row.
+    if (requestNo) {
       group["Request Number"] = requestNo;
       requestByNo[requestNo] = group;
     }
+    if (group["Machine Name"] === "-" && l.machine) group["Machine Name"] = l.machine;
+    if (group["Request Date & Time"] === "-" && l.requestDateTime) group["Request Date & Time"] = l.requestDateTime;
+    if (group["Part Number"] === "-" && l.partNo) group["Part Number"] = l.partNo;
+    if (group["Part Name"] === "-" && l.partName) group["Part Name"] = toExcelProperCase(l.partName);
+    if (group["Qty"] === "-" && l.qty) group["Qty"] = l.qty;
 
     const eventTime = l.timeStr || (l.timestamp ? new Date(Number(l.timestamp)).toLocaleString("en-IN") : "-");
     const actionText = String(l.detail || l.action || "-");
