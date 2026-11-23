@@ -2186,25 +2186,39 @@ function updateShiftEndMaterialSummary(){
     ? pending.map(x=>`${x.machine}: ${x.partNo} | ${x.partName} | Qty ${x.qty} (${x.status})`).join(" • ")
     : "No pending material requirements.";
 
-  const unread=getUnreadShiftEndNotifications();
+  // Bell must reflect ONLY the current shift's live pending requirements.
+  // Old unread Firebase snapshots must never keep the bell active when pending is zero.
+  const now = new Date();
+  const inAlertWindow = now.getTime() >= info.alertAt.getTime() && now.getTime() < info.end.getTime();
+  const currentShiftKey = info.key;
+  const unread=getUnreadShiftEndNotifications().filter(n =>
+    n.key === currentShiftKey && pending.length > 0 && inAlertWindow
+  );
   const bell=document.getElementById("supervisorNotifBell");
   const badge=document.getElementById("supervisorNotifBadge");
+  const showBell = department === "supervisor" && pending.length > 0 && inAlertWindow && unread.length > 0;
   if(bell){
-    bell.style.display=department==="supervisor"?"inline-flex":"none";
-    bell.classList.toggle("hasAlert",department==="supervisor" && unread.length>0);
+    bell.style.display=showBell?"inline-flex":"none";
+    bell.classList.toggle("hasAlert",showBell);
   }
   if(badge){
-    badge.textContent=String(unread.length);
-    badge.style.display=department==="supervisor" && unread.length>0?"inline-flex":"none";
+    badge.textContent=String(showBell ? unread.length : 0);
+    badge.style.display=showBell?"inline-flex":"none";
   }
   const modal=document.getElementById("supervisorShiftPendingModal");
   if(modal && modal.style.display==="flex") renderSupervisorShiftPendingModal();
 }
 
 function renderSupervisorShiftPendingModal(){
-  const notifications=Object.keys(shiftEndMaterialNotifications||{}).map(key=>({key,...(shiftEndMaterialNotifications[key]||{})}))
-    .filter(n=>Array.isArray(n.pendingItems)&&n.pendingItems.length>0)
-    .sort((a,b)=>(Number(b.shiftEndTimestamp)||0)-(Number(a.shiftEndTimestamp)||0));
+  const livePending = getPendingMaterialRequirements();
+  const currentInfo = getCurrentShiftEndInfo();
+  const now = Date.now();
+  const inAlertWindow = now >= currentInfo.alertAt.getTime() && now < currentInfo.end.getTime();
+  const notifications=livePending.length > 0 && inAlertWindow
+    ? Object.keys(shiftEndMaterialNotifications||{}).map(key=>({key,...(shiftEndMaterialNotifications[key]||{})}))
+        .filter(n=>n.key===currentInfo.key && Array.isArray(n.pendingItems)&&n.pendingItems.length>0)
+        .sort((a,b)=>(Number(b.shiftEndTimestamp)||0)-(Number(a.shiftEndTimestamp)||0))
+    : [];
   const infoEl=document.getElementById("supervisorModalShiftInfo");
   const countEl=document.getElementById("supervisorModalPendingCount");
   const textEl=document.getElementById("supervisorModalAlertText");
