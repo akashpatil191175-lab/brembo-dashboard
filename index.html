@@ -2133,23 +2133,38 @@ function getUnreadShiftEndNotifications(){
 }
 
 function persistShiftEndMaterialNotification(info,pending,lateLogin=false){
-  if(!db || !info || !pending.length) return Promise.resolve(false);
-  const localKey="brembo_shift_end_saved_"+info.key;
+  if(!db || !info || !Array.isArray(pending) || !pending.length) return Promise.resolve(false);
+
+  // Strict rule: save only during the 40-minute window before this shift ends.
+  // Never create a notification mid-shift or after shift end.
+  const now = Date.now();
+  if(now < info.alertAt.getTime() || now >= info.end.getTime()) return Promise.resolve(false);
+  if(department !== "supervisor") return Promise.resolve(false);
+
   const state=shiftEndMaterialWriteState[info.key];
-  if(localStorage.getItem(localKey)==="1" || state==="saved" || state==="writing") return Promise.resolve(false);
+  if(state==="saved" || state==="writing") return Promise.resolve(false);
   if(typeof state==="number" && Date.now()-state<60000) return Promise.resolve(false);
+
   shiftEndMaterialWriteState[info.key]="writing";
   return db.ref("shiftEndMaterialNotifications/"+info.key).transaction(current=>{
-    if(current) return;
+    // A previous version may have created this shift's alert too early.
+    // Refresh that old snapshot at the correct 40-minute mark.
+    if(current && Number(current.createdAt) >= info.alertAt.getTime()) return;
     return {
-      shift:info.shift,shiftEnd:info.end.toISOString(),shiftEndTimestamp:info.end.getTime(),
-      alertAt:info.alertAt.toISOString(),alertAtTimestamp:info.alertAt.getTime(),
-      createdAt:Date.now(),createdLateOnLogin:!!lateLogin,
-      pendingCount:pending.length,pendingItems:pending,read:false
+      shift:info.shift,
+      shiftEnd:info.end.toISOString(),
+      shiftEndTimestamp:info.end.getTime(),
+      alertAt:info.alertAt.toISOString(),
+      alertAtTimestamp:info.alertAt.getTime(),
+      createdAt:Date.now(),
+      createdLateOnLogin:false,
+      pendingCount:pending.length,
+      pendingItems:pending,
+      read:false
     };
   }).then(result=>{
     shiftEndMaterialWriteState[info.key]="saved";
-    localStorage.setItem(localKey,"1");
+    localStorage.setItem("brembo_shift_end_saved_"+info.key,"1");
     return !!result.committed;
   }).catch(err=>{
     console.error("Shift-end notification save failed:",err);
@@ -2243,23 +2258,24 @@ function closeSupervisorShiftPendingModal(){
 
 function checkShiftEndMaterialPendingNotification(){
   updateShiftEndMaterialSummary();
-  if(!db) return;
-  const now=new Date();
-  const pending=getPendingMaterialRequirements();
+
+  // Only the Supervisor dashboard creates the bell notification.
+  // This function may be checked by the live clock every second, but the
+  // Firebase transaction saves one snapshot per shift, only in the 40-minute
+  // pre-shift-end window.
+  if(!db || department !== "supervisor") return;
+
+  const now = new Date();
+  const currentInfo = getCurrentShiftEndInfo(now);
+
+  // No notifications during the rest of the shift or after shift end.
+  if(now.getTime() < currentInfo.alertAt.getTime() ||
+     now.getTime() >= currentInfo.end.getTime()) return;
+
+  const pending = getPendingMaterialRequirements();
   if(!pending.length) return;
 
-  // Any open app instance can save the alert when the 40-minute window begins.
-  const currentInfo=getCurrentShiftEndInfo(now);
-  if(now>=currentInfo.alertAt && now<currentInfo.end)
-    persistShiftEndMaterialNotification(currentInfo,pending,false);
-
-  // If Supervisor signs in after shift end, create a durable late-login snapshot.
-  if(department==="supervisor"){
-    const previousInfo=getMostRecentlyEndedShiftInfo(now);
-    if(previousInfo && now.getTime()-previousInfo.end.getTime()<=24*60*60*1000 &&
-       now>=previousInfo.alertAt)
-      persistShiftEndMaterialNotification(previousInfo,pending,true);
-  }
+  persistShiftEndMaterialNotification(currentInfo,pending,false);
 }
 
 function adminSendPendingMaterialWhatsApp(){
