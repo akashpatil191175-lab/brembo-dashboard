@@ -2070,25 +2070,29 @@ function resetAllMachinesFirebase(){
   return db.ref().update(updates);  
 }  
 
-function logStatusAction(mc, action, detail, user, oldSt, newSt){  
-  const m = machines[mc] || {};  
-  const mat = m.materialDetails || {};  
-  
-  db.ref("statusLogs").push({  
-    machine: mc,  
-    oldStatus: oldSt || m.oldStatus || "RUNNING",  
-    newStatus: newSt || getMachineStatusString(m),  
-    action: action,  
-    detail: detail,  
-    user: user || "System",  
-    shift: (m.materialDetails && m.materialDetails.shift) ? m.materialDetails.shift : getCurrentShift(),  
-    partNo: mat.partNo || "-",  
-    partName: mat.partName || "-",  
-    qty: mat.qty || "-",  
-    timestamp: Date.now(),  
-    timeStr: mat.dateTime || new Date().toLocaleString("en-IN")  
-  });  
-}  
+function logStatusAction(mc, action, detail, user, oldSt, newSt){
+  const m = machines[mc] || {};
+  const mat = m.materialDetails || {};
+  const eventTime = Date.now();
+  const eventDateTime = new Date(eventTime).toLocaleString("en-IN");
+
+  db.ref("statusLogs").push({
+    machine: mc,
+    requestNo: mat.requestNo || "",
+    requestDateTime: mat.dateTime || "",
+    oldStatus: oldSt || m.oldStatus || "RUNNING",
+    newStatus: newSt || getMachineStatusString(m),
+    action: action,
+    detail: detail,
+    user: user || "System",
+    shift: mat.shift || getCurrentShift(),
+    partNo: mat.partNo || "-",
+    partName: mat.partName || "-",
+    qty: mat.qty || "-",
+    timestamp: eventTime,
+    timeStr: eventDateTime
+  });
+}
 
 function load(){  
   if(!db){
@@ -2922,34 +2926,54 @@ function closeMaterialModal(){
   document.getElementById("materialModal").style.display="none";  
 }  
 
-function submitMaterialRequirement(){  
-  const partNo=document.getElementById("matPartNo").value.trim();  
-  const partName=document.getElementById("matPartName").value.trim();  
-  const qty=document.getElementById("matQty").value.trim();  
+async function submitMaterialRequirement(){
+  const partNo=document.getElementById("matPartNo").value.trim();
+  const partName=document.getElementById("matPartName").value.trim();
+  const qty=document.getElementById("matQty").value.trim();
 
-  if(!partNo || !partName || !qty){ alert("Please fill Part No, Part Name, and Quantity!"); return; }  
-  if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied."); return; }  
-  if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();  
+  if(!partNo || !partName || !qty){ alert("Please fill Part No, Part Name, and Quantity!"); return; }
+  if(!operator || !curMachine || curMachine!==operator.machine){ alert("Access denied."); return; }
+  if(!machines[curMachine]) machines[curMachine]=getDefaultMachine();
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString('en-GB'); 
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-  const dateTimeStr = `${dateStr} | ${timeStr}`;
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  const dateKey = `${now.getFullYear()}${mm}${dd}`;
+  const datePrefix = `${dd}${mm}${yy}`;
 
-  machines[curMachine].materialRequestSent = false;
-  machines[curMachine].materialCancel = null;
-  machines[curMachine].materialDetails={
-    partNo: partNo,
-    partName: partName,
-    qty: qty,
-    dateTime: dateTimeStr,
-    timestamp: Date.now(), 
-    shift: getCurrentShift()
-  };  
-  closeMaterialModal();  
+  try {
+    // Firebase transaction guarantees a daily serial even when multiple operators submit together.
+    const counterRef = db.ref("materialRequestCounters/" + dateKey);
+    const counterResult = await counterRef.transaction(current => (Number(current) || 0) + 1);
+    if (!counterResult.committed) throw new Error("Request number could not be generated.");
 
-  executeStatusUpdate("MATERIAL REQUIREMENT");  
-}  
+    const serialNo = Number(counterResult.snapshot.val());
+    const requestNo = `${datePrefix}${serialNo}`;
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    const dateStr = now.toLocaleDateString('en-GB');
+    const dateTimeStr = `${dateStr} | ${timeStr}`;
+
+    machines[curMachine].materialRequestSent = false;
+    machines[curMachine].materialCancel = null;
+    machines[curMachine].materialDetails={
+      requestNo: requestNo,
+      partNo: partNo,
+      partName: partName,
+      qty: qty,
+      dateTime: dateTimeStr,
+      timestamp: now.getTime(),
+      shift: getCurrentShift()
+    };
+    closeMaterialModal();
+
+    await executeStatusUpdate("MATERIAL REQUIREMENT");
+    alert("Material Request Submitted. Request No: " + requestNo);
+  } catch(err) {
+    console.error("Material request submission failed:", err);
+    alert("Material request submit failed. Please check Firebase connection and try again.");
+  }
+}
 
 function executeStatusUpdate(s){  
   if(!operator){ alert("Operator login required."); return; }  
@@ -3026,11 +3050,12 @@ function toExcelProperCase(value) {
 }
 
 function getFilteredLogsForDepartment(logsData) {
-  let filtered = [];
-  if (!logsData) return filtered;
+  if (!logsData) return [];
 
+  const grouped = {};
   const ALLOWED_KEYWORDS = [
-    "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED", "OUT OF STOCK"
+    "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED",
+    "OUT OF STOCK", "MATERIAL REQUEST SENT"
   ];
 
   Object.keys(logsData).forEach(logKey => {
@@ -3042,28 +3067,56 @@ function getFilteredLogsForDepartment(logsData) {
     const isMatched = ALLOWED_KEYWORDS.some(kw =>
       ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
     );
+    if (!isMatched) return;
 
-    if (isMatched) {
-      // Backward-compatible label correction for older Store action logs.
-      // New Store events are also saved with the corrected wording below.
-      const rawActionDetail = String(l.detail || l.action || "-");
-      const normalizedActionDetail = rawActionDetail.trim().toUpperCase();
-      const displayActionDetail = normalizedActionDetail === "MATERIAL REQUEST SENT TO OPERATOR"
-        ? "Material Request Sent to Store"
-        : rawActionDetail;
+    const machine = l.machine || "-";
+    const partNo = l.partNo || "-";
+    const partName = l.partName || "-";
+    const qty = l.qty || "-";
+    const requestDateTime = l.requestDateTime || l.timeStr || "-";
+    // New logs use requestNo. Older logs are grouped by request details as a best-effort fallback.
+    const groupKey = l.requestNo
+      ? String(l.requestNo)
+      : ["LEGACY", machine, partNo, partName, qty, requestDateTime].join("|");
 
-      filtered.unshift({
-        "Date and Time": l.timeStr || "-",
-        "Machine Name": l.machine || "-",
-        "Action Taken": toExcelProperCase(displayActionDetail),
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = {
+        "Request Number": l.requestNo || "Legacy",
+        "Machine Name": machine,
+        "Request Date & Time": requestDateTime,
+        "Operator Action": "-",
+        "Store Action": "-",
+        "Operator Receive Action": "-",
         "Shift": l.shift || "-",
-        "Part Name": toExcelProperCase(l.partName || "-"),
-        "Part Number": l.partNo || "-",
-        "Qty": l.qty || "-"
-      });
+        "Part Name": toExcelProperCase(partName),
+        "Part Number": partNo,
+        "Qty": qty,
+        _sortTime: Number(l.timestamp) || 0
+      };
+    }
+
+    const eventTime = l.timeStr || (l.timestamp ? new Date(Number(l.timestamp)).toLocaleString("en-IN") : "-");
+    const actionText = String(l.detail || l.action || "-");
+    const actionUpper = (String(l.action || "") + " " + actionText + " " + String(l.newStatus || "")).toUpperCase();
+    const eventDisplay = `${toExcelProperCase(actionText)}\n${eventTime}`;
+
+    if (actionUpper.includes("MATERIAL RECEIVED")) {
+      grouped[groupKey]["Operator Receive Action"] = eventDisplay;
+    } else if (actionUpper.includes("STORE MATERIAL REQUEST") || actionUpper.includes("MATERIAL REQUEST SENT")) {
+      grouped[groupKey]["Store Action"] = eventDisplay;
+    } else if (actionUpper.includes("MATERIAL REQUIREMENT")) {
+      grouped[groupKey]["Operator Action"] = eventDisplay;
+      if (!l.requestDateTime && l.timeStr) grouped[groupKey]["Request Date & Time"] = l.timeStr;
+    }
+
+    if ((Number(l.timestamp) || 0) < grouped[groupKey]._sortTime || !grouped[groupKey]._sortTime) {
+      grouped[groupKey]._sortTime = Number(l.timestamp) || grouped[groupKey]._sortTime;
     }
   });
-  return filtered;
+
+  return Object.values(grouped)
+    .sort((a, b) => a._sortTime - b._sortTime)
+    .map(({_sortTime, ...row}) => row);
 }
 
 // Excel design follows the supplied Material Record reference image:
@@ -3071,22 +3124,23 @@ function getFilteredLogsForDepartment(logsData) {
 // filter arrows, clear borders and action-specific highlight colors.
 function buildMaterialRecordWorksheet(rows) {
   const headers = [
-    "Date and Time", "Machine Name", "Action Taken", "Shift",
-    "Part Name", "Part Number", "Qty"
+    "Request Number", "Machine Name", "Request Date & Time",
+    "Operator Action", "Store Action", "Operator Receive Action",
+    "Shift", "Part Name", "Part Number", "Qty"
   ];
   const aoa = [
-    ["🏭  Material Record", "", "", "", "", "", ""],
+    ["🏭  Material Record — One Row Per Material Request", "", "", "", "", "", "", "", "", ""],
     headers,
     ...rows.map(row => headers.map(header => row[header] ?? "-"))
   ];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
-  ws["!autofilter"] = { ref: `A2:G${rows.length + 2}` };
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 9 } }];
+  ws["!autofilter"] = { ref: `A2:J${rows.length + 2}` };
   ws["!cols"] = [
-    { wch: 23 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
-    { wch: 23 }, { wch: 18 }, { wch: 10 }
+    { wch: 15 }, { wch: 16 }, { wch: 23 }, { wch: 30 }, { wch: 30 },
+    { wch: 30 }, { wch: 12 }, { wch: 23 }, { wch: 18 }, { wch: 10 }
   ];
-  ws["!rows"] = [{ hpt: 36 }, { hpt: 28 }, ...rows.map(() => ({ hpt: 24 }))];
+  ws["!rows"] = [{ hpt: 38 }, { hpt: 32 }, ...rows.map(() => ({ hpt: 48 }))];
 
   const border = {
     top: { style: "thin", color: { rgb: "A6B7AE" } },
@@ -3100,7 +3154,7 @@ function buildMaterialRecordWorksheet(rows) {
     alignment: { horizontal: "center", vertical: "center" }, border
   };
   const headerStyle = {
-    font: { name: "Aptos", sz: 12, bold: true, color: { rgb: "FFFFFF" } },
+    font: { name: "Aptos", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
     fill: { patternType: "solid", fgColor: { rgb: "087B4B" } },
     alignment: { horizontal: "center", vertical: "center", wrapText: true }, border
   };
@@ -3118,28 +3172,23 @@ function buildMaterialRecordWorksheet(rows) {
       const ref = XLSX.utils.encode_cell({ r, c });
       if (!ws[ref]) continue;
       ws[ref].s = {
-        font: { name: "Aptos", sz: 11, color: { rgb: "161616" } },
+        font: { name: "Aptos", sz: 10, color: { rgb: "161616" } },
         fill: { patternType: "solid", fgColor: { rgb: bandColor } },
-        alignment: { horizontal: c === 2 ? "left" : "center", vertical: "center", wrapText: true },
+        alignment: { horizontal: c >= 3 && c <= 5 ? "left" : "center", vertical: "center", wrapText: true },
         border
       };
     }
-
-    const actionRef = XLSX.utils.encode_cell({ r, c: 2 });
-    const action = String(rows[r - 2]["Action Taken"] || "").toLowerCase();
-    let actionColor = "";
-    if (action.includes("material requirement")) actionColor = "FFE699";
-    else if (action.includes("material received")) actionColor = "C6EFC0";
-    else if (action.includes("shortage") || action.includes("out of stock") || action.includes("wrong requirement")) actionColor = "F4CCCC";
-    else if (action.includes("request sent")) actionColor = "E4C7F7";
-    else if (action.includes("setup change")) actionColor = "C6E2F8";
-    if (actionColor && ws[actionRef]) {
-      ws[actionRef].s = {
-        ...ws[actionRef].s,
-        font: { name: "Aptos", sz: 11, bold: true, color: { rgb: "161616" } },
-        fill: { patternType: "solid", fgColor: { rgb: actionColor } }
+    [3, 4, 5].forEach(c => {
+      const ref = XLSX.utils.encode_cell({ r, c });
+      const value = String(rows[r - 2][headers[c]] || "");
+      if (!ws[ref] || value === "-") return;
+      const fill = c === 3 ? "FFE699" : c === 4 ? "E4C7F7" : "C6EFC0";
+      ws[ref].s = {
+        ...ws[ref].s,
+        font: { name: "Aptos", sz: 10, bold: true, color: { rgb: "161616" } },
+        fill: { patternType: "solid", fgColor: { rgb: fill } }
       };
-    }
+    });
   }
   return ws;
 }
@@ -3168,10 +3217,13 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Date and Time": mat.dateTime || new Date().toLocaleString("en-IN"),
+              "Request Number": mat.requestNo || "Legacy",
               "Machine Name": mcId,
-              "Action Taken": toExcelProperCase(stStr),
-              "Shift": getCurrentShift(),
+              "Request Date & Time": mat.dateTime || new Date().toLocaleString("en-IN"),
+              "Operator Action": toExcelProperCase(stStr) + "\\n" + (mat.dateTime || "-"),
+              "Store Action": "-",
+              "Operator Receive Action": "-",
+              "Shift": mat.shift || getCurrentShift(),
               "Part Name": toExcelProperCase(mat.partName || "-"),
               "Part Number": mat.partNo || "-",
               "Qty": mat.qty || "-"
