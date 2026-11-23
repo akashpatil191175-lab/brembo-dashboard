@@ -2763,7 +2763,7 @@ function openStoreCancelNotifications(){
   if(!notices.length){
     list.innerHTML = '<div style="padding:18px;text-align:center;color:#aaa;font-size:12px;">No cancelled material requirements.</div>';
   } else {
-    list.innerHTML = notices.map(({machine,notice})=>{
+    list.innerHTML = notices.map(({notificationId,machine,notice})=>{
       const unread = notice.notificationRead !== true;
       return `<div class="cancelNoticeItem ${unread ? "unread" : ""}">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
