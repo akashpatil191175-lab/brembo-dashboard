@@ -3055,36 +3055,46 @@ function getFilteredLogsForDepartment(logsData) {
   const grouped = {};
   const ALLOWED_KEYWORDS = [
     "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED",
-    "OUT OF STOCK", "MATERIAL REQUEST SENT"
+    "OUT OF STOCK", "MATERIAL REQUEST SENT", "STORE MATERIAL REQUEST"
   ];
 
-  Object.keys(logsData).forEach(logKey => {
-    const l = logsData[logKey] || {};
-    const ns = String(l.newStatus || "").toUpperCase();
-    const os = String(l.oldStatus || "").toUpperCase();
-    const act = String(l.action || "").toUpperCase();
-    const det = String(l.detail || "").toUpperCase();
-    const isMatched = ALLOWED_KEYWORDS.some(kw =>
-      ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
-    );
-    if (!isMatched) return;
+  // First collect matching events. Some older Store events were saved without
+  // requestNo, so correlate them with the Operator event using the original
+  // request timestamp + machine + part + quantity.
+  const events = Object.keys(logsData).map(key => logsData[key] || {}).filter(l => {
+    const haystack = [l.newStatus, l.oldStatus, l.action, l.detail].join(" ").toUpperCase();
+    return ALLOWED_KEYWORDS.some(kw => haystack.includes(kw));
+  });
 
+  const makeRequestFingerprint = l => [
+    l.machine || "-", l.partNo || "-", l.partName || "-", l.qty || "-",
+    l.requestDateTime || "-", l.shift || "-"
+  ].map(v => String(v).trim()).join("|");
+
+  // Prefer the real daily serial if any event for the same request has one.
+  const serialByFingerprint = {};
+  events.forEach(l => {
+    if (l.requestNo) serialByFingerprint[makeRequestFingerprint(l)] = String(l.requestNo);
+  });
+
+  events.forEach(l => {
     const machine = l.machine || "-";
     const partNo = l.partNo || "-";
     const partName = l.partName || "-";
     const qty = l.qty || "-";
     const requestDateTime = l.requestDateTime || l.timeStr || "-";
-    // New logs use requestNo. Older logs are grouped by request details as a best-effort fallback.
-    const groupKey = l.requestNo
-      ? String(l.requestNo)
-      : ["LEGACY", machine, partNo, partName, qty, requestDateTime].join("|");
+    const fingerprint = makeRequestFingerprint(l);
+    const requestNo = l.requestNo || serialByFingerprint[fingerprint] || "";
+    // Fingerprint groups events even if one of the older Store/Receive logs
+    // did not carry the Request Number. The serial is displayed when available.
+    const groupKey = fingerprint;
 
     if (!grouped[groupKey]) {
       grouped[groupKey] = {
-        "Request Number": l.requestNo || "Legacy",
+        "Request Number": requestNo || "Legacy",
         "Machine Name": machine,
         "Request Date & Time": requestDateTime,
-        "Operator Action": "-",
+        "Operator Material Requirement": "-",
         "Store Action": "-",
         "Operator Receive Action": "-",
         "Shift": l.shift || "-",
@@ -3093,6 +3103,8 @@ function getFilteredLogsForDepartment(logsData) {
         "Qty": qty,
         _sortTime: Number(l.timestamp) || 0
       };
+    } else if (requestNo) {
+      grouped[groupKey]["Request Number"] = requestNo;
     }
 
     const eventTime = l.timeStr || (l.timestamp ? new Date(Number(l.timestamp)).toLocaleString("en-IN") : "-");
@@ -3105,12 +3117,13 @@ function getFilteredLogsForDepartment(logsData) {
     } else if (actionUpper.includes("STORE MATERIAL REQUEST") || actionUpper.includes("MATERIAL REQUEST SENT")) {
       grouped[groupKey]["Store Action"] = eventDisplay;
     } else if (actionUpper.includes("MATERIAL REQUIREMENT")) {
-      grouped[groupKey]["Operator Action"] = eventDisplay;
+      grouped[groupKey]["Operator Material Requirement"] = eventDisplay;
       if (!l.requestDateTime && l.timeStr) grouped[groupKey]["Request Date & Time"] = l.timeStr;
     }
 
-    if ((Number(l.timestamp) || 0) < grouped[groupKey]._sortTime || !grouped[groupKey]._sortTime) {
-      grouped[groupKey]._sortTime = Number(l.timestamp) || grouped[groupKey]._sortTime;
+    const eventTimestamp = Number(l.timestamp) || 0;
+    if (eventTimestamp && (!grouped[groupKey]._sortTime || eventTimestamp < grouped[groupKey]._sortTime)) {
+      grouped[groupKey]._sortTime = eventTimestamp;
     }
   });
 
@@ -3125,11 +3138,11 @@ function getFilteredLogsForDepartment(logsData) {
 function buildMaterialRecordWorksheet(rows) {
   const headers = [
     "Request Number", "Machine Name", "Request Date & Time",
-    "Operator Action", "Store Action", "Operator Receive Action",
+    "Operator Material Requirement", "Store Action", "Operator Receive Action",
     "Shift", "Part Name", "Part Number", "Qty"
   ];
   const aoa = [
-    ["🏭  Material Record — One Row Per Material Request", "", "", "", "", "", "", "", "", ""],
+    ["🏭  Material Record", "", "", "", "", "", "", "", "", ""],
     headers,
     ...rows.map(row => headers.map(header => row[header] ?? "-"))
   ];
@@ -3220,7 +3233,7 @@ function downloadDepartmentExcel(){
               "Request Number": mat.requestNo || "Legacy",
               "Machine Name": mcId,
               "Request Date & Time": mat.dateTime || new Date().toLocaleString("en-IN"),
-              "Operator Action": toExcelProperCase(stStr) + "\\n" + (mat.dateTime || "-"),
+              "Operator Material Requirement": toExcelProperCase(stStr) + "\\n" + (mat.dateTime || "-"),
               "Store Action": "-",
               "Operator Receive Action": "-",
               "Shift": mat.shift || getCurrentShift(),
