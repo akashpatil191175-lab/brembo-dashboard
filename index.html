@@ -1744,7 +1744,16 @@ button:disabled {
             <div style="font-size:9px;color:#aaa;margin-top:3px;">Supervisor ला WhatsApp manually पाठवा</div>
             <div style="font-size:10px;color:#ddd;margin-top:3px;">Pending: <b id="adminShiftPendingCount" style="color:#fbbf24;">0</b> | <span id="adminShiftEndText">Shift end: --</span></div>
           </div>
-          <button type="button" class="shiftWhatsAppBtn" onclick="adminSendPendingMaterialWhatsApp()">🟢 SEND TO SUPERVISOR</button>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <select id="adminSupervisorRecipient" aria-label="Choose supervisor for WhatsApp"
+              style="min-width:155px;max-width:100%;background:#111;color:#fff;border:1px solid #22c55e;border-radius:7px;padding:8px;font-size:10px;font-weight:800;">
+              <option value="">Choose Supervisor</option>
+              <option value="anand">Anand Rajapure</option>
+              <option value="vinayak">Vinayak Patil</option>
+              <option value="mahesh">Mahesh Andhale</option>
+            </select>
+            <button type="button" class="shiftWhatsAppBtn" onclick="adminSendPendingMaterialWhatsApp()">🟢 SEND WHATSAPP</button>
+          </div>
         </div>
         <div id="adminShiftPendingList" style="font-size:9px;color:#aaa;margin:0 0 6px;line-height:1.4;"></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px;">
@@ -2258,19 +2267,40 @@ function adminSendPendingMaterialWhatsApp(){
     alert("Only Admin Department can send this WhatsApp message.");
     return;
   }
+
+  const recipientSelect = document.getElementById("adminSupervisorRecipient");
+  const recipientKey = recipientSelect ? recipientSelect.value : "";
+  const supervisors = {
+    anand: { name:"Anand Rajapure", phone:"919823884600" },
+    vinayak: { name:"Vinayak Patil", phone:"919822396019" },
+    mahesh: { name:"Mahesh Andhale", phone:"919881097236" }
+  };
+  const supervisor = supervisors[recipientKey];
+
+  if(!supervisor){
+    alert("Please choose a Supervisor first.");
+    if(recipientSelect) recipientSelect.focus();
+    return;
+  }
+
   const pending = getPendingMaterialRequirements();
+  if(!pending.length){
+    if(!confirm("There are currently no pending material requirements. Do you still want to send this WhatsApp message?")) return;
+  }
+
   const info = getCurrentShiftEndInfo();
-  const supervisor = ROUTE_MAP.RUNNING;
   const items = pending.length
     ? pending.map((x,i) => `${i+1}. ${x.machine} | Part No: ${x.partNo} | ${x.partName} | Qty: ${x.qty} | ${x.status}`).join("\n")
     : "No pending material requirements.";
 
   const message =
     `*BREMBO - SHIFT END MATERIAL PENDING*\n` +
+    `To: ${supervisor.name}\n` +
     `Shift: ${info.shift}\nShift End: ${formatTimeString(info.end)}\n` +
     `Pending Count: ${pending.length}\n\n` +
     `${items}\n\nPlease review and follow up before shift end.`;
-  const url = `https://wa.me/${supervisor.no}?text=${encodeURIComponent(message)}`;
+
+  const url = `https://wa.me/${supervisor.phone}?text=${encodeURIComponent(message)}`;
   window.open(url,"_blank");
 }
 
