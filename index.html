@@ -2121,7 +2121,8 @@ function getPendingMaterialRequirements(){
   }).map(id=>{
     const m=machines[id]||{};
     const mat=m.materialDetails||{};
-    return {machine:id,partNo:mat.partNo||"-",partName:mat.partName||"-",qty:mat.qty||"-",
+    // Keep every material-detail field in the shift notification snapshot.
+    return {...mat, machine:id, partNo:mat.partNo||"-", partName:mat.partName||"-", qty:mat.qty||"-",
       status:hasStatus(m,"MATERIAL SHORTAGE")?"MATERIAL SHORTAGE":"MATERIAL REQUIREMENT"};
   });
 }
@@ -2213,7 +2214,7 @@ function renderSupervisorShiftPendingModal(){
     ? `${notifications.length} saved shift notification(s) • Firebase`
     : "No saved shift-end notifications";
   if(countEl) countEl.textContent=String(total);
-  if(textEl) textEl.textContent="Saved pending snapshot at 40 minutes before shift end (or when Supervisor logged in late).";
+  if(textEl) textEl.textContent="Notification is created whenever Supervisor is logged in during the 40-minute window before shift end; all material details are included.";
   if(!list) return;
   if(!notifications.length){
     list.innerHTML='<div style="padding:14px;text-align:center;color:#22c55e;font-size:12px;font-weight:900;">✅ NO SAVED SHIFT-END NOTIFICATIONS</div>';
@@ -2224,9 +2225,7 @@ function renderSupervisorShiftPendingModal(){
     const items=(n.pendingItems||[]).map(x=>`
       <div class="shiftPendingItem">
         <div class="shiftPendingMachine">${escapeHtml(x.machine||"-")}</div>
-        <div class="shiftPendingDetails"><b>Part No:</b> ${escapeHtml(x.partNo||"-")}<br>
-          <b>Part Name:</b> ${escapeHtml(x.partName||"-")}<br>
-          <b>Quantity:</b> ${escapeHtml(x.qty||"-")}<br>
+        <div class="shiftPendingDetails">${Object.entries(x).filter(([k,v])=>k!=="machine" && k!=="status" && v!==null && v!==undefined && String(v).trim()!=="").map(([k,v])=>`<div><b>${escapeHtml(k.replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase()))}:</b> ${escapeHtml(typeof v==="object"?JSON.stringify(v):String(v))}</div>`).join("")}
           <span class="shiftPendingStatus">${escapeHtml(x.status||"PENDING")}</span>
         </div>
       </div>`).join("");
