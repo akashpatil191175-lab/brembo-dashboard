@@ -13,7 +13,7 @@
 <script src="https://cdn.tailwindcss.com"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>  
 <style>  
@@ -3029,36 +3029,41 @@ function escapeHtml(value){
   return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");  
 }  
 
+// Proper Case for descriptive text only. Machine names, part numbers, dates,
+// quantities and Shift codes are preserved in their original format.
+function toExcelProperCase(value) {
+  const raw = String(value ?? "-").trim();
+  if (!raw || raw === "-") return raw || "-";
+  return raw.toLocaleLowerCase("en-US").replace(/(^|[\s:;,(\/-])([a-z])/g,
+    (match, prefix, letter) => prefix + letter.toLocaleUpperCase("en-US"));
+}
+
 function getFilteredLogsForDepartment(logsData) {
   let filtered = [];
   if (!logsData) return filtered;
 
   const ALLOWED_KEYWORDS = [
-    "MATERIAL REQUIREMENT", 
-    "MATERIAL SHORTAGE", 
-    "MATERIAL RECEIVED",
-    "OUT OF STOCK"
+    "MATERIAL REQUIREMENT", "MATERIAL SHORTAGE", "MATERIAL RECEIVED", "OUT OF STOCK"
   ];
 
   Object.keys(logsData).forEach(logKey => {
-    const l = logsData[logKey];
+    const l = logsData[logKey] || {};
     const ns = String(l.newStatus || "").toUpperCase();
     const os = String(l.oldStatus || "").toUpperCase();
     const act = String(l.action || "").toUpperCase();
     const det = String(l.detail || "").toUpperCase();
-
-    const isMatched = ALLOWED_KEYWORDS.some(kw => 
+    const isMatched = ALLOWED_KEYWORDS.some(kw =>
       ns.includes(kw) || os.includes(kw) || act.includes(kw) || det.includes(kw)
     );
 
     if (isMatched) {
       filtered.unshift({
-        "Date and time": l.timeStr || "-",
+        "Date and Time": l.timeStr || "-",
         "Machine Name": l.machine || "-",
-        "action taken": l.detail || l.action || "-",
-        "shift": l.shift || "-",
-        "part name": l.partName || "-",
-        "part number": l.partNo || "-",
+        "Action Taken": toExcelProperCase(l.detail || l.action || "-"),
+        "Shift": l.shift || "-",
+        "Part Name": toExcelProperCase(l.partName || "-"),
+        "Part Number": l.partNo || "-",
         "Qty": l.qty || "-"
       });
     }
@@ -3066,11 +3071,89 @@ function getFilteredLogsForDepartment(logsData) {
   return filtered;
 }
 
-function downloadDepartmentExcel(){  
-  try{  
-    if(typeof XLSX === "undefined"){ 
-      alert("Excel library not loaded."); 
-      return; 
+// Excel design follows the supplied Material Record reference image:
+// merged green title, dark-green headings, alternating light-green rows,
+// filter arrows, clear borders and action-specific highlight colors.
+function buildMaterialRecordWorksheet(rows) {
+  const headers = [
+    "Date and Time", "Machine Name", "Action Taken", "Shift",
+    "Part Name", "Part Number", "Qty"
+  ];
+  const aoa = [
+    ["🏭  Material Record", "", "", "", "", "", ""],
+    headers,
+    ...rows.map(row => headers.map(header => row[header] ?? "-"))
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
+  ws["!autofilter"] = { ref: `A2:G${rows.length + 2}` };
+  ws["!cols"] = [
+    { wch: 23 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
+    { wch: 23 }, { wch: 18 }, { wch: 10 }
+  ];
+  ws["!rows"] = [{ hpt: 36 }, { hpt: 28 }, ...rows.map(() => ({ hpt: 24 }))];
+
+  const border = {
+    top: { style: "thin", color: { rgb: "A6B7AE" } },
+    bottom: { style: "thin", color: { rgb: "A6B7AE" } },
+    left: { style: "thin", color: { rgb: "A6B7AE" } },
+    right: { style: "thin", color: { rgb: "A6B7AE" } }
+  };
+  const titleStyle = {
+    font: { name: "Aptos Display", sz: 20, bold: true, color: { rgb: "FFFFFF" } },
+    fill: { patternType: "solid", fgColor: { rgb: "006B50" } },
+    alignment: { horizontal: "center", vertical: "center" }, border
+  };
+  const headerStyle = {
+    font: { name: "Aptos", sz: 12, bold: true, color: { rgb: "FFFFFF" } },
+    fill: { patternType: "solid", fgColor: { rgb: "087B4B" } },
+    alignment: { horizontal: "center", vertical: "center", wrapText: true }, border
+  };
+
+  for (let c = 0; c < headers.length; c++) {
+    const titleRef = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[titleRef]) ws[titleRef].s = titleStyle;
+    const headerRef = XLSX.utils.encode_cell({ r: 1, c });
+    if (ws[headerRef]) ws[headerRef].s = headerStyle;
+  }
+
+  for (let r = 2; r < rows.length + 2; r++) {
+    const bandColor = (r % 2 === 0) ? "FFFFFF" : "E2F0D9";
+    for (let c = 0; c < headers.length; c++) {
+      const ref = XLSX.utils.encode_cell({ r, c });
+      if (!ws[ref]) continue;
+      ws[ref].s = {
+        font: { name: "Aptos", sz: 11, color: { rgb: "161616" } },
+        fill: { patternType: "solid", fgColor: { rgb: bandColor } },
+        alignment: { horizontal: c === 2 ? "left" : "center", vertical: "center", wrapText: true },
+        border
+      };
+    }
+
+    const actionRef = XLSX.utils.encode_cell({ r, c: 2 });
+    const action = String(rows[r - 2]["Action Taken"] || "").toLowerCase();
+    let actionColor = "";
+    if (action.includes("material requirement")) actionColor = "FFE699";
+    else if (action.includes("material received")) actionColor = "C6EFC0";
+    else if (action.includes("shortage") || action.includes("out of stock") || action.includes("wrong requirement")) actionColor = "F4CCCC";
+    else if (action.includes("request sent")) actionColor = "E4C7F7";
+    else if (action.includes("setup change")) actionColor = "C6E2F8";
+    if (actionColor && ws[actionRef]) {
+      ws[actionRef].s = {
+        ...ws[actionRef].s,
+        font: { name: "Aptos", sz: 11, bold: true, color: { rgb: "161616" } },
+        fill: { patternType: "solid", fgColor: { rgb: actionColor } }
+      };
+    }
+  }
+  return ws;
+}
+
+function downloadDepartmentExcel(){
+  try{
+    if(typeof XLSX === "undefined"){
+      alert("Excel library not loaded. Please check internet connection and try again.");
+      return;
     }
     if(department !== "store" && department !== "supervisor"){
       alert("Excel Report is available for Store Department & Supervisor only.");
@@ -3079,9 +3162,8 @@ function downloadDepartmentExcel(){
 
     db.ref("statusLogs").once("value").then(snapshot => {
       const logsData = snapshot.val() || {};
-      const workbook = XLSX.utils.book_new();  
+      const workbook = XLSX.utils.book_new();
       const sheetName = "Material Record";
-
       let rows = getFilteredLogsForDepartment(logsData);
 
       if(rows.length === 0){
@@ -3091,12 +3173,12 @@ function downloadDepartmentExcel(){
           if(stStr.includes("MATERIAL")){
             const mat = m.materialDetails || {};
             rows.push({
-              "Date and time": mat.dateTime || new Date().toLocaleString("en-IN"),
+              "Date and Time": mat.dateTime || new Date().toLocaleString("en-IN"),
               "Machine Name": mcId,
-              "action taken": stStr,
-              "shift": getCurrentShift(),
-              "part name": mat.partName || "-",
-              "part number": mat.partNo || "-",
+              "Action Taken": toExcelProperCase(stStr),
+              "Shift": getCurrentShift(),
+              "Part Name": toExcelProperCase(mat.partName || "-"),
+              "Part Number": mat.partNo || "-",
               "Qty": mat.qty || "-"
             });
           }
@@ -3108,23 +3190,19 @@ function downloadDepartmentExcel(){
         return;
       }
 
-      const worksheet = XLSX.utils.json_to_sheet(rows);  
-      worksheet["!cols"] = [{wch:22},{wch:16},{wch:25},{wch:10},{wch:20},{wch:16},{wch:10}];  
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);  
-
-      const date = new Date().toISOString().slice(0,10);  
-      const fileName = "Material_Record_" + date + ".xlsx";
-      XLSX.writeFile(workbook, fileName);  
+      const worksheet = buildMaterialRecordWorksheet(rows);
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      const date = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(workbook, "Material_Record_" + date + ".xlsx", { cellStyles: true });
     }).catch(err => {
       console.error("Firebase Read Error:", err);
       alert("Error fetching logs from database.");
     });
-
-  } catch(err){  
-    console.error("Excel Error:", err); 
-    alert("Excel download failed: " + err.message);  
-  }  
-}  
+  } catch(err){
+    console.error("Excel Error:", err);
+    alert("Excel download failed: " + err.message);
+  }
+}
 
 function resetExcelFile(){
   if(department !== "store" && department !== "supervisor"){
